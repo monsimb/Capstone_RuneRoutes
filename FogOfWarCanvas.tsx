@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, View, Alert } from 'react-native';
 import MapView, { Marker, Region, Polygon } from 'react-native-maps';
-import { Canvas, useCanvasRef, Circle, Path, Paint, usePaintRef, Skia, useValue } from "@shopify/react-native-skia";
+import { Canvas, useCanvasRef, Circle, Path, Paint, Skia } from "@shopify/react-native-skia";
 
 const FogOfWarCanvas = () => {
   const [color, setColor] = useState('green');
