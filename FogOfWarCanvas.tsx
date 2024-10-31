@@ -3,7 +3,7 @@ import { SafeAreaView, StyleSheet, View, Alert } from 'react-native';
 import MapView, { Marker, Region, Polygon } from 'react-native-maps';
 import { Canvas, useCanvasRef, Circle, Path, Paint, usePaintRef, Skia, useValue } from "@shopify/react-native-skia";
 
-const FogOfWarCanvas = ({ interactive }) => {
+const FogOfWarCanvas = () => {
   const [color, setColor] = useState('green');
   const ref = useCanvasRef();
 
@@ -15,10 +15,10 @@ const FogOfWarCanvas = ({ interactive }) => {
   return(
     <Canvas style={styles.canvas}
       ref={ref}
-      style={{
-        ...styles.fogCanvas,
-        pointerEvents: interactive ? 'auto' : 'none'
-      }}
+      //style={{
+      //  ...styles.fogCanvas, // ...styles.fogCanvas copies all the properties of it into this new style object
+      //  pointerEvents: interactive ? 'auto' : 'none' // If pointerEvents is interactive, its set to auto. If not, it will be set to none
+      //}}
     >
       {/* The Circle is interactive and changes color on touch */}
       <Circle
@@ -26,7 +26,6 @@ const FogOfWarCanvas = ({ interactive }) => {
         cy={200}
         r={50}
         color={color}
-        onTouch={handleTouch}
       />
     </Canvas>
   );
