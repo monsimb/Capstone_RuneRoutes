@@ -38,7 +38,7 @@ const App: React.FC = () => {
                 {/* Example Marker */}
                 <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
               </MapView>
-              <FogOfWarCanvas interactive={interactive} />
+              <FogOfWarCanvas/>
             </View>
           </SafeAreaView>
     );
