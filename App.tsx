@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, View, Alert, Button } from 'react-native';
 import MapView, { Marker, Region, Polygon } from 'react-native-maps';
-import { Canvas, useCanvasRef, Circle, Path, Paint, usePaintRef, Skia } from "@shopify/react-native-skia";
+import { Canvas, useCanvasRef, Circle, Path, Paint, Skia } from "@shopify/react-native-skia";
 import FogOfWarCanvas from './FogOfWarCanvas';
 // Define the main App component
 const App: React.FC = () => {
@@ -38,7 +38,7 @@ const App: React.FC = () => {
                 {/* Example Marker */}
                 <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
               </MapView>
-              <FogOfWarCanvas interactive={interactive} />}
+              <FogOfWarCanvas interactive={interactive} />
             </View>
           </SafeAreaView>
     );
@@ -154,9 +154,6 @@ const styles = StyleSheet.create({
     top: 50, // Adjust top and left as needed to position the canvas
     left: 50,
     zIndex: 10,
-  },
-  container: {
-    flex: 1,
   },
   mapContainer: {
     flex: 1,
