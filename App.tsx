@@ -1,10 +1,14 @@
 
-import React from 'react';
-import { SafeAreaView, StyleSheet, View, Alert } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
-
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet, View, Alert, Button } from 'react-native';
+import MapView, { Marker, Region, Polygon } from 'react-native-maps';
+import { Canvas, useCanvasRef, Circle, Path, Paint, usePaintRef, Skia } from "@shopify/react-native-skia";
+import FogOfWarCanvas from './FogOfWarCanvas';
 // Define the main App component
 const App: React.FC = () => {
+  const [interactive, setInteractive] = useState(true);
+  const ref = useCanvasRef();
+  const paintRef = Skia.Paint();
   // Define the initial region for the map
   const initialRegion: Region = {
     latitude: 37.78825,
@@ -12,29 +16,33 @@ const App: React.FC = () => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   };
+// Test coordinates
+  const coordinates = [
+      { latitude: 37.78825, longitude: -122.4324 },
+      { latitude: 37.38825, longitude: -122.3324 },
+      { latitude: 37.78825, longitude: -122.4324 },
+  ];
+
+  const handleToggle = () => {
+    setInteractive(!interactive);
+  };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <MapView
-          style={styles.mapStyle}
-          initialRegion={initialRegion}
-          customMapStyle={mapStyle}>
-          <Marker
-            draggable
-            coordinate={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-            }}
-            onDragEnd={(e) => Alert.alert('New Coordinates', JSON.stringify(e.nativeEvent.coordinate))}
-            title={'Test Marker'}
-            description={'This is a description of the marker'}
-          />
-        </MapView>
-      </View>
-    </SafeAreaView>
-  );
-};
+      <SafeAreaView style={styles.container}>
+            <Button title="Toggle Fog Interaction" onPress={handleToggle} />
+            <View style={styles.mapContainer}>
+              <MapView
+                style={StyleSheet.absoluteFillObject}
+                initialRegion={initialRegion}
+              >
+                {/* Example Marker */}
+                <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
+              </MapView>
+              <FogOfWarCanvas interactive={interactive} />}
+            </View>
+          </SafeAreaView>
+    );
+  };
 
 // Export the App component
 export default App;
@@ -138,5 +146,29 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  canvas: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    top: 50, // Adjust top and left as needed to position the canvas
+    left: 50,
+    zIndex: 10,
+  },
+  container: {
+    flex: 1,
+  },
+  mapContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  fogCanvas: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent', // Ensure canvas is see-through
   },
 });
