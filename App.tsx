@@ -1,14 +1,18 @@
 
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Alert, Button } from 'react-native';
+import { SafeAreaView, StyleSheet, View, Alert, Button, TouchableOpacity, Text, Modal } from 'react-native';
 import MapView, { Marker, Region, Polygon } from 'react-native-maps';
 import { Canvas, useCanvasRef, Circle, Path, Paint, Skia } from "@shopify/react-native-skia";
 import FogOfWarCanvas from './FogOfWarCanvas';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { TapGesture } from 'react-native-gesture-handler/lib/typescript/handlers/gestures/tapGesture';
+import { PanGesture } from 'react-native-gesture-handler/lib/typescript/handlers/gestures/panGesture';
+
 // Define the main App component
 const App: React.FC = () => {
-  const [interactive, setInteractive] = useState(true);
   const ref = useCanvasRef();
   const paintRef = Skia.Paint();
+
   // Define the initial region for the map
   const initialRegion: Region = {
     latitude: 37.78825,
@@ -23,14 +27,12 @@ const App: React.FC = () => {
       { latitude: 37.78825, longitude: -122.4324 },
   ];
 
-  const handleToggle = () => {
-    setInteractive(!interactive);
-  };
-
   return (
-      <SafeAreaView style={styles.container}>
-            <Button title="Toggle Fog Interaction" onPress={handleToggle} />
-            <View style={styles.mapContainer}>
+    <GestureHandlerRootView>
+      
+        <SafeAreaView style={styles.container}>
+          
+          <View style={styles.mapContainer}>
               <MapView
                 style={StyleSheet.absoluteFillObject}
                 initialRegion={initialRegion}
@@ -38,9 +40,11 @@ const App: React.FC = () => {
                 {/* Example Marker */}
                 <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
               </MapView>
-              <FogOfWarCanvas/>
-            </View>
-          </SafeAreaView>
+              <FogOfWarCanvas/>              
+          </View>
+        </SafeAreaView>
+      
+    </GestureHandlerRootView>
     );
   };
 
@@ -146,26 +150,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  canvas: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    top: 50, // Adjust top and left as needed to position the canvas
-    left: 50,
-    zIndex: 10,
+    zIndex: 1,
   },
   mapContainer: {
     flex: 1,
     width: '100%',
     height: '100%',
   },
-  fogCanvas: {
+  button: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'transparent', // Ensure canvas is see-through
+    bottom: 20,
+    left: 20,
+    backgroundColor: 'blue',
+    padding: 10,
   },
 });
