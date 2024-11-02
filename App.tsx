@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { SafeAreaView, StyleSheet, View, Alert, Button, TouchableOpacity, Text, Modal } from 'react-native';
 import MapView, { Marker, Region, Polygon } from 'react-native-maps';
 import { Canvas, useCanvasRef, Circle, Path, Paint, Skia } from "@shopify/react-native-skia";
@@ -13,36 +13,58 @@ const App: React.FC = () => {
   const ref = useCanvasRef();
   const paintRef = Skia.Paint();
 
+  const mapRef = useRef<MapView>(null);
+  const panGestureRef = useRef(Gesture.Pan()); // Ref for the Canvas gesture
+
   // Define the initial region for the map
-  const initialRegion: Region = {
+  const [region, setRegion] = useState<Region>({
     latitude: 37.78825,
     longitude: -122.4324,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
-  };
+  });
 // Test coordinates
-  const coordinates = [
-      { latitude: 37.78825, longitude: -122.4324 },
-      { latitude: 37.38825, longitude: -122.3324 },
-      { latitude: 37.78825, longitude: -122.4324 },
-  ];
+const mapGesture = Gesture.Pan().simultaneousWithExternalGesture(panGestureRef);
+
+const panGesture = Gesture.Pan()
+    .onChange((e) => {
+      console.log("Pan on Canvas:", e.translationX, e.translationY);
+
+      // Update map region based on pan movement
+      const newRegion = {
+        ...region,
+        latitude: region.latitude + e.translationY * 0.0001, // Scale movement as needed
+        longitude: region.longitude - e.translationX * 0.0001,
+      };
+      setRegion(newRegion);
+
+      // Programmatically animate MapView to the new region
+      mapRef.current?.animateToRegion(newRegion, 100);
+    })
+    .withRef(panGestureRef);
 
   return (
     <GestureHandlerRootView>
-      
-        <SafeAreaView style={styles.container}>
-          
-          <View style={styles.mapContainer}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.mapContainer}>
+          <GestureDetector gesture={mapGesture}>
               <MapView
+                ref={mapRef}
                 style={StyleSheet.absoluteFillObject}
-                initialRegion={initialRegion}
+                initialRegion={region}
+                onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+
               >
                 {/* Example Marker */}
                 <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
               </MapView>
-              <FogOfWarCanvas/>              
-          </View>
-        </SafeAreaView>
+              </GestureDetector>
+              <GestureDetector gesture={panGesture}>
+                <FogOfWarCanvas />
+              </GestureDetector>           
+        </View>
+          
+      </SafeAreaView>
       
     </GestureHandlerRootView>
     );
