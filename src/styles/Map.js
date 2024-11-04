@@ -80,8 +80,8 @@ export const mapStyle = [
       stylers: [{ color: '#17263c' }],
     },
   ];
-  // Define styles
-  export const styles = StyleSheet.create({
+// Define styles
+export const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     top: 0,

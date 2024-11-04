@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Button, Text, View } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
+import { styles } from "../styles/Login";
 
 function Login({ navigation }) {
   const { authorize, user } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
+  
   if (user) {
     navigation.navigate('Maps'); // Navigate to Maps if user is defined
   }
@@ -22,7 +24,7 @@ function Login({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={styles.container}>
       <Text>Login to Rune Routes</Text>
       <Button onPress={onPress} title={isLoading ? "Logging in..." : "Log in"} disabled={isLoading} />
       {/* Optional: You can remove this button or implement a logout function */}

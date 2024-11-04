@@ -31,6 +31,7 @@
     "@react-native/metro-config": "0.75.4",
     "@react-native/typescript-config": "0.75.4",
     "@react-navigation/native": "^6.1.18",
+    "@react-native-community/geolocation":"3.4.0",
     "@types/react": "^18.2.6",
     "@types/react-native-maps": "^0.24.2",
     "@types/react-test-renderer": "^18.0.0",
