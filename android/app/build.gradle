@@ -86,8 +86,10 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        manifestPlaceholders = [ MAPS_API_KEY: localProperties['MAPS_API_KEY'] ]
+        manifestPlaceholders = [ MAPS_API_KEY: localProperties['MAPS_API_KEY'], auth0Domain: localProperties['AUTH0_DOMAIN'], auth0Scheme: "${applicationId}.auth0"]
         buildConfigField "String", "MAPS_API_KEY", "\"${localProperties['MAPS_API_KEY']}\""
+        buildConfigField "String", "AUTH0_DOMAIN", "\"${localProperties['AUTH0_DOMAIN']}\""
+        buildConfigField "String", "AUTH0_DOMAIN", "\"${localProperties['AUTH0_CLIENTID']}\""
     }
     signingConfigs {
         debug {
@@ -114,6 +116,7 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation("com.auth0.android:auth0:2.+")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
