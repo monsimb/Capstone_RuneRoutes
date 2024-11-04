@@ -5,8 +5,6 @@ import MapView, { Marker, Region, Polygon } from 'react-native-maps';
 import { Canvas, useCanvasRef, Circle, Path, Paint, Skia } from "@shopify/react-native-skia";
 import FogOfWarCanvas from './FogOfWarCanvas';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { TapGesture } from 'react-native-gesture-handler/lib/typescript/handlers/gestures/tapGesture';
-import { PanGesture } from 'react-native-gesture-handler/lib/typescript/handlers/gestures/panGesture';
 
 // Define the main App component
 const App: React.FC = () => {
