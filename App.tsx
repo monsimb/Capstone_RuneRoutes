@@ -58,8 +58,8 @@ const panGesture = Gesture.Pan()
               </MapView>
               </GestureDetector>
               <GestureDetector gesture={panGesture}>
-                <FogOfWarCanvas />
-              </GestureDetector>           
+                <FogOfWarCanvas region ={region} />
+              </GestureDetector>
         </View>
           
       </SafeAreaView>

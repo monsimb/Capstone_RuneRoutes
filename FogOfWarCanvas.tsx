@@ -1,29 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View, Alert } from 'react-native';
 import MapView, { Marker, Region, Polygon } from 'react-native-maps';
 import { Canvas, useCanvasRef, Circle, Path, Paint, Skia } from "@shopify/react-native-skia";
 
-const FogOfWarCanvas = () => {
+// props for FogOfWarCanvas
+interface FogOfWarCanvasProps {
+  region: Region;
+}
+
+const CLOUD_LATITUDE = 37.78825;
+const CLOUD_LONGITUDE = -122.4324;
+
+const FogOfWarCanvas: React.FC<FogOfWarCanvasProps> = ({ region }) => {
   const [color, setColor] = useState('blue');
-  const ref = useCanvasRef();
+  const canvasRef = useCanvasRef();
+  const [cloudPosition, setCloudPosition] = useState({ cx: 100, cy: 100 });
+
+  useEffect(() => {
+    // Calculate the offset to keep the cloud in a fixed geographical location
+    const latOffset = (CLOUD_LATITUDE - region.latitude) * 10000; // Scale as needed
+    const lonOffset = (CLOUD_LONGITUDE - region.longitude) * 10000;
+
+    // Update the cloud's position based on these offsets
+    setCloudPosition({
+      cx: 220 + lonOffset, // Adjust the base x position as needed
+      cy: 450 - latOffset,  // Adjust the base y position as needed
+    });
+  }, [region]);
 
   return(
-    <Canvas style={styles.canvas}
-      ref={ref}
-      pointerEvents="none" // Allow touch events to pass through
-      //style={{
-      //  ...styles.fogCanvas, // ...styles.fogCanvas copies all the properties of it into this new style object
-      //  pointerEvents: interactive ? 'auto' : 'none' // If pointerEvents is interactive, its set to auto. If not, it will be set to none
-      //}}
-    >
-      {/* The Circle is interactive and changes color on touch */}
-      <Circle
-        cx={200}
-        cy={200}
-        r={50}
-        color={color}
-      />
-      
+    <Canvas ref={canvasRef} style={styles.canvas} pointerEvents="none">
+      {/* Use the calculated cloudPosition to render the circle at the correct location */}
+      <Circle cx={cloudPosition.cx} cy={cloudPosition.cy} r={80} color="rgba(255, 255, 255, 0.3)" />
+      {/* Additional clouds can be rendered here similarly */}
     </Canvas>
       
   );
