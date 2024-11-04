@@ -1,38 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Text, View } from "react-native";
-import {useAuth0, Auth0Provider} from 'react-native-auth0';
+import { useAuth0 } from 'react-native-auth0';
 
 function Login({ navigation }) {
-  // return (
-  //   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-  //     <Text>Home Screen</Text>
-  //     <Button
-  //       title="Go to Details"
-  //       onPress={() => navigation.navigate('Details')}
-  //     />
-  //   </View>
-  // );
-  const {authorize} = useAuth0();
+  const { authorize, user } = useAuth0();
+  const [isLoading, setIsLoading] = useState(false);
+  if (user) {
+    navigation.navigate('Maps'); // Navigate to Maps if user is defined
+  }
 
-    const onPress = async () => {
-        try {
-            await authorize();
-            navigation.navigate('Maps');
-        } catch (e) {
-            console.log(e);
-        }
-    };
+  const onPress = async () => {
+    setIsLoading(true);
+    try {
+      await authorize();
 
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Login to Rune Routes</Text>
-        <Button onPress={onPress} title="Log in" />
-        <Button
+      <Button onPress={onPress} title={isLoading ? "Logging in..." : "Log in"} disabled={isLoading} />
+      {/* Optional: You can remove this button or implement a logout function */}
+      <Button
         title="Logout"
         onPress={() => navigation.navigate('Logout')}
-        />
-      </View>
-    )
+      />
+    </View>
+  );
 }
 
-export default Login
+export default Login;
