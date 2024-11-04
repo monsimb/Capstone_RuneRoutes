@@ -1,17 +1,15 @@
+/** 
+ * Logout.tsx
+ * Responsible for creating the Logout page.
+ * 
+*/
+
 import React from "react";
 import { Button, Text, View } from "react-native";
 import {useAuth0, Auth0Provider} from 'react-native-auth0';
 
+// TODO: Re-route so this is accessible from the profile page
 function Logout({ navigation }) {
-  // return (
-  //   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-  //     <Text>Home Screen</Text>
-  //     <Button
-  //       title="Go to Details"
-  //       onPress={() => navigation.navigate('Details')}
-  //     />
-  //   </View>
-  // );
   const {clearSession} = useAuth0();
 
   const onPress = async () => {

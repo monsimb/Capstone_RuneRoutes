@@ -1,3 +1,9 @@
+/** 
+ * Login.tsx
+ * Responsible for creating the homepage that routes user to AUTH0 login.
+ * @returns the 'first page'.
+*/
+
 import React, { useState } from "react";
 import { Button, Text, View } from "react-native";
 import { useAuth0 } from 'react-native-auth0';

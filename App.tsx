@@ -1,12 +1,15 @@
+/** 
+ * App.tsx
+ * Entry point of application.
+*/
+
 import * as React from 'react';
-import { Button, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './src/screens/Login.tsx'
 import Logout from './src/screens/Logout.tsx'
 import Map from './src/screens/Map.tsx'
 import { Auth0Provider } from 'react-native-auth0';
-
 
 const Stack = createNativeStackNavigator();
 
