@@ -112,4 +112,12 @@ export const styles = StyleSheet.create({
     backgroundColor: 'blue',
     padding: 10,
   },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 8,
+    color: '#3B3456',
+  },
 });

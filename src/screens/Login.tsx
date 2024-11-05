@@ -9,6 +9,7 @@ import { Button, Text, View } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
 import { styles } from "../styles/Login";
 
+
 function Login({ navigation }) {
   const { authorize, user } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +34,6 @@ function Login({ navigation }) {
     <View style={styles.container}>
       <Text>Login to Rune Routes</Text>
       <Button onPress={onPress} title={isLoading ? "Logging in..." : "Log in"} disabled={isLoading} />
-      {/* Optional: You can remove this button or implement a logout function */}
       <Button
         title="Logout"
         onPress={() => navigation.navigate('Logout')}
