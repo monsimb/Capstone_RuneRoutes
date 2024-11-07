@@ -40,7 +40,7 @@ function Map() {
   }
 
   // Function to handle adding a new custom marker on the map
-  const [markers, setMarkers] = useState<{ latitude: number; longitude: number; key: string; title: string; description: string }[]>([]);
+  const [markers, setMarkers] = useState<{ latitude: number; longitude: number; key: string; title: string; description: string;pinColor?: string }[]>([]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState<any>(null); // Store selected marker to edit
@@ -53,8 +53,9 @@ function Map() {
       latitude,
       longitude,
       key: `${latitude}-${longitude}`,
-      title: 'New Marker',
-      description: 'Enter a description...',
+      title: '',
+      description: '',
+      pinColor: '#3B3456',
     };
 
     setMarkers((prevMarkers) => [...prevMarkers, newMarker]);
@@ -129,6 +130,7 @@ function Map() {
                   }}
                   title={marker.title}
                   description={marker.description}
+                  pinColor={marker.pinColor}
                   onPress={() => handleMarkerPress(marker)} // Open edit form when marker is tapped
                 />
               ))}
@@ -143,8 +145,10 @@ function Map() {
           visible={modalVisible}
           animationType="slide"
           onRequestClose={() => setModalVisible(false)}
+          transparent={true}
         >
-          <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+          <View style={styles.modalOverlay}>
+           <View style={styles.modalContent}>
             <TextInput
               placeholder="Title"
               value={newTitle}
@@ -157,8 +161,9 @@ function Map() {
               onChangeText={setNewDescription}
               style={styles.input}
             />
-            <Button title="Update Marker" onPress={handleUpdateMarker} />
-            <Button title="Cancel" onPress={() => setModalVisible(false)} color="red" />
+            <Button title="Update Marker" onPress={handleUpdateMarker} color="#3B3456" />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} color="#3B3456C7" />
+              </View>
           </View>
         </Modal>
       </SafeAreaView>

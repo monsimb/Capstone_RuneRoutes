@@ -120,4 +120,21 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 8,
     color: '#3B3456',
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
+  modalContent: {
+    width: 300, // Adjust the width of the modal content
+    padding: 20,
+    backgroundColor: '#FEE9E7',
+    borderRadius: 10,
+    elevation: 5, // Shadow for Android
+    shadowColor: '#000', // Shadow for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
 });
