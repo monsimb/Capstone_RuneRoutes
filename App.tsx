@@ -1,38 +1,24 @@
-import React, { Component } from "react";
-import { StyleSheet, View } from "react-native";
-import Mapbox, {MapView} from "@rnmapbox/maps";
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Login from './src/screens/Login.tsx'
+import Maps from './src/screens/Maps.tsx'
+import { Auth0Provider } from 'react-native-auth0';
 
-Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw")
+const Stack = createNativeStackNavigator();
 
-const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F5FCFF"
-  },
-  container: {
-    height: 300,
-    width: 300,
-    backgroundColor: "tomato"
-  },
-  map: {
-    flex: 1
-  }
-});
+function App() {
 
-export default class App extends Component {
-  componentDidMount() {
-    Mapbox.setTelemetryEnabled(false);
-  }
-
-  render() {
-    return (
-      <View style={styles.page}>
-        <View style={styles.container}>
-          <MapView style={styles.map} />
-        </View>
-      </View>
-    );
-  }
+  return (
+    <Auth0Provider domain={"dev-r3fzkkn3e0cei0co.us.auth0.com"} clientId={"63jqpjQZkZYz91XhIGkxDr401zJX4h3b"}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={Login} />
+          <Stack.Screen name="Maps" component={Maps} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Auth0Provider>
+  );
 }
+
+export default App;
