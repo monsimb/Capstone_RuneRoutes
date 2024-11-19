@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import Mapbox, { MapView, Camera, Marker, UserTrackingMode, LocationPuck } from '@rnmapbox/maps';
+import { View, Text, StyleSheet } from 'react-native';
+import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck } from '@rnmapbox/maps';
 import Location from 'react-native-location';
 
 Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw")
@@ -10,32 +10,38 @@ Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOW
 
 
 const Maps = () => {
-  const [userLocation, setUserLocation] = useState(null);
+    const [userLocation, setUserLocation] = useState(null);
 
-useEffect(() => {
-    // Request permission and get user location
-    Location.requestPermission({
-      ios: 'whenInUse',     // Hopefully next sem we will onboard iOS
-      android: {
-        detail: 'fine',
-      },
-    })
-      .then(granted => {
-        if (granted) {
-          // Fetch the user curr location
-          Location.getLatestLocation({ enableHighAccuracy: true })
-            .then(location => {
-              setUserLocation(location); // Save location to state
-            })
-            .catch(err => console.warn(err));
-        }
-      })
-      .catch(err => console.warn('Permission denied:', err));
-  }, []);
+    useEffect(() => {
+        // Request permission and get user location
+        Location.requestPermission({
+          ios: 'whenInUse',     // Hopefully next sem we will onboard iOS
+          android: {
+            detail: 'fine',
+          },
+        })
+          .then(granted => {
+            if (granted) {
+              // Fetch the user curr location
+              Location.getLatestLocation({ enableHighAccuracy: true })
+                .then(location => {
+                  setUserLocation(location); // Save location to state
+                })
+                .catch(err => console.warn(err));
+            }
+          })
+          .catch(err => console.warn('Permission denied:', err));
+      }, []);
 
-  if (!userLocation) {
-    return <View style={{ flex: 1 }} />; // Return blank until location is fetched (no more SF map uhul!)
-  }
+      if (!userLocation) {
+        return <View style={{ flex: 1 }} />; // Return blank until location is fetched (no more SF map uhul!)
+      }
+   const markerCoordinates = [
+     { id: 1, latitude: userLocation.latitude, longitude: userLocation.longitude }, // User's location
+     { id: 2, latitude: 37.7749, longitude: -122.4194 }, // Example: San Francisco coordinates
+     { id: 3, latitude: 40.7128, longitude: -74.0060 }, // Example: New York coordinates
+   ];
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -65,6 +71,17 @@ useEffect(() => {
             radius: 50.0,
           }}
         />
+        {markerCoordinates.map((marker) => (
+                  <MarkerView
+                    key={marker.id}
+                    coordinate={[marker.longitude, marker.latitude]} // Marker location
+                  >
+                    <View style={styles.markerViewContainer}>
+                      <View style={styles.marker}>
+                      </View>
+                    </View>
+                  </MarkerView>
+                ))}
 
       </MapView>
     </View>
@@ -89,6 +106,22 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: 'white',
   },
-});
+    markerViewContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    marker: {
+      height: 40,
+      width: 40,
+      backgroundColor: 'red',
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    markerText: {
+      color: 'white',
+      fontWeight: 'bold',
+    },
+  });
 
 export default Maps;
