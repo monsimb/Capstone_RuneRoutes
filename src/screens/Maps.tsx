@@ -39,7 +39,7 @@ const Maps = () => {
             const coordinates = e.geometry ? e.geometry.coordinates : null;
 
             if (coordinates) {
-                const [longitude, latitude] = coordinates; // Coordinates should be in [longitude, latitude] order
+                const [longitude, latitude] = coordinates; // Coordinates should be in [longitude, latitude] order. This is likely what will be stored in the DB!!
                 setMarkers(prevMarkers => [
                     ...prevMarkers,
                     { id: Math.random().toString(), longitude, latitude },
