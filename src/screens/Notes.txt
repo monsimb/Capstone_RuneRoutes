@@ -1,0 +1,22 @@
+NOTES:
+
+# Maps.tsx
+
+To change location pucks image, we can use something like this
+        <Images>
+          <Image name="topImage">
+            <View
+              style={{
+                borderColor: 'blue',
+                borderWidth: 2,
+                width: 16,
+                height: 16,
+                borderRadius: 8,
+                backgroundColor: 'red',
+              }}
+            />
+          </Image>
+        </Images>
+    I'm pretty sure it's not limited to colours only and we can use pictures instead if we want to
+
+
