@@ -29,6 +29,16 @@ function Login({ navigation }) {
     }
   };
 
+  const {clearSession} = useAuth0();
+
+  const Logout = async () => {
+      try {
+          await clearSession();
+      } catch (e) {
+          console.log(e);
+      }
+  };
+
   return (
     <View style={styles.container}>
       <Text>Login to Rune Routes</Text>
@@ -36,7 +46,7 @@ function Login({ navigation }) {
       {/* Optional: You can remove this button or implement a logout function */}
       <Button
         title="Logout"
-        onPress={() => navigation.navigate('Logout')}
+        onPress={Logout}
       />
     </View>
   );
