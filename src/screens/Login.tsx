@@ -35,14 +35,15 @@ function Login({ navigation }) {
   return (
     <View style={styles.container}>
       
-
       {/* Back button to return to Maps */}
       <TouchableOpacity 
         style={styles.backButton} 
         onPress={() => navigation.navigate('Home', { screen: 'MapView' })}
       >
-        <Ionicons name="arrow-back" size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color="white" />  
       </TouchableOpacity>
+
+       
 
 
       {/* Image placeholder */}
