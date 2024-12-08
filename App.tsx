@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Login from './src/screens/Login.tsx'
 import Maps from './src/screens/Maps.tsx'
+import Welcome from './src/screens/Welcome.tsx';
 import { Auth0Provider } from 'react-native-auth0';
 import { View, StyleSheet } from "react-native";
 import Ionicons from 'react-native-vector-icons/FontAwesome';
@@ -54,13 +55,14 @@ function App() {
     <Auth0Provider domain={"dev-r3fzkkn3e0cei0co.us.auth0.com"} clientId={"63jqpjQZkZYz91XhIGkxDr401zJX4h3b"}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Home" component={MainTabs} />
           <Stack.Screen name="LoginStack" component={LoginStack} />
         </Stack.Navigator>
       </NavigationContainer>
     </Auth0Provider>
   );
-}
+ }
 
 export default App;
 

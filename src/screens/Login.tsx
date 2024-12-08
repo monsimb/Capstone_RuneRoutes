@@ -4,24 +4,6 @@ import { useAuth0 } from 'react-native-auth0';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 function Login({ navigation }) {
-  const { authorize, user } = useAuth0();
-  const [isLoading, setIsLoading] = useState(false);
-
-  if (user) {
-    navigation.navigate('Maps'); // Navigate to Maps if user is defined
-  }
-
-  const onPress = async () => {
-    setIsLoading(true);
-    try {
-      await authorize();
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const {clearSession} = useAuth0();
 
   const Logout = async () => {
@@ -30,36 +12,18 @@ function Login({ navigation }) {
       } catch (e) {
           console.log(e);
       }
+      navigation.navigate('Welcome')
   };
 
   return (
     <View style={styles.container}>
-      
-      {/* Back button to return to Maps */}
-      <TouchableOpacity 
-        style={styles.backButton} 
-        onPress={() => navigation.navigate('Home', { screen: 'MapView' })}
-      >
-        <Ionicons name="arrow-back" size={24} color="white" />  
-      </TouchableOpacity>
-
-       
-
+       {/* Title */}
+       <Text style={styles.title}>Settings</Text>
 
       {/* Image placeholder */}
       <View style={styles.imageContainer}>
         <Image style={styles.image} source={require('../assets/roune_routes_logo.png')} resizeMode="contain" />
       </View>
-
-
-      {/* Title */}
-      <Text style={styles.title}>Login to Rune Routes</Text>
-
-
-      {/* Login Button */}
-      <TouchableOpacity style={styles.loginButton} onPress={onPress} disabled={isLoading}>
-        <Text style={styles.buttonText}>{isLoading ? "Logging in..." : "Log in"}</Text>
-      </TouchableOpacity>
 
 
       {/* Logout Button */}
@@ -88,19 +52,20 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: "bold",
     color: "white",
     marginBottom: 30,
+    bottom: "30%",
+    justifyContent: "top"
   },
   imageContainer: {
-    width: 300,
-    height: 300,
+    width: 200,
+    height: 200,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 10,
-    marginBottom: 50,
+    marginBottom: 70,
     marginTop: '-50%',
   },
   image: {
