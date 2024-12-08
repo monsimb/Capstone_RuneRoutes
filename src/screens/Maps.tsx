@@ -61,12 +61,6 @@ const Maps: React.FC = () => {
     };
   };
 
-  //TODO: CreateRemovalPolygon() - Create a function that creates a Polygon on user's location. 
-  //      Preferably a circle.
-  //      The purpose of this circle will be to eventually be subtracted from the large polygon that will cover the whole earth. 
-  //      This function will do no more than create the polygon but it should be different from the fog polygon because we want different color/opacity.
-  //      Eventually, it will probably be transparent and then it will be subtracted from the large polygon.
-
   useEffect(() => {
     // Request permission and get user location
     Location.requestPermission({
@@ -79,13 +73,6 @@ const Maps: React.FC = () => {
           Location.getLatestLocation({ enableHighAccuracy: true })
             .then(location => {
               setUserLocation(location); // Save location to state
-              //TODO: Call CreateRemovalPolygon and create a removalPolygon at the user's location. 
-              //      Will need to have a check so we're not making polygons in areas that have been cleared already. 
-              //      Will also need to make a useState most likely so we can overcome scope issues.
-
-              //TODO: Sometime after a removalPolygon has been created, it will be removed from the large polygon with Turf.JS
-              //      This can probably be done here as the removalPolygon will be created and instantly removed
-              //      from the fogPolygon
             })
             .catch(err => console.warn(err));
         }
