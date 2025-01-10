@@ -35,7 +35,7 @@ const Maps: React.FC = () => {
   // Function to create a polygon around a given location
   const createPolygon = (longitude: number, latitude: number) => {
     // Define the offset for the polygon (in degrees, adjust as needed)
-    const offset = 0.1; // Increase this to make the polygon larger
+    const offset = 0.03; // Increase this to make the polygon larger
 
     // Create the coordinates for the polygon
     return {
@@ -48,12 +48,58 @@ const Maps: React.FC = () => {
             type: 'Polygon',
             coordinates: [
               [
-                [longitude - offset, latitude - offset],
-                [longitude + offset, latitude - offset],
-                [longitude + offset, latitude + offset],
-                [longitude - offset, latitude + offset],
-                [longitude - offset, latitude - offset],
+                [
+                  -180,
+                  -90
+                ],
+                [
+                  190,
+                  -90
+                ],
+                [
+                  190,
+                  90
+                ],
+                [
+                  -170,
+                  90
+                ],
+                [
+                  -170,
+                  -90
+                ]
               ],
+               [
+                [
+                  longitude + offset,
+                  latitude - offset
+                ],
+                [
+                  longitude - offset,
+                  latitude - offset
+                ],
+                [
+                  longitude - offset,
+                  // 37.5
+                  latitude + offset
+                ],
+                [
+                  longitude + offset,
+                  // 37.5
+                  latitude + offset
+                ],
+                [
+                  longitude + offset,
+                  latitude + offset
+                ]
+              ]
+              // [
+              //   [longitude - offset, latitude - offset],
+              //   [longitude + offset, latitude - offset],
+              //   [longitude + offset, latitude + offset],
+              //   [longitude - offset, latitude + offset],
+              //   [longitude - offset+100, latitude - offset],
+              // ],
             ],
           },
         },
@@ -201,7 +247,7 @@ const Maps: React.FC = () => {
             id="reqId"
             style={{
               lineColor: '#ffffff',
-              lineWidth: 15,
+              lineWidth: 10,
             }}
           />
           <FillLayer
@@ -210,8 +256,7 @@ const Maps: React.FC = () => {
             style={{
               // Fill outside the polygon (the area surrounding it)
               fillColor: '#000000', // Color of the filled area
-              fillOpacity: 0.5,
-              // Use a negative fill to fill the area outside the polygon?
+              fillOpacity: 0.8,
             }}
           />
         </ShapeSource>
