@@ -48,70 +48,27 @@ const Maps: React.FC = () => {
             type: 'Polygon',
             coordinates: [
               [
-                [
-                  -180,
-                  -90
-                ],
-                [
-                  190,
-                  -90
-                ],
-                [
-                  190,
-                  90
-                ],
-                [
-                  -170,
-                  90
-                ],
-                [
-                  -170,
-                  -90
-                ]
+                [-180,-90],
+                [190,-90],
+                [190,90],
+                [-170,90],
+                [-170,-90]
               ],
+              // hole in polygone coords
                [
-                [
-                  longitude + offset,
-                  latitude - offset
-                ],
-                [
-                  longitude - offset,
-                  latitude - offset
-                ],
-                [
-                  longitude - offset,
-                  // 37.5
-                  latitude + offset
-                ],
-                [
-                  longitude + offset,
-                  // 37.5
-                  latitude + offset
-                ],
-                [
-                  longitude + offset,
-                  latitude + offset
-                ]
+                [longitude + offset,latitude - offset],
+                [longitude - offset,latitude - offset],
+                [longitude - offset,latitude + offset],
+                [longitude + offset,latitude + offset],
+
+                [longitude + offset+.01,latitude + offset-.03]
               ]
-              // [
-              //   [longitude - offset, latitude - offset],
-              //   [longitude + offset, latitude - offset],
-              //   [longitude + offset, latitude + offset],
-              //   [longitude - offset, latitude + offset],
-              //   [longitude - offset+100, latitude - offset],
-              // ],
             ],
           },
         },
       ],
     };
   };
-
-  //TODO: CreateRemovalPolygon() - Create a function that creates a Polygon on user's location. 
-  //      Preferably a circle.
-  //      The purpose of this circle will be to eventually be subtracted from the large polygon that will cover the whole earth. 
-  //      This function will do no more than create the polygon but it should be different from the fog polygon because we want different color/opacity.
-  //      Eventually, it will probably be transparent and then it will be subtracted from the large polygon.
 
   useEffect(() => {
     // Request permission and get user location
@@ -125,13 +82,6 @@ const Maps: React.FC = () => {
           Location.getLatestLocation({ enableHighAccuracy: true })
             .then(location => {
               setUserLocation(location); // Save location to state
-              //TODO: Call CreateRemovalPolygon and create a removalPolygon at the user's location. 
-              //      Will need to have a check so we're not making polygons in areas that have been cleared already. 
-              //      Will also need to make a useState most likely so we can overcome scope issues.
-
-              //TODO: Sometime after a removalPolygon has been created, it will be removed from the large polygon with Turf.JS
-              //      This can probably be done here as the removalPolygon will be created and instantly removed
-              //      from the fogPolygon
             })
             .catch(err => console.warn(err));
         }
@@ -216,7 +166,7 @@ const Maps: React.FC = () => {
         provider="mapbox"
         style={styles.map}
         centerCoordinate={[userLocation.longitude, userLocation.latitude]} // Set initial map center to user's location
-        zoomLevel={15} // Zoom level to 15
+        zoomLevel={10} // Zoom level to 15
         showUserLocation={true} // Show user location on map
         onPress={handlePress} // Handle press to add custom marker
       >
@@ -239,9 +189,12 @@ const Maps: React.FC = () => {
             radius: 50.0,
           }}
         />
-
+        
         {/* Add inverted polygon (filled outside) */}
         <ShapeSource id="userPolygon" shape={geoJson}>
+          {/*Will need to be changed so that only uses user location to create polygone 
+          if there is no pre-existing user information (edge case, check if user is out of 
+          bounds-> use location to create polygon*/}      
           <LineLayer
             sourceID="feature"
             id="reqId"
