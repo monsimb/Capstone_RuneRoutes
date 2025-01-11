@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, TextInput, Image, View, Text, StyleSheet } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import Mapbox, {MapboxGL, MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
+import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import Location, { Location as LocationType } from 'react-native-location';
-import DefaultPin from './Assets/Markers/defaultPin.png';
+import DefaultPin from '../assets/defaultPin.png';
 
 Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw");
 
@@ -237,7 +237,7 @@ const Maps: React.FC = () => {
             radius: 50.0,
           }}
         />
-        
+
         {/*Will need to be changed so that only uses user location to create polygone 
           if there is no pre-existing user information (edge case, check if user is out of 
           bounds-> use location to create polygon*/} 
