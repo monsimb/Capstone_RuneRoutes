@@ -59,7 +59,7 @@ const Maps: React.FC = () => {
   // Function to create a polygon around a given location
   const createPolygon = (longitude: number, latitude: number) => {
     // Define the offset for the polygon
-    const offset = 0.03; // Increase this to make the polygon larger
+    const offset = 0.01; // Increase this to make the polygon larger
 
     // Create the coordinates for the polygon
     const polygonData= {
@@ -82,10 +82,11 @@ const Maps: React.FC = () => {
                [
                 [longitude + offset,latitude - offset],
                 [longitude - offset,latitude - offset],
+                [longitude - offset-.005,latitude - offset+.01],
+
                 [longitude - offset,latitude + offset],
                 [longitude + offset,latitude + offset],
-
-                [longitude + offset+.01,latitude + offset-.03]
+                [longitude + offset+.005,latitude + offset-.01]
               ]
             ],
           },
@@ -110,6 +111,7 @@ const Maps: React.FC = () => {
       const xj = polygon[0][j][0];
       const yj = polygon[0][j][1];
 
+      // Ray Casting Algo https://rosettacode.org/wiki/Ray-casting_algorithm
       const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi)/(yj - yi) + xi);
       if (intersect) inside = !inside;
     }
@@ -223,7 +225,7 @@ const Maps: React.FC = () => {
           }}
           followUserLocation={true}
           followUserMode={UserTrackingMode.Follow}
-          followZoomLevel={14}
+          followZoomLevel={13.5}
         />
         <LocationPuck
           topImage="topImage"
@@ -236,11 +238,11 @@ const Maps: React.FC = () => {
           }}
         />
         
-        {/* Add inverted polygon (filled outside) */}
-        <ShapeSource id="userPolygon" shape={geoJson}>
-          {/*Will need to be changed so that only uses user location to create polygone 
+        {/*Will need to be changed so that only uses user location to create polygone 
           if there is no pre-existing user information (edge case, check if user is out of 
-          bounds-> use location to create polygon*/}      
+          bounds-> use location to create polygon*/} 
+        {/* Add inverted polygon (filled outside) */}
+        <ShapeSource id="userPolygon" shape={geoJson}> 
           <LineLayer
             sourceID="feature"
             id="reqId"
@@ -253,7 +255,6 @@ const Maps: React.FC = () => {
             sourceID="feat"
             id="feat"
             style={{
-              // Fill outside the polygon (the area surrounding it)
               fillColor: '#000000', // Color of the filled area
               fillOpacity: 0.8,
             }}
