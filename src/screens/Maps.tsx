@@ -32,13 +32,37 @@ const Maps: React.FC = () => {
   
 
 
+  const savePolygonToDatabase = async (polygonData: any)=>{
+    // TODO: im just mocking some stuff, we need to fill in with how we are actually hitting our DB
+    try{
+      const response = await fetch("http of db api",{
+        method: 'POST',
+        headers: {},
+        body: JSON.stringify({
+          coordinates:polygonData,
+          created_at: new Date().toISOString(),
+        }),
+      });
+      const result = await response.json();
+      if (result.ok) {
+        console.log('Poly save success', result);
+      }
+      else{
+        console.error('Poly save FAILURE', result);
+      }
+    }
+    catch(error){
+      console.error('Error saving polygon', error);
+    }
+  };
+
   // Function to create a polygon around a given location
   const createPolygon = (longitude: number, latitude: number) => {
-    // Define the offset for the polygon (in degrees, adjust as needed)
+    // Define the offset for the polygon
     const offset = 0.03; // Increase this to make the polygon larger
 
     // Create the coordinates for the polygon
-    return {
+    const polygonData= {
       type: 'FeatureCollection',
       features: [
         {
@@ -68,7 +92,30 @@ const Maps: React.FC = () => {
         },
       ],
     };
+    // Call to function to save poly data to DB
+    // savePolygonToDatabase(polygonData.features[0].geometry.coordinates);
+
+    return polygonData;
   };
+
+  const isPointInPolygon = (point: {latitude: number, longitude: number}, polygon: number[][][]): boolean => {
+    // UNTESTED -> this is for checking if user is within known poly (info should come from db or cache)
+    const x = point.longitude;
+    const y = point.latitude;
+    let inside = false;
+
+    for (let i = 0, j = polygon[0].length - 1; i < polygon[0].length; j = i++){
+      const xi = polygon[0][i][0];
+      const yi = polygon[0][i][1];
+      const xj = polygon[0][j][0];
+      const yj = polygon[0][j][1];
+
+      const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi)/(yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
 
   useEffect(() => {
     // Request permission and get user location
@@ -166,14 +213,13 @@ const Maps: React.FC = () => {
         provider="mapbox"
         style={styles.map}
         centerCoordinate={[userLocation.longitude, userLocation.latitude]} // Set initial map center to user's location
-        zoomLevel={10} // Zoom level to 15
         showUserLocation={true} // Show user location on map
         onPress={handlePress} // Handle press to add custom marker
       >
         <Camera
           defaultSettings={{
             centerCoordinate: [-77.036086, 38.910233],
-            zoomLevel: 10,
+            zoomLevel: 8,
           }}
           followUserLocation={true}
           followUserMode={UserTrackingMode.Follow}
