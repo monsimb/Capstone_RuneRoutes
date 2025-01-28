@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Login from './src/screens/Login.tsx'
 import Maps from './src/screens/Maps.tsx'
+import Friends from './src/screens/Friends.tsx'
 import Welcome from './src/screens/Welcome.tsx';
 import { Auth0Provider } from 'react-native-auth0';
 import { View, StyleSheet } from "react-native";
@@ -26,6 +27,8 @@ function MainTabs() {
             iconName = focused ? 'map' : 'map';  //should work to import from icons repo as map  for dbug: https://sapui5.hana.ondemand.com/sdk/test-resources/sap/m/demokit/iconExplorer/webapp/index.html#/overview/SAP-icons/?tab=grid&search=map
           } else if (route.name === 'Settings') {
             iconName = focused ? 'gear' : 'gear';
+          } else if (route.name === 'Friends') {
+              iconName = focused ? 'user-plus' : 'user-plus';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -36,6 +39,7 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Maps" component={Maps} />
+      <Tab.Screen name="Friends" component={Friends} /> 
       <Tab.Screen name="Settings" component={Login} /> 
     </Tab.Navigator>
   );
