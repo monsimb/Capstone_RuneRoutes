@@ -184,7 +184,10 @@ const Maps: React.FC = () => {
 
     if (coordinates) {
       const [longitude, latitude] = coordinates;
-      console.log("Coordinates:", longitude, latitude); // Log coordinates
+      if(turf.booleanPointInPolygon(coordinates, geoJson)) {
+        console.log("MARKER IN POLYGON!!!!")
+      }
+      //console.log("Coordinates:", longitude, latitude); // Log coordinates
       setCurrentCoordinates({ longitude, latitude });
       setModalVisible(true);
     } else {
