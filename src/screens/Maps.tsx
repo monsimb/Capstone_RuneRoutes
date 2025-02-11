@@ -4,6 +4,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import Location, { Location as LocationType } from 'react-native-location';
 import DefaultPin from '../assets/defaultPin.png';
+import { styles } from '../styles/Map';
 import * as turf from '@turf/turf';
 
 Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw");
@@ -64,18 +65,18 @@ const Maps: React.FC = () => {
   // Function to create a polygon around a given location
   const createPolygon = (longitude: number, latitude: number) => {
     // Define the offset for the polygon
-    const offset = 0.01; // Increase this to make the polygon larger
+    const offset = 0.001; // Increase this to make the polygon larger
 
-    // Outer boundary which covers the whole world (this will surely impact the local trout population...)
+    // Outer boundary which covers the whole world
     const outerBoundary = [
       [-180, -90],
       [190, -90],
       [190, 90],
       [-170, 90],
-      [-180, -90] // Ensure it closes properly (or adjust as needed)
+      [-180, -90]
     ];
 
-    // Inner hole (hole in the ozone layer. or something.)
+    // Inner hole. User 'explored area'
    const hole = [
       [longitude - offset, latitude - offset],
       [longitude + offset, latitude - offset],
@@ -126,28 +127,6 @@ const Maps: React.FC = () => {
     return turfPolygon;
   };
 
-
-/*
-  const isPointInPolygon = (point: {latitude: number, longitude: number}, polygon: number[][]): boolean => {
-    // UNTESTED -> this is for checking if user is within known poly (info should come from db or cache)
-    const x = point.longitude;
-    const y = point.latitude;
-    let inside = false;
-
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++){
-      const xi = polygon[i][0];
-      const yi = polygon[i][1];
-      const xj = polygon[j][0];
-      const yj = polygon[j][1];
-
-      // Ray Casting Algo https://rosettacode.org/wiki/Ray-casting_algorithm
-      const intersect = ((yi > y) !== (yj > y)) &&
-          (x < (xj - xi) * (y - yi)/(yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  }
-*/
 
   useEffect(() => {
     // Request permission and get user location
@@ -372,64 +351,6 @@ const Maps: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  map: {
-    flex: 1,
-  },
-  markerViewContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  marker: {
-    height: 40,
-    width: 40,
-    backgroundColor: 'red',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  markerText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent overlay
-  },
-  modalContent: {
-    width: '90%',
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  buttonContainer: {
-      position: 'absolute',
-      bottom: 50,
-      alignSelf: 'center',
-      backgroundColor: 'white',
-      padding: 10,
-      borderRadius: 10,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 3.84,
-      elevation: 5,
-  },
-});
+
 
 export default Maps;
