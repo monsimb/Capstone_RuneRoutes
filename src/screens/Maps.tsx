@@ -4,6 +4,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import Location, { Location as LocationType } from 'react-native-location';
 import DefaultPin from '../assets/defaultPin.png';
+import * as turf from '@turf/turf';
 
 Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw");
 
@@ -15,7 +16,10 @@ Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOW
 
 const Maps: React.FC = () => {
   const [userLocation, setUserLocation] = useState<LocationType | null>(null);
+  const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
+  const [staticPolygon, setStaticPolygon] = useState<turf.Feature<turf.Polygon> | null>(null);
   const [markers, setMarkers] = useState<{
+
     id: string;
     longitude: number;
     latitude: number;
@@ -29,7 +33,7 @@ const Maps: React.FC = () => {
   const [newImageUri, setNewImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentCoordinates, setCurrentCoordinates] = useState<{ longitude: number; latitude: number } | null>(null);
-  
+
 
 
   const savePolygonToDatabase = async (polygonData: any)=>{
@@ -56,12 +60,33 @@ const Maps: React.FC = () => {
     }
   };
 
+
   // Function to create a polygon around a given location
   const createPolygon = (longitude: number, latitude: number) => {
     // Define the offset for the polygon
     const offset = 0.01; // Increase this to make the polygon larger
 
+    // Outer boundary which covers the whole world (this will surely impact the local trout population...)
+    const outerBoundary = [
+      [-180, -90],
+      [190, -90],
+      [190, 90],
+      [-170, 90],
+      [-180, -90] // Ensure it closes properly (or adjust as needed)
+    ];
+
+    // Inner hole (hole in the ozone layer. or something.)
+   const hole = [
+      [longitude - offset, latitude - offset],
+      [longitude + offset, latitude - offset],
+      [longitude + offset, latitude + offset],
+      [longitude - offset, latitude + offset],
+      [longitude - offset, latitude - offset]
+    ];
+
+
     // Create the coordinates for the polygon
+    /*
     const polygonData= {
       type: 'FeatureCollection',
       features: [
@@ -95,29 +120,34 @@ const Maps: React.FC = () => {
     };
     // Call to function to save poly data to DB
     // savePolygonToDatabase(polygonData.features[0].geometry.coordinates);
-
-    return polygonData;
+    */
+    const turfPolygon = turf.polygon([outerBoundary, hole]);
+    //console.log(turfPolygon); // debug for Joseph(me)
+    return turfPolygon;
   };
 
-  const isPointInPolygon = (point: {latitude: number, longitude: number}, polygon: number[][][]): boolean => {
+
+/*
+  const isPointInPolygon = (point: {latitude: number, longitude: number}, polygon: number[][]): boolean => {
     // UNTESTED -> this is for checking if user is within known poly (info should come from db or cache)
     const x = point.longitude;
     const y = point.latitude;
     let inside = false;
 
-    for (let i = 0, j = polygon[0].length - 1; i < polygon[0].length; j = i++){
-      const xi = polygon[0][i][0];
-      const yi = polygon[0][i][1];
-      const xj = polygon[0][j][0];
-      const yj = polygon[0][j][1];
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++){
+      const xi = polygon[i][0];
+      const yi = polygon[i][1];
+      const xj = polygon[j][0];
+      const yj = polygon[j][1];
 
       // Ray Casting Algo https://rosettacode.org/wiki/Ray-casting_algorithm
-      const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi)/(yj - yi) + xi);
+      const intersect = ((yi > y) !== (yj > y)) &&
+          (x < (xj - xi) * (y - yi)/(yj - yi) + xi);
       if (intersect) inside = !inside;
     }
     return inside;
   }
-
+*/
 
   useEffect(() => {
     // Request permission and get user location
@@ -131,6 +161,15 @@ const Maps: React.FC = () => {
           Location.getLatestLocation({ enableHighAccuracy: true })
             .then(location => {
               setUserLocation(location); // Save location to state
+
+              // Set initial location (on load) ONCE, never again
+              if (!initialUserLocation) {
+                setInitialUserLocation(location); // Initial location has been set
+                // Now it is important we generate the polygon hole here because we only want a new hole to generate on load and then we will modify/extend
+                const poly = createPolygon(location.longitude, location.latitude);
+                setStaticPolygon(poly);
+              }
+
             })
             .catch(err => console.warn(err));
         }
@@ -140,9 +179,9 @@ const Maps: React.FC = () => {
 
   // Marker touch interaction handler
   const handlePress = (e: any) => {
-    console.log("Map pressed", e); 
+    console.log("Map pressed", e);
     const coordinates = e.geometry ? e.geometry.coordinates : null;
-  
+
     if (coordinates) {
       const [longitude, latitude] = coordinates;
       console.log("Coordinates:", longitude, latitude); // Log coordinates
@@ -152,7 +191,7 @@ const Maps: React.FC = () => {
       console.error("No coordinates found in event:", e);
     }
   };
-  
+
   // User uploaded images
   const pickImage = () => {
     launchImageLibrary({}, (response) => {
@@ -183,6 +222,21 @@ const Maps: React.FC = () => {
     setNewImageUri(null);
   };
 
+  const handleMove = () => {
+    if(userLocation) {
+      setUserLocation(prev => ({
+        latitude: prev!.latitude,
+        longitude: prev!.longitude + 0.5,
+        }));
+      }
+    console.log(userLocation);
+    const pt = turf.point([userLocation.longitude, userLocation.latitude]);
+    if(turf.booleanPointInPolygon(pt,geoJson))
+    {
+      console.log("USER IN POLYGON")
+    }
+  };
+
   //Marker State
   const [selectedMarker, setSelectedMarker] = useState<{
     id: string;
@@ -202,7 +256,7 @@ const Maps: React.FC = () => {
     setModalVisible(true); // Show the modal
   };
 
-  
+
   if (!userLocation) {
     return <View style={{ flex: 1 }} />; // Return blank until location is fetched
   }
@@ -211,13 +265,17 @@ const Maps: React.FC = () => {
 
   return (
     <View style={{ flex: 1 }}>
+
+
       <MapView
         provider="mapbox"
         style={styles.map}
         centerCoordinate={[userLocation.longitude, userLocation.latitude]} // Set initial map center to user's location
         showUserLocation={true} // Show user location on map
         onPress={handlePress} // Handle press to add custom marker
+
       >
+
         <Camera
           defaultSettings={{
             centerCoordinate: [-77.036086, 38.910233],
@@ -228,6 +286,7 @@ const Maps: React.FC = () => {
           followZoomLevel={13.5}
         />
         <LocationPuck
+
           topImage="topImage"
           visible={true}
           scale={['interpolate', ['linear'], ['zoom'], 10, 1.0, 20, 4.0]}
@@ -238,11 +297,11 @@ const Maps: React.FC = () => {
           }}
         />
 
-        {/*Will need to be changed so that only uses user location to create polygone 
-          if there is no pre-existing user information (edge case, check if user is out of 
-          bounds-> use location to create polygon*/} 
+        {/*Will need to be changed so that only uses user location to create polygone
+          if there is no pre-existing user information (edge case, check if user is out of
+          bounds-> use location to create polygon*/}
         {/* Add inverted polygon (filled outside) */}
-        <ShapeSource id="userPolygon" shape={geoJson}> 
+        <ShapeSource id="userPolygon" shape={staticPolygon}>
           <LineLayer
             sourceID="feature"
             id="reqId"
@@ -301,8 +360,11 @@ const Maps: React.FC = () => {
                 </View>
               </View>
             </Modal>
-            
+
       </MapView>
+      <View style={styles.buttonContainer}>
+              <Button title="Move Right" onPress={handleMove} />
+            </View>
     </View>
   );
 };
@@ -342,7 +404,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 5,
-    elevation: 5, 
+    elevation: 5,
   },
   input: {
     height: 40,
@@ -351,6 +413,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
     paddingHorizontal: 10,
+  },
+  buttonContainer: {
+      position: 'absolute',
+      bottom: 50,
+      alignSelf: 'center',
+      backgroundColor: 'white',
+      padding: 10,
+      borderRadius: 10,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 3.84,
+      elevation: 5,
   },
 });
 
