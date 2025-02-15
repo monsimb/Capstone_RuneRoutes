@@ -361,8 +361,15 @@ const Maps: React.FC = () => {
                     onChangeText={setNewDescription}
                     style={styles.input}
                   />
-                  <Button title="Upload Image" onPress={pickImage} color='#33CCFF' />
-                  <Button title="Add Marker" onPress={handleAddMarker} color="#3B3456" />
+
+                  {/* Temp fix for button overlap issue */}
+                  <View style={{marginBottom: 5}}>
+                    <Button title="Upload Image" onPress={pickImage} color='#33CCFF'/>
+                  </View>
+
+                  <View style={{marginBottom: 5}}>
+                    <Button title="Add Marker" onPress={handleAddMarker} color="#3B3456" />
+                  </View>
                   <Button title="Cancel" onPress={() => setModalVisible(false)} color="#3B3456C7" />
                 </View>
               </View>
@@ -462,6 +469,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     lineHeight: 24,
+    color: 'black'
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -493,6 +501,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
     paddingHorizontal: 10,
+    color: 'black'
   },
 });
 
