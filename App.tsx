@@ -4,11 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Login from './src/screens/Login.tsx'
 import Maps from './src/screens/Maps.tsx'
-import Welcome from './src/screens/Welcome.tsx';
+import Friends from './src/screens/Friends.tsx'
+import Welcome from './src/screens/Welcome.tsx'
+import Profile from './src/screens/Profile.tsx';
 import { Auth0Provider } from 'react-native-auth0';
 import { View, StyleSheet } from "react-native";
-import Ionicons from 'react-native-vector-icons/FontAwesome';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/FontAwesome6';
+import Icon from 'react-native-vector-icons/FontAwesome6';
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -26,7 +29,11 @@ function MainTabs() {
             iconName = focused ? 'map' : 'map';  //should work to import from icons repo as map  for dbug: https://sapui5.hana.ondemand.com/sdk/test-resources/sap/m/demokit/iconExplorer/webapp/index.html#/overview/SAP-icons/?tab=grid&search=map
           } else if (route.name === 'Settings') {
             iconName = focused ? 'gear' : 'gear';
-          }
+          } else if (route.name === 'Friends') {
+              iconName = focused ? 'users' : 'users';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'user' : 'user';
+        }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -36,7 +43,10 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Maps" component={Maps} />
+      <Tab.Screen name="Friends" component={Friends} />
+      <Tab.Screen name="Profile" component={Profile} /> 
       <Tab.Screen name="Settings" component={Login} /> 
+
     </Tab.Navigator>
   );
 }
