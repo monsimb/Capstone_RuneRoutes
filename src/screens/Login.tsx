@@ -39,7 +39,7 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'flex-start',
     alignItems: "center",
     backgroundColor: "#5b4087",
     padding: 20,
@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: "bold",
     color: "white",
-    marginBottom: 30,
-    bottom: "30%",
-    justifyContent: "top"
+    //marginBottom: 30,
+    //bottom: "30%",
+    //justifyContent: "top"
   },
   imageContainer: {
     width: 200,
@@ -65,8 +65,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 70,
-    marginTop: '-50%',
+    //marginBottom: 70,
+    //marginTop: '-50%',
   },
   image: {
     width: "100%",
