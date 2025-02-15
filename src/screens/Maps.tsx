@@ -278,7 +278,7 @@ const Maps: React.FC = () => {
               <Text style={styles.descriptionLabel}>Description:</Text>
               <Text style={styles.descriptionText}>{selectedMarker.description}</Text>
               
-              <View style={styles.buttonContainer}>
+              <View style={styles.markerButtonContainer}>
                 <TouchableOpacity 
                   style={[styles.button, styles.deleteButton]}
                   onPress={() => handleDeleteMarker(selectedMarker.id)}
