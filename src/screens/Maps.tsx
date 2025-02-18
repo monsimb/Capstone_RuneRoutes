@@ -176,7 +176,9 @@ const Maps: React.FC = () => {
 
   // User uploaded images
   const pickImage = () => {
-    launchImageLibrary({}, (response) => {
+    launchImageLibrary(
+      {}, 
+      (response) => {
       if (response.assets && response.assets.length > 0) {
         setNewImageUri(response.assets[0].uri || null);
       }
@@ -344,9 +346,6 @@ const Maps: React.FC = () => {
             </Modal>
 
       </MapView>
-      <View style={styles.buttonContainer}>
-              <Button title="Move Right" onPress={handleMove} />
-            </View>
     </View>
   );
 };
