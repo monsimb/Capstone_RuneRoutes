@@ -5,7 +5,8 @@ import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, Sh
 import Location, { Location as LocationType } from 'react-native-location';
 import DefaultPin from '../assets/defaultPin.png';
 import { styles } from '../styles/Map';
-import * as turf from '@turf/turf';
+import { booleanTouches, booleanPointInPolygon } from '@turf/turf';
+import { feature, polygon, point } from "@turf/helpers";
 
 Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw");
 
@@ -18,7 +19,7 @@ Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOW
 const Maps: React.FC = () => {
   const [userLocation, setUserLocation] = useState<LocationType | null>(null);
   const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
-  const [staticPolygon, setStaticPolygon] = useState<turf.Feature<turf.Polygon> | null>(null);
+  const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
   const [markers, setMarkers] = useState<{
 
     id: string;
@@ -42,7 +43,7 @@ const Maps: React.FC = () => {
   const [currentCoordinates, setCurrentCoordinates] = useState<{ longitude: number; latitude: number } | null>(null);
 
 
-
+  // 'pseudo code' for database store of poly
   const savePolygonToDatabase = async (polygonData: any)=>{
     // TODO: im just mocking some stuff, we need to fill in with how we are actually hitting our DB
     try{
@@ -128,10 +129,17 @@ const Maps: React.FC = () => {
     // Call to function to save poly data to DB
     // savePolygonToDatabase(polygonData.features[0].geometry.coordinates);
     */
-    const turfPolygon = turf.polygon([outerBoundary, hole]);
+    const turfPolygon = polygon([outerBoundary, hole]);
     //console.log(turfPolygon); // debug for Joseph(me)
     return turfPolygon;
   };
+
+  // Expansion logic
+  {/*
+    turf.booleanTouches(point,line)
+    */}
+
+
 
 
   useEffect(() => {
@@ -169,7 +177,7 @@ const Maps: React.FC = () => {
 
     if (coordinates) {
       const [longitude, latitude] = coordinates;
-      if(turf.booleanPointInPolygon(coordinates, geoJson)) {
+      if(booleanPointInPolygon(coordinates, geoJson)) {
         console.log("MARKER IN POLYGON!!!!")
       }
       //console.log("Coordinates:", longitude, latitude); // Log coordinates
@@ -223,8 +231,8 @@ const Maps: React.FC = () => {
         }));
       }
     console.log(userLocation);
-    const pt = turf.point([userLocation.longitude, userLocation.latitude]);
-    if(turf.booleanPointInPolygon(pt,geoJson))
+    const pt = point([userLocation.longitude, userLocation.latitude]);
+    if(booleanPointInPolygon(pt,geoJson))
     {
       console.log("USER IN POLYGON")
     }
