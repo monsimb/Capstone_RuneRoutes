@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, TextInput, Image, View, Text, StyleSheet } from 'react-native';
+import { Button, Modal, TextInput, Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import Location, { Location as LocationType } from 'react-native-location';
@@ -29,6 +29,12 @@ const Maps: React.FC = () => {
     imageUri: string | null;
   }[]>([]); // Store custom markers
   const [modalVisible, setModalVisible] = useState(false);
+  const [isViewingMarker, setIsViewingMarker] = useState(false);
+  const handleDeleteMarker = (markerId: string) => {
+    setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
+    setIsViewingMarker(false);
+    setSelectedMarker(null);
+  };
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUri, setNewImageUri] = useState<string | null>(null);
@@ -176,9 +182,12 @@ const Maps: React.FC = () => {
 
   // User uploaded images
   const pickImage = () => {
-    launchImageLibrary(
-      {}, 
-      (response) => {
+    launchImageLibrary({
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 1200,
+      maxWidth: 1200,
+    }, (response) => {
       if (response.assets && response.assets.length > 0) {
         setNewImageUri(response.assets[0].uri || null);
       }
@@ -232,14 +241,64 @@ const Maps: React.FC = () => {
   //Marker click handler
   const handleMarkerPress = (marker: {
     id: string;
+    longitude: number;
+    latitude: number;
     title: string;
     description: string;
     imageUri: string | null;
   }) => {
-    setSelectedMarker(marker); // Set the selected marker details
-    setModalVisible(true); // Show the modal
+    setSelectedMarker(marker);
+    setIsViewingMarker(true); // Show view modal instead of add modal
   };
 
+  const ViewMarkerModal = () => (
+    <Modal
+      visible={isViewingMarker}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setIsViewingMarker(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          {selectedMarker && (
+            <>
+              <Text style={styles.modalTitle}>{selectedMarker.title}</Text>
+              
+              {selectedMarker.imageUri ? (
+                <Image
+                  source={{ uri: selectedMarker.imageUri }}
+                  style={styles.markerImage}
+                />
+              ) : (
+                <View style={styles.noImageContainer}>
+                  <Text style={styles.noImageText}>No image uploaded</Text>
+                </View>
+              )}
+              
+              <Text style={styles.descriptionLabel}>Description:</Text>
+              <Text style={styles.descriptionText}>{selectedMarker.description}</Text>
+              
+              <View style={styles.markerButtonContainer}>
+                <TouchableOpacity 
+                  style={[styles.button, styles.deleteButton]}
+                  onPress={() => handleDeleteMarker(selectedMarker.id)}
+                >
+                  <Text style={styles.buttonText}>Delete Marker</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.button, styles.closeButton]}
+                  onPress={() => setIsViewingMarker(false)}
+                >
+                  <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
 
   if (!userLocation) {
     return <View style={{ flex: 1 }} />; // Return blank until location is fetched
@@ -307,16 +366,20 @@ const Maps: React.FC = () => {
         {/* Render custom markers */}
         {markers.map((marker) => (
           <MarkerView key={marker.id} coordinate={[marker.longitude, marker.latitude]}>
-            <View style={{ alignItems: 'center' }}>
-              <Image
-                source={DefaultPin} // Rune R
-                style={{ width: 50, height: 50, borderRadius: 25 }}
-              />
-              <Text style={{ fontWeight: 'bold' }}>{marker.title}</Text>
-              <Text>{marker.description}</Text>
+            <TouchableOpacity
+            onPress={() => handleMarkerPress(marker)}
+            style={styles.markerContainer}
+          >
+            <Image
+              source={DefaultPin}
+              style={{ width: 50, height: 50, borderRadius: 25 }}
+            />
+            <View style={styles.markerTitleContainer}>
+              <Text style={styles.markerTitle}>{marker.title}</Text>
             </View>
-          </MarkerView>
-          ))}
+          </TouchableOpacity>
+        </MarkerView>
+      ))}
           {/* Modal for adding marker details */}
           <Modal
               visible={modalVisible}
@@ -338,18 +401,25 @@ const Maps: React.FC = () => {
                     onChangeText={setNewDescription}
                     style={styles.input}
                   />
-                  <Button title="Upload Image" onPress={pickImage} color='#33CCFF' />
-                  <Button title="Add Marker" onPress={handleAddMarker} color="#3B3456" />
+
+                  {/* Temp fix for button overlap issue */}
+                  <View style={{marginBottom: 5}}>
+                    <Button title="Upload Image" onPress={pickImage} color='#33CCFF'/>
+                  </View>
+
+                  <View style={{marginBottom: 5}}>
+                    <Button title="Add Marker" onPress={handleAddMarker} color="#3B3456" />
+                  </View>
                   <Button title="Cancel" onPress={() => setModalVisible(false)} color="#3B3456C7" />
                 </View>
               </View>
             </Modal>
 
+          <ViewMarkerModal /> 
+      
       </MapView>
     </View>
   );
 };
-
-
 
 export default Maps;
