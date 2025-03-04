@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, TextInput, Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import Location, { Location as LocationType } from 'react-native-location';
+import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
+import { booleanTouches, booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
+import { circle } from "@turf/circle";
+import { feature, polygon, point } from "@turf/helpers";
 import DefaultPin from '../assets/defaultPin.png';
 import { styles } from '../styles/Map';
-import { booleanTouches, booleanPointInPolygon } from '@turf/turf';
-import { feature, polygon, point } from "@turf/helpers";
 
 Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw");
 
@@ -136,8 +137,28 @@ const Maps: React.FC = () => {
 
   // Expansion logic
   {/*
-    turf.booleanTouches(point,line)
+    1. if Circle around user (based on location), if boolean touches polyedge
+          turf.booleanTouches(point,line)
+    2. push points out
+    
     */}
+
+  function subtractPoly() {
+    if (!userLocation || !staticPolygon) return;
+
+    const rad = 0.05;
+    const centerPtn = point([userLocation.longitude, userLocation.latitude]);
+    const playerCircle = circle(centerPtn, rad);  // in an effor t to limit points stored, we should think about changing this to poly (used circle for ease of testing)
+
+    // polygon difference (subtract player circle from fog poly)
+    const fog = staticPolygon;
+    const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
+    setStaticPolygon(newFogLayer); // Update the polygon state
+
+    // Log the difference
+    console.log('Updated fog layer!!!!', newFogLayer);
+  }
+
 
 
 
@@ -159,8 +180,8 @@ const Maps: React.FC = () => {
               if (!initialUserLocation) {
                 setInitialUserLocation(location); // Initial location has been set
                 // Now it is important we generate the polygon hole here because we only want a new hole to generate on load and then we will modify/extend
-                const poly = createPolygon(location.longitude, location.latitude);
-                setStaticPolygon(poly);
+                const fog = createPolygon(location.longitude, location.latitude);
+                setStaticPolygon(fog);
               }
 
             })
@@ -169,6 +190,8 @@ const Maps: React.FC = () => {
       })
       .catch(err => console.warn('Permission denied:', err));
   }, []);
+
+  
 
   // Marker touch interaction handler
   const handlePress = (e: any) => {
@@ -222,20 +245,28 @@ const Maps: React.FC = () => {
     setNewDescription('');
     setNewImageUri(null);
   };
+  const geoJson = staticPolygon ? staticPolygon : null;
 
   const handleMove = () => {
     if(userLocation) {
       setUserLocation(prev => ({
         latitude: prev!.latitude,
-        longitude: prev!.longitude + 0.5,
+        longitude: prev!.longitude + 0.001, // Simulating movement for testing purposes
         }));
-      }
-    console.log(userLocation);
-    const pt = point([userLocation.longitude, userLocation.latitude]);
-    if(booleanPointInPolygon(pt,geoJson))
-    {
-      console.log("USER IN POLYGON")
     }
+    console.log(userLocation);
+    if (userLocation && geoJson) {
+      const pt = point([userLocation.longitude, userLocation.latitude]);
+      if (booleanPointInPolygon(pt, geoJson)) {
+        console.log("USER IN POLYGON");
+        subtractPoly(); // Update fog layer if the user is inside the polygon
+      }
+    }
+    // const pt = point([userLocation.longitude, userLocation.latitude]);
+    // if(booleanPointInPolygon(pt,geoJson))
+    // {
+    //   console.log("USER IN POLYGON")
+    // }
   };
 
   //Marker State
@@ -312,7 +343,7 @@ const Maps: React.FC = () => {
     return <View style={{ flex: 1 }} />; // Return blank until location is fetched
   }
 
-  const geoJson = createPolygon(userLocation.longitude, userLocation.latitude); // Generate polygon based on user location
+  // const geoJson = createPolygon(userLocation.longitude, userLocation.latitude); // Generate polygon based on user location
 
   return (
     <View style={{ flex: 1 }}>
@@ -347,6 +378,27 @@ const Maps: React.FC = () => {
             radius: 50.0,
           }}
         />
+        {geoJson && (
+          <ShapeSource id="userPolygon" shape={geoJson} existing={true}>
+            <LineLayer
+              sourceID="userPolygon"
+              id="lineLayer"
+              style={{
+                lineColor: '#ffffff',
+                lineWidth: 10,
+              }}
+            />
+            <FillLayer
+              sourceID="userPolygon"
+              id="fillLayer"
+              style={{
+                fillColor: '#000000',
+                fillOpacity: 0.8,
+              }}
+            />
+          </ShapeSource>
+        )}
+
 
         {/*Will need to be changed so that only uses user location to create polygone
           if there is no pre-existing user information (edge case, check if user is out of
@@ -370,6 +422,7 @@ const Maps: React.FC = () => {
             }}
           />
         </ShapeSource>
+        
 
         {/* Render custom markers */}
         {markers.map((marker) => (
@@ -426,6 +479,11 @@ const Maps: React.FC = () => {
           <ViewMarkerModal /> 
       
       </MapView>
+      {/* Move User Button */}
+      <View style={{ position: 'absolute', bottom: 20, left: 20, zIndex: 100 }}>
+        <Button title="Move User" onPress={handleMove} color="#33CCFF" />
+      </View>
+    
     </View>
   );
 };
