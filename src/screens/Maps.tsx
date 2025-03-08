@@ -393,7 +393,7 @@ const Maps: React.FC = () => {
               id="fillLayer"
               style={{
                 fillColor: '#000000',
-                fillOpacity: 0.8,
+                fillOpacity: 0,
               }}
             />
           </ShapeSource>
