@@ -452,12 +452,14 @@ const Maps: React.FC = () => {
                 <View style={styles.modalContent}>
                   <TextInput
                     placeholder="Title"
+                    placeholderTextColor="#9989b3"
                     value={newTitle}
                     onChangeText={setNewTitle}
                     style={styles.input}
                   />
                   <TextInput
                     placeholder="Description"
+                    placeholderTextColor="#9989b3"
                     value={newDescription}
                     onChangeText={setNewDescription}
                     style={styles.input}
