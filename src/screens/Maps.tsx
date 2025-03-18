@@ -424,7 +424,7 @@ const Maps: React.FC = () => {
               id="fillLayer"
               style={{
                 fillColor: '#000000',
-                fillOpacity: 0.8,
+                fillOpacity: 0,
               }}
             />
           </ShapeSource>
@@ -483,12 +483,14 @@ const Maps: React.FC = () => {
                 <View style={styles.modalContent}>
                   <TextInput
                     placeholder="Title"
+                    placeholderTextColor="#9989b3"
                     value={newTitle}
                     onChangeText={setNewTitle}
                     style={styles.input}
                   />
                   <TextInput
                     placeholder="Description"
+                    placeholderTextColor="#9989b3"
                     value={newDescription}
                     onChangeText={setNewDescription}
                     style={styles.input}
