@@ -200,14 +200,15 @@ const Maps: React.FC = () => {
   useEffect(() => {
     if (!userLocation || !staticPolygon) return;
 
-    // ONLY check if the user has moved significantly (NEEDS TO BE CHECKED)
+    // ONLY check if the user has moved significantly (NEEDS TO BE double CHECKED), important so we aren't checking a bunch of times
     if (
       Math.abs(userLocation.longitude - (previousLocation?.longitude || 0)) > DISTANCE_THRESHOLD ||
       Math.abs(userLocation.latitude - (previousLocation?.latitude || 0)) > DISTANCE_THRESHOLD
     ) 
     {
       const pt = point([userLocation.longitude, userLocation.latitude]);
-
+      
+      // needs tweaking otherwise user has to be fully outside polygon (req. offset)
       if (booleanPointInPolygon(pt, staticPolygon)) {
         console.log("USER INSIDE POLYGON");
       } else {
@@ -219,7 +220,7 @@ const Maps: React.FC = () => {
       setPreviousLocation(userLocation);
     }
   }, [userLocation, staticPolygon, previousLocation]); // Trigger when user's location or polygon changes
-    
+  
 
   
 
