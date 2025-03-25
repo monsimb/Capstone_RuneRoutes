@@ -208,7 +208,7 @@ const Maps: React.FC = () => {
     {
       const pt = point([userLocation.longitude, userLocation.latitude]);
       
-      // needs tweaking otherwise user has to be fully outside polygon (req. offset)
+      // needs tweaking otherwise user has to be fully outside polygon (req. off)
       if (booleanPointInPolygon(pt, staticPolygon)) {
         console.log("USER INSIDE POLYGON");
       } else {
@@ -220,7 +220,7 @@ const Maps: React.FC = () => {
       setPreviousLocation(userLocation);
     }
   }, [userLocation, staticPolygon, previousLocation]); // Trigger when user's location or polygon changes
-  
+    
 
   
 
@@ -424,7 +424,7 @@ const Maps: React.FC = () => {
               id="fillLayer"
               style={{
                 fillColor: '#000000',
-                fillOpacity: 0,
+                fillOpacity: 0.8,
               }}
             />
           </ShapeSource>
@@ -483,14 +483,12 @@ const Maps: React.FC = () => {
                 <View style={styles.modalContent}>
                   <TextInput
                     placeholder="Title"
-                    placeholderTextColor="#9989b3"
                     value={newTitle}
                     onChangeText={setNewTitle}
                     style={styles.input}
                   />
                   <TextInput
                     placeholder="Description"
-                    placeholderTextColor="#9989b3"
                     value={newDescription}
                     onChangeText={setNewDescription}
                     style={styles.input}
