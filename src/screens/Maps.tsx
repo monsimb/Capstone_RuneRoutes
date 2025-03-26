@@ -9,9 +9,10 @@ import { feature, polygon, point } from "@turf/helpers";
 import DefaultPin from '../assets/defaultPin.png';
 import { styles } from '../styles/Map';
 
-Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw");
+const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
+Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 const DISTANCE_THRESHOLD = 0.0001; // Define the threshold for location change
-const LOCATION_UPDATE_INTERVAL = 10000; // 10 seconds interval
+const LOCATION_UPDATE_INTERVAL = 1000; // 10 seconds interval
 
 
 /*interface Marker {
@@ -26,7 +27,6 @@ const Maps: React.FC = () => {
   const [previousLocation, setPreviousLocation] = useState<LocationType | null>(null); // track the prev location
   const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
   const [markers, setMarkers] = useState<{
-
     id: string;
     longitude: number;
     latitude: number;
@@ -77,7 +77,7 @@ const Maps: React.FC = () => {
   // Function to create a polygon around a given location
   const createPolygon = (longitude: number, latitude: number) => {
     // Define the offset for the polygon
-    const offset = 0.0001; // Increase this to make the polygon larger
+    const offset = 0.00001; // Increase this to make the polygon larger
 
     // Outer boundary which covers the whole world
     const outerBoundary = [
@@ -168,59 +168,60 @@ const Maps: React.FC = () => {
 
 
   useEffect(() => {
-    // Request permission and get user location
-    Location.requestPermission({
-      ios: 'whenInUse',
-      android: { detail: 'fine' },
-    })
-      .then(granted => {
-        if (granted) {
-          // Fetch user current location
-          Location.getLatestLocation({ enableHighAccuracy: true })
-            .then(location => {
-              setUserLocation(location); // Save location to state
-
-              // Set initial location (on load) ONCE, never again
-              if (!initialUserLocation) {
-                setInitialUserLocation(location); // Initial location has been set
-                // Now it is important we generate the polygon hole here because we only want a new hole to generate on load and then we will modify/extend
-                const fog = createPolygon(location.longitude, location.latitude);
-                setStaticPolygon(fog);
-              }
-
-            })
-            .catch(err => console.warn(err));
-        }
-      })
-      .catch(err => console.warn('Permission denied:', err));
-  }, []);
-
-
-// tracking user movement and checking if user is inside or outside the polygon
-  useEffect(() => {
-    if (!userLocation || !staticPolygon) return;
-
-    // ONLY check if the user has moved significantly (NEEDS TO BE double CHECKED), important so we aren't checking a bunch of times
-    if (
-      Math.abs(userLocation.longitude - (previousLocation?.longitude || 0)) > DISTANCE_THRESHOLD ||
-      Math.abs(userLocation.latitude - (previousLocation?.latitude || 0)) > DISTANCE_THRESHOLD
-    ) 
-    {
+    const interval = setInterval(() => {
+      if (!userLocation || !staticPolygon) return;
+  
+      const now = Date.now();
       const pt = point([userLocation.longitude, userLocation.latitude]);
-      
-      // needs tweaking otherwise user has to be fully outside polygon (req. off)
+  
+      // Check if the user is inside or outside the polygon
       if (booleanPointInPolygon(pt, staticPolygon)) {
         console.log("USER INSIDE POLYGON");
       } else {
         console.log("USER OUTSIDE POLYGON");
         subtractPoly(); // Call subtractPoly when user is outside the polygon
       }
+  
+      // Update the previous location timestamp
+      setPreviousLocation({
+        ...userLocation,
+        timestamp: now,
+      });
+  
+    }, LOCATION_UPDATE_INTERVAL); // Runs at the defined interval
+  
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [userLocation, staticPolygon]); // Dependencies ensure it resets if these change
 
-      // Update the previous location after the check
-      setPreviousLocation(userLocation);
+
+// tracking user movement and checking if user is inside or outside the polygon
+useEffect(() => {
+  if (!userLocation || !staticPolygon) return;
+
+  const now = Date.now();
+  const timeSinceLastCheck = now - (previousLocation?.timestamp || 0); // Calculate time elapsed since last check
+
+  console.log(timeSinceLastCheck);
+
+  // ONLY check if the interval has passed since the last check
+  if (timeSinceLastCheck > LOCATION_UPDATE_INTERVAL) {
+    const pt = point([userLocation.longitude, userLocation.latitude]);
+
+    // check if the user is inside or outside the polygon
+    if (booleanPointInPolygon(pt, staticPolygon)) {
+      console.log("USER INSIDE POLYGON");
+    } else {
+      console.log("USER OUTSIDE POLYGON");
+      subtractPoly(); // Call subtractPoly when user is outside the polygon
     }
-  }, [userLocation, staticPolygon, previousLocation]); // Trigger when user's location or polygon changes
-    
+
+    // Update the previous location after the check
+    setPreviousLocation({
+      ...userLocation,
+      timestamp: now, // add timestamp to track when location was last checked
+    });
+  }
+}, [userLocation,staticPolygon]); // Trigger when user's location or polygon changes
 
   
 
@@ -278,27 +279,27 @@ const Maps: React.FC = () => {
   };
   const geoJson = staticPolygon ? staticPolygon : null;
 
-  const handleMove = () => {
-    if(userLocation) {
-      setUserLocation(prev => ({
-        latitude: prev!.latitude,
-        longitude: prev!.longitude + 0.001, // Simulating movement for testing purposes
-        }));
-    }
-    console.log(userLocation);
-    if (userLocation && geoJson) {
-      const pt = point([userLocation.longitude, userLocation.latitude]);
-      if (booleanPointInPolygon(pt, geoJson)) {
-        console.log("USER IN POLYGON");
-        subtractPoly();
-      }
-    }
-    // const pt = point([userLocation.longitude, userLocation.latitude]);
-    // if(booleanPointInPolygon(pt,geoJson))
-    // {
-    //   console.log("USER IN POLYGON")
-    // }
-  };
+  // const handleMove = () => {
+  //   if(userLocation) {
+  //     setUserLocation(prev => ({
+  //       latitude: prev!.latitude,
+  //       longitude: prev!.longitude + 0.001, // Simulating movement for testing purposes
+  //       }));
+  //   }
+  //   console.log(userLocation);
+  //   if (userLocation && geoJson) {
+  //     const pt = point([userLocation.longitude, userLocation.latitude]);
+  //     if (booleanPointInPolygon(pt, geoJson)) {
+  //       console.log("USER IN POLYGON");
+  //       subtractPoly();
+  //     }
+  //   }
+  //   // const pt = point([userLocation.longitude, userLocation.latitude]);
+  //   // if(booleanPointInPolygon(pt,geoJson))
+  //   // {
+  //   //   console.log("USER IN POLYGON")
+  //   // }
+  // };
 
   //Marker State
   const [selectedMarker, setSelectedMarker] = useState<{
@@ -376,6 +377,8 @@ const Maps: React.FC = () => {
 
   // const geoJson = createPolygon(userLocation.longitude, userLocation.latitude); // Generate polygon based on user location
 
+
+
   return (
     <View style={{ flex: 1 }}>
 
@@ -396,7 +399,7 @@ const Maps: React.FC = () => {
           }}
           followUserLocation={true}
           followUserMode={UserTrackingMode.Follow}
-          followZoomLevel={13.5}
+          followZoomLevel={20}
         />
         <LocationPuck
 
