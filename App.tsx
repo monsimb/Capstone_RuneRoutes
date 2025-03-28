@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Login from './src/screens/Login.tsx'
-import Maps from './src/screens/Maps.tsx'
+import Maps from './src/screens/MapsTrial.tsx'
 import Friends from './src/screens/Friends.tsx'
 import Welcome from './src/screens/Welcome.tsx'
 import Profile from './src/screens/Profile.tsx';

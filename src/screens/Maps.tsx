@@ -6,20 +6,20 @@ import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, Sh
 import { booleanTouches, booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
 import { feature, polygon, point } from "@turf/helpers";
+import { area } from "@turf/area";
 import DefaultPin from '../assets/defaultPin.png';
 import { styles } from '../styles/Map';
+import { Feature, Point, GeoJsonProperties } from 'geojson';
 
-Mapbox.setAccessToken("pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw");
-
-/*interface Marker {
-  id: string;
-  longitude: number;
-  latitude: number;
-}*/
+const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
+Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
+// const DISTANCE_THRESHOLD = 0.0001; // Define the threshold for location change
+const LOCATION_UPDATE_INTERVAL = 1000; // 10 seconds interval
 
 const Maps: React.FC = () => {
   const [userLocation, setUserLocation] = useState<LocationType | null>(null);
   const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
+  const [previousLocation, setPreviousLocation] = useState<LocationType | null>(null); // track the prev location
   const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
   const [markers, setMarkers] = useState<{
 
@@ -43,128 +43,8 @@ const Maps: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentCoordinates, setCurrentCoordinates] = useState<{ longitude: number; latitude: number } | null>(null);
 
-
-  // 'pseudo code' for database store of poly
-  const savePolygonToDatabase = async (polygonData: any)=>{
-    // TODO: im just mocking some stuff, we need to fill in with how we are actually hitting our DB
-    try{
-      const response = await fetch("http of db api",{
-        method: 'POST',
-        headers: {},
-        body: JSON.stringify({
-          coordinates:polygonData,
-          created_at: new Date().toISOString(),
-        }),
-      });
-      const result = await response.json();
-      if (result.ok) {
-        console.log('Poly save success', result);
-      }
-      else{
-        console.error('Poly save FAILURE', result);
-      }
-    }
-    catch(error){
-      console.error('Error saving polygon', error);
-    }
-  };
-
-
-  // Function to create a polygon around a given location
-  const createPolygon = (longitude: number, latitude: number) => {
-    // Define the offset for the polygon
-    const offset = 0.001; // Increase this to make the polygon larger
-
-    // Outer boundary which covers the whole world
-    const outerBoundary = [
-      [-180, -90],
-      [190, -90],
-      [190, 90],
-      [-170, 90],
-      [-180, -90]
-    ];
-
-    // Inner hole. User 'explored area'
-   const hole = [
-      [longitude - offset, latitude - offset],
-      [longitude + offset, latitude - offset],
-      [longitude + offset, latitude + offset],
-      [longitude - offset, latitude + offset],
-      [longitude - offset, latitude - offset]
-    ];
-
-
-    // Create the coordinates for the polygon
-    /*
-    const polygonData= {
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'Polygon',
-            coordinates: [
-              [
-                [-180,-90],
-                [190,-90],
-                [190,90],
-                [-170,90],
-                [-170,-90]
-              ],
-              // hole in polygone coords
-               [
-                [longitude + offset,latitude - offset],
-                [longitude - offset,latitude - offset],
-                [longitude - offset-.005,latitude - offset+.01],
-
-                [longitude - offset,latitude + offset],
-                [longitude + offset,latitude + offset],
-                [longitude + offset+.005,latitude + offset-.01]
-              ]
-            ],
-          },
-        },
-      ],
-    };
-    // Call to function to save poly data to DB
-    // savePolygonToDatabase(polygonData.features[0].geometry.coordinates);
-    */
-    const turfPolygon = polygon([outerBoundary, hole]);
-    //console.log(turfPolygon); // debug for Joseph(me)
-    return turfPolygon;
-  };
-
-  // Expansion logic
-  {/*
-    1. if Circle around user (based on location), if boolean touches polyedge
-          turf.booleanTouches(point,line)
-    2. push points out
-    
-    */}
-
-  function subtractPoly() {
-    if (!userLocation || !staticPolygon) return;
-
-    const rad = 0.05;
-    const centerPtn = point([userLocation.longitude, userLocation.latitude]);
-    const playerCircle = circle(centerPtn, rad);  // in an effor t to limit points stored, we should think about changing this to poly (used circle for ease of testing)
-
-    // polygon difference (subtract player circle from fog poly)
-    const fog = staticPolygon;
-    const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
-    setStaticPolygon(newFogLayer); // Update the polygon state
-
-    // Log the difference
-    console.log('Updated fog layer!!!!', newFogLayer);
-  }
-
-
-
-
-
+  // Request permission and get user location
   useEffect(() => {
-    // Request permission and get user location
     Location.requestPermission({
       ios: 'whenInUse',
       android: { detail: 'fine' },
@@ -179,7 +59,7 @@ const Maps: React.FC = () => {
               // Set initial location (on load) ONCE, never again
               if (!initialUserLocation) {
                 setInitialUserLocation(location); // Initial location has been set
-                // Now it is important we generate the polygon hole here because we only want a new hole to generate on load and then we will modify/extend
+                // Now, it is important we generate the polygon hole here because we only want a new hole to generate on load and then we will modify/extend
                 const fog = createPolygon(location.longitude, location.latitude);
                 setStaticPolygon(fog);
               }
@@ -190,6 +70,103 @@ const Maps: React.FC = () => {
       })
       .catch(err => console.warn('Permission denied:', err));
   }, []);
+
+
+  const geoJson = staticPolygon ? staticPolygon : null;
+
+  // Function to create a polygon around a given location
+  const createPolygon = (longitude: number, latitude: number) => {
+    // Define the offset for the polygon
+    const offset = 0.0001; // Increase this to make the polygon larger
+
+    // Outer boundary which covers the whole world
+    const outerBoundary = [
+      [-180, -90],
+      [190, -90],
+      [190, 90],
+      [-170, 90],
+      [-180, -90]
+    ];
+
+    // Inner hole. User's 'explored area'
+   const hole = [
+      [longitude - offset, latitude - offset],
+      [longitude + offset, latitude - offset],
+      [longitude + offset, latitude + offset],
+      [longitude - offset, latitude + offset],
+      [longitude - offset, latitude - offset]
+    ];
+
+    const turfPolygon = polygon([outerBoundary, hole]);
+    return turfPolygon;
+  };
+
+  // Function to chomp away at fog polygon
+  function subtractPoly() {
+    if (!userLocation || !geoJson) return;
+
+    const rad = 0.005;
+    const centerPtn = point([userLocation.longitude, userLocation.latitude]);
+    const playerCircle = circle(centerPtn, rad);
+
+    // Subtract circle from fog polygon
+    const fog = geoJson;
+    const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
+    console.log(newFogLayer);
+    console.log(area(geoJson));
+
+    if (newFogLayer) {
+      setStaticPolygon(newFogLayer);
+      console.log('Updated fog layer!!!!');
+      console.log(area(geoJson));
+
+    } else {
+      console.warn("Difference operation returned null, check polygon validity!");
+    }
+  }
+  
+
+
+  // Every time step, it checks if user is within Polygon, if outside-- triggers subtractPoly
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!userLocation || !geoJson) return;
+  
+      const now = Date.now();
+      const pt = point([userLocation.longitude, userLocation.latitude]);
+
+      // Check if the user is inside or outside the polygon
+      if (booleanPointInPolygon(pt, geoJson)) {
+        console.log("USER OUTSIDE POLYGON");
+        subtractPoly(); // Call subtractPoly when user is outside the polygon
+      } else {
+        console.log("USER INSIDE POLYGON");
+      }
+  
+      // Update the previous location timestamp
+      setPreviousLocation({
+        ...userLocation,
+        timestamp: now,
+      });
+  
+    }, LOCATION_UPDATE_INTERVAL); // Runs at the defined interval
+  
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [userLocation, geoJson]); // Dependencies ensure it resets if these change
+  
+  // checker for polygon updates
+  useEffect(() => {
+    if (geoJson) {
+      // Trigger re-render when staticPolygon changes
+      console.log("Static polygon updated:", geoJson);
+    }
+  }, [geoJson]); // Will trigger every time staticPolygon changes
+
+
+
+
+
+
 
   
 
@@ -244,29 +221,6 @@ const Maps: React.FC = () => {
     setNewTitle('');
     setNewDescription('');
     setNewImageUri(null);
-  };
-  const geoJson = staticPolygon ? staticPolygon : null;
-
-  const handleMove = () => {
-    if(userLocation) {
-      setUserLocation(prev => ({
-        latitude: prev!.latitude,
-        longitude: prev!.longitude + 0.001, // Simulating movement for testing purposes
-        }));
-    }
-    console.log(userLocation);
-    if (userLocation && geoJson) {
-      const pt = point([userLocation.longitude, userLocation.latitude]);
-      if (booleanPointInPolygon(pt, geoJson)) {
-        console.log("USER IN POLYGON");
-        subtractPoly(); // Update fog layer if the user is inside the polygon
-      }
-    }
-    // const pt = point([userLocation.longitude, userLocation.latitude]);
-    // if(booleanPointInPolygon(pt,geoJson))
-    // {
-    //   console.log("USER IN POLYGON")
-    // }
   };
 
   //Marker State
@@ -339,25 +293,48 @@ const Maps: React.FC = () => {
     </Modal>
   );
 
+
+
+  
+
+
+  const handleMove = () => {
+    if(userLocation) {
+      setUserLocation(prev => ({
+        latitude: prev!.latitude,
+        longitude: prev!.longitude + 0.0001, // Simulating movement for testing purposes
+        }));
+    }
+    if (userLocation && geoJson) {
+      const pt = point([userLocation.longitude, userLocation.latitude]);
+      if (booleanPointInPolygon(pt, geoJson)) {
+        console.log("USER IN POLYGON");
+        subtractPoly(); // Update fog layer if the user is inside the polygon
+      }
+    }
+    // const pt = point([userLocation.longitude, userLocation.latitude]);
+    // if(booleanPointInPolygon(pt,geoJson))
+    // {
+    //   console.log("USER IN POLYGON")
+    // }
+  };
+
+
+
+ 
   if (!userLocation) {
     return <View style={{ flex: 1 }} />; // Return blank until location is fetched
   }
 
-  // const geoJson = createPolygon(userLocation.longitude, userLocation.latitude); // Generate polygon based on user location
-
   return (
     <View style={{ flex: 1 }}>
-
-
       <MapView
         provider="mapbox"
         style={styles.map}
         centerCoordinate={[userLocation.longitude, userLocation.latitude]} // Set initial map center to user's location
         showUserLocation={true} // Show user location on map
         onPress={handlePress} // Handle press to add custom marker
-
       >
-
         <Camera
           defaultSettings={{
             centerCoordinate: [-77.036086, 38.910233],
@@ -365,7 +342,7 @@ const Maps: React.FC = () => {
           }}
           followUserLocation={true}
           followUserMode={UserTrackingMode.Follow}
-          followZoomLevel={13.5}
+          followZoomLevel={20}
         />
         <LocationPuck
 
@@ -379,7 +356,7 @@ const Maps: React.FC = () => {
           }}
         />
         {geoJson && (
-          <ShapeSource id="userPolygon" shape={geoJson} existing={true}>
+          <ShapeSource id="userPolygon" shape={staticPolygon} existing={true}>
             <LineLayer
               sourceID="userPolygon"
               id="lineLayer"
@@ -422,6 +399,7 @@ const Maps: React.FC = () => {
             }}
           />
         </ShapeSource>
+    
         
 
         {/* Render custom markers */}
