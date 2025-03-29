@@ -1,6 +1,8 @@
 const express = require('express');
 const { auth } = require('express-oauth2-jwt-bearer');
 const router = express.Router();
+require('dotenv').config({ path: '../.env' });
+
 
 // Auth0 JWT verification middleware
 const checkJwt = auth({

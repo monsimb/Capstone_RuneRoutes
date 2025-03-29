@@ -6,14 +6,31 @@ function Welcome({ navigation }) {
   const { authorize, user } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
 
-  if (user) {
-    navigation.navigate('Home'); // Navigate to Maps if user is defined
-  }
-
   const onPress = async () => {
     setIsLoading(true);
     try {
-      await authorize();
+      const authResult = await authorize();
+      console.log("Auth result: ", authResult);
+
+      const accessToken = authResult?.accessToken;
+      if(accessToken) {
+        const response = await fetch('http://localhost:3001/login', { // Not going to work right now, we need to figure out host 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({}),
+        });
+
+        const data = await response.json();
+        console.log("Backend response: ", data);
+      }
+      else {
+        console.log("No access token received");
+      }
+      
+      navigation.navigate('Home');
     } catch (e) {
       console.log(e);
     } finally {
