@@ -22,7 +22,6 @@ const Maps: React.FC = () => {
   const [previousLocation, setPreviousLocation] = useState<LocationType | null>(null); // track the prev location
   const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
   const [markers, setMarkers] = useState<{
-
     id: string;
     longitude: number;
     latitude: number;
