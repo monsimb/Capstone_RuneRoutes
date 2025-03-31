@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');  // Allows frontend to connect
 
-const User = require('./server/database/db'); // Import User model
+const User = require('./database/schema/userModel.js'); // Import User model
 
 const app = express();
 app.use(express.json()); // Middleware to parse JSON data
@@ -48,5 +48,5 @@ app.post('/addUser', async (req, res) => {
 
 // Render requires listening on 0.0.0.0
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

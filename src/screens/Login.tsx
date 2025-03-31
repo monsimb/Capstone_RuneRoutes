@@ -1,79 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { Button, Text, View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from '../styles/Login';
+
+const API_URL = "https://your-app.onrender.com"; // Replace with your Render API URL
 
 function Login({ navigation }) {
   const { clearSession, user, isAuthenticated, loginWithRedirect } = useAuth0();
-  const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Function to send user data to backend API
-  const addUser = async (userId: string) => {
-    try {
-      const response = await fetch('http://localhost:5000/addUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          userName: 'momo',
-          avatarSelections: 'slipknot',
-          travelDistance: 555
-        }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        console.log('User added:', data);
-      } else {
-        console.log('Error:', data.message);
-      }
-    } catch (error) {
-      console.error('Error adding user:', error);
-    }
-  };
-
-  // Get userId only after the user is authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      const newUserId = user.sub; // Directly use user.sub
-      
-      setUserId(newUserId); 
-      console.log("UserID:", newUserId);
+      setUserId(user.sub); // Auth0 user ID
+      console.log("User ID:", user.sub);
 
-      // Call addUser function to send user data to the backend
-      addUser(newUserId);
+      // Send data to backend
+      addUserToDB(user.sub, 'momo', ['slipknot'], 40.7128, -74.0060);
     }
   }, [isAuthenticated, user]);
 
-  const Logout = async () => {
+  // Function to send user data to backend
+  const addUserToDB = async (userId: string, userName: string, avatarSelections: string[], lat: number, lon: number) => {
     try {
-      await clearSession();
-    } catch (e) {
-      console.log(e);
+      const response = await fetch(`${API_URL}/addUser`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, userName, avatarSelections, lat, lon }),
+      });
+
+      const data = await response.json();
+      console.log("Response:", data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Error adding user");
+      }
+    } catch (error) {
+      console.error("❌ Error sending data:", error);
     }
-    console.log("userID " + user.sub); // for testing purposed
-    navigation.navigate('Welcome');
   };
 
   return (
     <View style={styles.container}>
-      {/* Title */}
       <Text style={styles.title}>Settings</Text>
-
-      {/* Image placeholder */}
       <View style={styles.imageContainer}>
         <Image style={styles.image} source={require('../assets/roune_routes_logo.png')} resizeMode="contain" />
       </View>
 
-      {/* Display User ID if available */}
-      {userId ? (
-        <Text style={styles.userIdText}>User ID: {userId}</Text>
-      ) : (
-        <Text style={styles.userIdText}>User not logged in</Text>
-      )}
+      {userId ? <Text style={styles.userIdText}>User ID: {userId}</Text> : <Text style={styles.userIdText}>User not logged in</Text>}
 
-      {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={Logout}>
+      <TouchableOpacity style={styles.logoutButton} onPress={async () => {
+        await clearSession();
+        navigation.navigate('Welcome');
+      }}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
     </View>
