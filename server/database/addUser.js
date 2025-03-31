@@ -1,20 +1,18 @@
 // addUser.js -> pretty self explanatory
-
+require('dotenv').config();
 const mongoose = require('mongoose');
-const User = mongoose.model('User');
+const User = require('./schema/userModel');
+const url = process.env.MONGODB_URI;
 
 // Add user
-async function addUser(userId, userName, avatarSelections, travelDistance) {
+export async function addUser(userId, userName, avatarSelections, travelDistance) {
   try {
-
-    const existinguser = await User.findOne({userId});
-    if(existingUser) {
+    const existingUser = await User.findOne({ userId });
+    if (existingUser) {
       console.log('User already exists.');
       return;
     }
 
-
-    // If user doesn't exist already, we continue onto adding
     const newUser = new User({
       userId,
       userName,
@@ -23,40 +21,25 @@ async function addUser(userId, userName, avatarSelections, travelDistance) {
     });
 
     await newUser.save();
-    console.log('New user added: ', newUser);
-  } catch(err) {
-    console.error('Error: ', err);
+    console.log('New user added:', newUser);
+  } catch (err) {
+    console.error('Error:', err);
   }
 }
 
 addUser('id', 'name', 'avatar', 'travelDistance');
 
 // Connect to MongoDB
-/*
-mongoose.connect(url)
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(async () => {
     console.log('MongoDB connected successfully');
 
-    // Create a new user object
-    const newUser = new User({
-      userId: 'test_user_123',  // Example user ID (replace with dynamic data)
-      coordinates: { 
-        lat: 45.00,  // Example latitude (replace with dynamic data)
-        lon: -10.00  // Example longitude (replace with dynamic data)
-      }
-    });
+    // Call addUser function with example data
+    await addUser('test_user_123', 'John Doe', 'avatar1', 50);
 
-    // Save the new user to the database
-    try {
-      const savedUser = await newUser.save();
-      console.log('User inserted:', savedUser);
-    } catch (err) {
-      console.log('Error inserting user:', err);
-    } finally {
-      mongoose.disconnect(); // Disconnect after the operation is complete
-    }
+    mongoose.disconnect(); // Disconnect after operation
   })
   .catch((err) => {
     console.log('Error connecting to MongoDB:', err);
   });
-  */

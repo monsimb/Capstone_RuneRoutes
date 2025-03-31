@@ -1,31 +1,41 @@
+// index.js
+
 require('dotenv').config();
-const express = require('express');
+
 const mongoose = require('mongoose');
+const express = require('express');
+
 const cors = require('cors');
+const User = require('./database/schema/userModel'); 
 
 const app = express();
-const port = process.env.PORT || 3001;
-
-const authRoutes = require('./routes/auth');
-app.use('/auth', authRoutes);
-
-
-const url = process.env.MONGODB_URI; // changed to env call
-
-
-mongoose.connect(url) 
-  // NO useNewUrlParser & useUnifiedTopology, they are deprecated
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch((err) => console.log('Error connecting to MongoDB:', err));
-
-app.use(cors()); // Middleware. Verifies token
+app.use(cors());
 app.use(express.json());
 
-// Simple test route - Not working rn
-app.get('/', (req, res) => {
-    res.send('Hello from Express!');
-  });
+const url = process.env.MONGODB_URI;
+console.log("uri"+url);
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log('DB connection error:', err));
+
+// Create an API route to add a user
+app.post('/addUser', async (req, res) => {
+  const { userId, userName, avatarSelections, travelDistance } = req.body;
   
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
+  try {
+    const existingUser = await User.findOne({ userId });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const newUser = new User({ userId, userName, avatarSelections, travelDistance });
+    await newUser.save();
+    
+    res.status(201).json({ message: 'User added successfully', newUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding user', error });
+  }
+});
+
+app.listen(5000, () => console.log('Server running on port 5000'));
