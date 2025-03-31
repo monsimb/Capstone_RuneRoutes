@@ -1,41 +1,52 @@
-// index.js
-
 require('dotenv').config();
-
-const mongoose = require('mongoose');
 const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');  // Allows frontend to connect
 
-const cors = require('cors');
-const User = require('./database/schema/userModel'); 
+const User = require('./server/database/db'); // Import User model
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(express.json()); // Middleware to parse JSON data
+app.use(cors());  // Enable CORS (important for frontend requests)
 
-const url = process.env.MONGODB_URI;
-console.log("uri"+url);
+const PORT = process.env.PORT || 5000;
 
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log('DB connection error:', err));
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// Create an API route to add a user
+// API route to add a user
 app.post('/addUser', async (req, res) => {
-  const { userId, userName, avatarSelections, travelDistance } = req.body;
-  
   try {
+    const { userId, userName, avatarSelections, lat, lon } = req.body;
+
+    // Check if user exists
     const existingUser = await User.findOne({ userId });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const newUser = new User({ userId, userName, avatarSelections, travelDistance });
+    // Add new user
+    const newUser = new User({
+      userId,
+      userName,
+      avatarSelections,
+      coordinates: { lat, lon }
+    });
+
     await newUser.save();
-    
-    res.status(201).json({ message: 'User added successfully', newUser });
-  } catch (error) {
-    res.status(500).json({ message: 'Error adding user', error });
+    res.status(201).json({ message: 'User added successfully', user: newUser });
+
+  } catch (err) {
+    console.error('❌ Error adding user:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+// Render requires listening on 0.0.0.0
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

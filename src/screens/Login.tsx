@@ -8,11 +8,40 @@ function Login({ navigation }) {
   const { clearSession, user, isAuthenticated, loginWithRedirect } = useAuth0();
   const [userId, setUserId] = useState(null);
 
+  // Function to send user data to backend API
+  const addUser = async (userId: string) => {
+    try {
+      const response = await fetch('http://localhost:5000/addUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          userName: 'momo',
+          avatarSelections: 'slipknot',
+          travelDistance: 555
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log('User added:', data);
+      } else {
+        console.log('Error:', data.message);
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+    }
+  };
+
   // Get userId only after the user is authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      setUserId(user.sub); // user.sub is the unique identifier for the user
-      console.log("userID " + userId);
+      const newUserId = user.sub; // Directly use user.sub
+      
+      setUserId(newUserId); 
+      console.log("UserID:", newUserId);
+
+      // Call addUser function to send user data to the backend
+      addUser(newUserId);
     }
   }, [isAuthenticated, user]);
 
