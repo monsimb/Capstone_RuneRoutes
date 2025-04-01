@@ -1,14 +1,38 @@
-// addUser.js -> pretty self explanatory
+// addMarker.js
 
 const mongoose = require('mongoose');
-const User = require('./db');
+const User = mongoose.model('User');
+
+// Add marker
+async function addMarker(userId, userName, avatarSelections, travelDistance) {
+  try {
+
+    const existinguser = await User.findOne({userId});
+    if(existingUser) {
+      console.log('User already exists.');
+      return;
+    }
+
+
+    // If user doesn't exist already, we continue onto adding
+    const newUser = new User({
+      userId,
+      userName,
+      avatarSelections,
+      travelDistance,
+    });
+
+    await newUser.save();
+    console.log('New user added: ', newUser);
+  } catch(err) {
+    console.error('Error: ', err);
+  }
+}
+
+addUser('id', 'name', 'avatar', 'travelDistance');
 
 // Connect to MongoDB
-const url = MONGODB_URI; // change to env call
-
-
-
-// Connect to MongoDB
+/*
 mongoose.connect(url)
   .then(async () => {
     console.log('MongoDB connected successfully');
@@ -35,3 +59,4 @@ mongoose.connect(url)
   .catch((err) => {
     console.log('Error connecting to MongoDB:', err);
   });
+  */

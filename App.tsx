@@ -62,7 +62,9 @@ function LoginStack() {
 
 function App() {
   return (
-    <Auth0Provider domain={"dev-r3fzkkn3e0cei0co.us.auth0.com"} clientId={"63jqpjQZkZYz91XhIGkxDr401zJX4h3b"}>
+    <Auth0Provider 
+      domain={"dev-r3fzkkn3e0cei0co.us.auth0.com"} 
+      clientId={"63jqpjQZkZYz91XhIGkxDr401zJX4h3b"}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Welcome" component={Welcome} />
