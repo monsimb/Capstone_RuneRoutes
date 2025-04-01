@@ -16,9 +16,9 @@ import { launchImageLibrary } from 'react-native-image-picker';
 const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
-// const DISTANCE_THRESHOLD = 0.0001; // Define the threshold for location change
-const LOCATION_UPDATE_INTERVAL = 100; // 10 seconds interval
-const OFFSET = 0.0001;  // Increase this to make the polygon larger (OFFSET from the user location)
+const CHOMP_RADIUS = 0.01;        // amount radius increases with movement
+const LOCATION_UPDATE_INTERVAL = 100;       // 1000 = 1 second interval
+const OFFSET = 0.0005;      // Increase this to make the polygon larger (OFFSET from the user location)
 
 const Maps: React.FC = () => {
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
@@ -76,7 +76,7 @@ const Maps: React.FC = () => {
     function subtractPoly() {
         if (!userLocation || !staticPolygon) return;
     
-        const rad = 0.005;
+        const rad = CHOMP_RADIUS;
         const centerPtn = point([userLocation.longitude, userLocation.latitude]);
         const playerCircle = circle(centerPtn, rad);
     
@@ -330,7 +330,7 @@ const Maps: React.FC = () => {
                 id="reqId"
                 style={{
                     lineColor: '#ffffff',
-                    lineWidth: 10,
+                    lineWidth: 5,
                 }}
                 />
                 <FillLayer

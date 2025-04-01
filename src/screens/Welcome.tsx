@@ -11,25 +11,25 @@ function Welcome({ navigation }) {
     try {
       const authResult = await authorize();
       console.log("Auth result: ", authResult);
-
-      const accessToken = authResult?.accessToken;
-      if(accessToken) {
-        const response = await fetch('http://localhost:3001/login', { // Not going to work right now, we need to figure out host 
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({}),
-        });
-
-        const data = await response.json();
-        console.log("Backend response: ", data);
-      }
-      else {
-        console.log("No access token received");
-      }
-      
+//
+//       const accessToken = authResult?.accessToken;
+//       if(accessToken) {
+//         const response = await fetch('http://localhost:3001/login', { // Not going to work right now, we need to figure out host
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             Authorization: `Bearer ${accessToken}`,
+//           },
+//           body: JSON.stringify({}),
+//         });
+//
+//         const data = await response.json();
+//         console.log("Backend response: ", data);
+//       }
+//       else {
+//         console.log("No access token received");
+//       }
+//
       navigation.navigate('Home');
     } catch (e) {
       console.log(e);
