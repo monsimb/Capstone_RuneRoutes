@@ -1,79 +1,75 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# RuneRoutes: Gamifying Real-World Exploration
 
-# Getting Started
+**RuneRoutes** is an innovative mobile application that transforms everyday travel into a fantasy adventure through an interactive "fog of war" mechanic. Built using **React Native** and **TypeScript**, the app allows users to uncover new areas as they navigate the real world, place custom Points of Interest (POIs) with images and descriptions, and share discoveries with friends.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+The application embraces a fantasy theme throughout its design, with the name "RuneRoutes" reflecting the magical journey of discovery. Users can personalize their exploration experience by selecting custom character icons, adding a role-playing element to the navigation experience. As explorers venture into uncharted territories, they reveal hidden realms on their map, dsicover points of interest, and build their own legendary path through the world around them.
 
-## Step 1: Start the Metro Server
+## Technical Features
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+- **Interactive Map System**: Integrated Mapbox API for advanced map visualization
+- **Fog of War**: Custom raycasting algorithm reveals areas as you explore them
+- **Points of Interest**: Place and discover custom markers with images and descriptions
+- **Friend System**: Share discoveries and compete with friends
+- **Custom Characters**: Personalize your explorer with unique character icons
 
-To start Metro, run the following command from the _root_ of your React Native project:
+## Getting Started
+
+> **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions up to the "Creating a new application" step before proceeding.
+
+### Step 1: Start the Metro Server
+
+Metro is the JavaScript *bundler* that ships *with* React Native.
+
+From the root of your React Native project, run:
 
 ```bash
 # using npm
 npm start
-
 # OR using Yarn
 yarn start
-```
 
-## Step 2: Start your Application
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+### Step 2: Start your Application
 
-### For Android
+Let Metro Bundler run in its own terminal. Open a new terminal from the root of your React Native project.
+
+To start the app:
+
+#### For Android:
 
 ```bash
 # using npm
 npm run android
-
 # OR using Yarn
 yarn android
 ```
 
-### For iOS
+#### For iOS:
 
 ```bash
 # using npm
 npm run ios
-
 # OR using Yarn
 yarn ios
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+If everything is set up correctly, you should see your new app running in the Android Emulator or iOS Simulator. You can also run it directly from Android Studio or Xcode.
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+### Step 3: Modifying your App
 
-## Step 3: Modifying your App
+Now that the app is running, open any of the `.tsx` files in your preferred code editor and make changes.
 
-Now that you have successfully run the app, let's modify it.
+- For **Android**: Press <kbd>R</kbd> twice or open the Developer Menu with <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS), then select **Reload**.
+- For **iOS**: Press <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in the Simulator.
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+## Technologies Used
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+- **Frontend**: React Native, TypeScript, StyleSheet
+- **Maps & Location**: Mapbox API, React Native Location
+- **Backend**: MongoDB Atlas, Terraform (for infrastructure provisioning)
+- **Authentication**: Auth0 integration
+- **Media Integration**: React Native Image Picker for photo uploads
 
-## Congratulations! :tada:
+## Troubleshooting
 
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+If you run into issues, refer to the official [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
