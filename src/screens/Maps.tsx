@@ -16,8 +16,8 @@ import { launchImageLibrary } from 'react-native-image-picker';
 const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
-const CHOMP_RADIUS = 0.05;        // amount radius increases with movement
-const LOCATION_UPDATE_INTERVAL = 50;       // 1000 = 1 second interval
+const CHOMP_DIAMETER = 0.025;        // amount radius increases with movement
+const LOCATION_UPDATE_INTERVAL = 100;       // 1000 = 1 second interval
 const OFFSET = 0.0005;      // Increase this to make the polygon larger (OFFSET from the user location)
 
 const Maps: React.FC = () => {
@@ -76,7 +76,7 @@ const Maps: React.FC = () => {
     function subtractPoly() {
         if (!userLocation || !staticPolygon) return;
     
-        const rad = CHOMP_RADIUS;
+        const rad = CHOMP_DIAMETER;
         const centerPtn = point([userLocation.longitude, userLocation.latitude]);
         const playerCircle = circle(centerPtn, rad);
     
@@ -225,7 +225,7 @@ const Maps: React.FC = () => {
 
 
 
-    // Request permission and get user location. Create initial fog polygon
+    // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
         Location.requestPermission({
         ios: 'whenInUse',
@@ -252,6 +252,7 @@ const Maps: React.FC = () => {
         .catch(err => console.warn('Permission denied:', err));
     }, []); // will trigger only on load
 
+
     useEffect(() => {
         const interval = setInterval(() => {
             Location.getLatestLocation({ enableHighAccuracy: true })
@@ -271,9 +272,12 @@ const Maps: React.FC = () => {
             setUserLocation((prevLocation) => {
                 if (!prevLocation || !staticPolygon) return prevLocation;
                 
-                const userPoint = point([prevLocation.longitude, prevLocation.latitude]);
+                const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);           // chomp checker: user + 1/2 of chomp radius on the y
+                const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);         // chomp checker: 1/2 of chomp radius - user on the y
+                const rightUser = point([prevLocation.longitude, (prevLocation.latitude + CHOMP_DIAMETER/8)]);
+                const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
     
-                if (booleanPointInPolygon(userPoint, staticPolygon)) {
+                if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
                     console.log("USER OUTSIDE POLYGON");
                     subtractPoly();
                 } else {
