@@ -1,3 +1,11 @@
+### Status
+![Static Badge](https://img.shields.io/badge/build-passing-brightgreen)  ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/monsimb/Capstone_RuneRoutes/main?link=https%3A%2F%2Fgithub.com%2Fmonsimb%2FCapstone_RuneRoutes%2Ftree%2Fmain%23)
+
+### Using
+![Static Badge](https://img.shields.io/badge/npm_package-10.9.0-red)  ![Static Badge](https://img.shields.io/badge/ReactNative-0.76.1-lightblue)  ![Static Badge](https://img.shields.io/badge/turf-7.2.0-green)  ![Static Badge](https://img.shields.io/badge/mongodb-6.15.0-darkgreen)
+
+
+
 # RuneRoutes: Gamifying Real-World Exploration
 
 **RuneRoutes** is an innovative mobile application that transforms everyday travel into a fantasy adventure through an interactive "fog of war" mechanic. Built using **React Native** and **TypeScript**, the app allows users to uncover new areas as they navigate the real world, place custom Points of Interest (POIs) with images and descriptions, and share discoveries with friends.
@@ -11,6 +19,10 @@ The application embraces a fantasy theme throughout its design, with the name "R
 - **Points of Interest**: Place and discover custom markers with images and descriptions
 - **Friend System**: Share discoveries and compete with friends
 - **Custom Characters**: Personalize your explorer with unique character icons
+
+## Planned Features
+
+-****
 
 ## Getting Started
 
