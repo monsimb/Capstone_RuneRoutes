@@ -17,7 +17,7 @@ const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0Mmt
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
 const CHOMP_DIAMETER = 0.025;        // amount radius increases with movement
-const LOCATION_UPDATE_INTERVAL = 100;       // 1000 = 1 second interval
+const LOCATION_UPDATE_INTERVAL = 1000;       // 1000 = 1 second interval
 const OFFSET = 0.0005;      // Increase this to make the polygon larger (OFFSET from the user location)
 
 const Maps: React.FC = () => {
