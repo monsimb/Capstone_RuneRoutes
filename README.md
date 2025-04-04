@@ -10,7 +10,7 @@
 
 **RuneRoutes** is an innovative mobile application that transforms everyday travel into a fantasy adventure through an interactive "fog of war" mechanic. Built using **React Native** and **TypeScript**, the app allows users to uncover new areas as they navigate the real world, place custom Points of Interest (POIs) with images and descriptions, and share discoveries with friends.
 
-The application embraces a fantasy theme throughout its design, with the name "RuneRoutes" reflecting the magical journey of discovery. Users can personalize their exploration experience by selecting custom character icons, adding a role-playing element to the navigation experience. As explorers venture into uncharted territories, they reveal hidden realms on their map, dsicover points of interest, and build their own legendary path through the world around them.
+The application embraces a fantasy theme throughout its design, with the name "RuneRoutes" reflecting the magical, RPG inspired journey of discovery. Users can personalize their exploration experience by selecting custom character icons, adding a role-playing element to the navigation experience. As explorers venture into uncharted territories, they reveal hidden realms on their map, dsicover points of interest, and build their own legendary path through the world around them.
 
 ## Technical Features
 
