@@ -22,7 +22,9 @@ The application embraces a fantasy theme throughout its design, with the name "R
 
 ## Planned Features
 
--****
+- **Competition**: 
+- **Driving mode**:
+- **Journeys**:
 
 ## Getting Started
 
