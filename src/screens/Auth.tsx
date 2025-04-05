@@ -14,12 +14,11 @@ function AuthScreen({ navigation }) {
   useEffect(() => {
     if (user) {
       setUserId(user.sub); // 'sub' is the unique identifier from Auth0
-      console.log(user.sub);
-      addUserToDB(user.sub, 'momo', ['slipknot'], 40.7128, -74.0060);
+      addUserToDB(user.sub, user.name, ['slipknot'], 10, { lat: 40.7128, lon: -74.0060 });
     }
   }, [user]);
-  // Function to send user data to backend
 
+  // Function to send user data to backend
   const addUserToDB = async (userId, userName, avatarSelections, travelDistance, coordinates) => {
     try {
       const response = await fetch("https://capstone-runeroutes.onrender.com/users", {

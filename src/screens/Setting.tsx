@@ -28,9 +28,6 @@ function Settings({ navigation }) {
 //     return (
 //             {/* {isAuthenticated ? ( */}
 //             <>
-//                 <Text style={styles.userIdText}>User: {user?.name || "Unknown User"}</Text>
-//                 <Text style={styles.userIdText}>User ID: {user?.sub || "N/A"}</Text>
-
 //                 {/* Toggle Switch */}
 //                 <View style={styles.toggleContainer}>
 //                     <Text style={styles.toggleText}>Driving Mode</Text>
@@ -61,6 +58,10 @@ return (
       <View style={styles.imageContainer}>
         <Image style={styles.image} source={require('../assets/roune_routes_logo.png')} resizeMode="contain" />
       </View>
+
+      {/* User information */}
+      <Text style={styles.userIdText}>User: {user?.name || "Unknown User"}</Text>
+      <Text style={styles.userIdText}>User ID: {user?.sub || "N/A"}</Text>
       
        {/* Toggle Switches */}
         <View style={styles.toggleContainer}>
