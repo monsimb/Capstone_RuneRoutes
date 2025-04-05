@@ -87,7 +87,7 @@ function AuthScreen({ navigation }) {
         </>
       ) : (
         <>
-          <Text style={styles.title}>Welcome to Rune Routes!</Text>
+          <Text style={styles.welcomeTitle}>Welcome to Rune Routes!</Text>
 
           {/* Login Button */}
           <TouchableOpacity style={styles.getStartedButton} onPress={handleLogin} disabled={isLoading}>

@@ -56,7 +56,7 @@ return (
 
       {/* Image placeholder */}
       <View style={styles.imageContainer}>
-        <Image style={styles.image} source={require('../assets/roune_routes_logo.png')} resizeMode="contain" />
+        <Image style={styles.image} source={require('../assets/icon/AppFaceLogo3.png')} resizeMode="contain" />
       </View>
 
       {/* User information */}

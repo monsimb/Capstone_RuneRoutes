@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -12,10 +13,20 @@ app.use(cors());  // Enable CORS (important for frontend requests)
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI).then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('✅ Connected to MongoDB');
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('❌ MongoDB Connection Error:', err);
+    process.exit(1); // Exit if unable to connect
+  });
 
 // API route to add a user
+// POST /users - Add a new user
 app.post('/users', async (req, res) => {
   try {
     const { userId, userName, avatarSelections, lat, lon } = req.body;
@@ -26,12 +37,23 @@ app.post('/users', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Add new user
+    // Ensure avatarSelections is an array
+    const avatarsArray = Array.isArray(avatarSelections)
+      ? avatarSelections
+      : [avatarSelections];
+
+    // Parse coordinates to numbers
+    const coordinates = {
+      lat: parseFloat(lat),
+      lon: parseFloat(lon),
+    };
+
+    // Create and save new user
     const newUser = new User({
       userId,
       userName,
-      avatarSelections,
-      coordinates: { lat, lon }
+      avatarSelections: avatarsArray,
+      coordinates,
     });
 
     await newUser.save();
@@ -39,6 +61,9 @@ app.post('/users', async (req, res) => {
 
   } catch (err) {
     console.error('❌ Error adding user:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
