@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
 
-import { styles } from "../styles/Auth";
+import { styles } from "../styles/UI";
 
 const API_URL = "https://capstone-runeroutes.onrender.com"; // Replace with your Render API URL
 

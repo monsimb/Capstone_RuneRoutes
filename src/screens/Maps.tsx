@@ -16,9 +16,10 @@ import { launchImageLibrary } from 'react-native-image-picker';
 const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
-const CHOMP_DIAMETER = 0.025;        // amount radius increases with movement
-const LOCATION_UPDATE_INTERVAL = 1000;       // 1000 = 1 second interval
-const OFFSET = 0.0005;      // Increase this to make the polygon larger (OFFSET from the user location)
+const CHOMP_DIAMETER = 0.025;           // amount radius increases with movement
+const LOCATION_UPDATE_INTERVAL = 100;  // 1000 = 1 second interval
+const OFFSET = 0.0005;                  // Increase this to make the polygon larger (OFFSET from the user location)
+
 
 const Maps: React.FC = () => {
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
@@ -83,12 +84,10 @@ const Maps: React.FC = () => {
         // Subtract circle from fog polygon
         const fog = staticPolygon;
         const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
-        console.log(area(staticPolygon));
     
         if (newFogLayer) {
           setStaticPolygon(newFogLayer);
           console.log('Updated fog layer!!!!');
-          console.log(area(staticPolygon));
     
         } else {
           console.warn("Difference operation returned null, check polygon validity!");
@@ -295,8 +294,10 @@ const Maps: React.FC = () => {
             setUserLocation((prevLocation) => {
                 if (!prevLocation || !staticPolygon) return prevLocation;
                 
-                const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);           // chomp checker: user + 1/2 of chomp radius on the y
-                const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);         // chomp checker: 1/2 of chomp radius - user on the y
+                // chomp checker: y axis
+                const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);           
+                const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);         
+                // chomp checker: x axis
                 const rightUser = point([prevLocation.longitude, (prevLocation.latitude + CHOMP_DIAMETER/8)]);
                 const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
     
