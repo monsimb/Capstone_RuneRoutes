@@ -28,12 +28,12 @@ async function addUser(userId, userName, avatarSelections, travelDistance, coord
 }
 
 // MongoDB connection and user addition
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(url)
   .then(async () => {
     console.log('MongoDB connected successfully');
     
     const coordinates = { lat: 40.7128, lon: -74.0060 }; // Example coordinates
-    await addUser('test_user_123', 'John Doe', 'avatar1', 50, coordinates);
+    await addUser('test_user_123', 'John Doe', ['avatar1'], 50, coordinates);
 
     mongoose.disconnect(); // Disconnect after operation
   })
