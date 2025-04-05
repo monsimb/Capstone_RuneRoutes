@@ -18,6 +18,7 @@ export async function addUser(userId, userName, avatarSelections, travelDistance
       userName,
       avatarSelections,
       travelDistance,
+      coordinates
     });
 
     await newUser.save();

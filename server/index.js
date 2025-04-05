@@ -12,14 +12,11 @@ app.use(cors());  // Enable CORS (important for frontend requests)
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('✅ Connected to MongoDB'))
+mongoose.connect(process.env.MONGODB_URI).then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // API route to add a user
-app.post('/addUser', async (req, res) => {
+app.post('/users', async (req, res) => {
   try {
     const { userId, userName, avatarSelections, lat, lon } = req.body;
 

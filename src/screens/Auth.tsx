@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
-
 import { styles } from "../styles/UI";
 
 const API_URL = "https://capstone-runeroutes.onrender.com"; // Replace with your Render API URL
@@ -16,8 +15,39 @@ function AuthScreen({ navigation }) {
     if (user) {
       setUserId(user.sub); // 'sub' is the unique identifier from Auth0
       console.log(user.sub);
+      addUserToDB(user.sub, 'momo', ['slipknot'], 40.7128, -74.0060);
     }
   }, [user]);
+  // Function to send user data to backend
+
+  const addUserToDB = async (userId, userName, avatarSelections, travelDistance, coordinates) => {
+    try {
+      const response = await fetch("https://capstone-runeroutes.onrender.com/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          userName,
+          avatarSelections,
+          travelDistance,
+          coordinates
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("User added:", data);
+    } catch (err) {
+      console.error("Error sending user to backend:", err);
+    }
+  };
+  
+
 
   // If user successfully authenticated, navigate to Home (Maps.tsx)
   const handleLogin = async () => {
@@ -40,7 +70,7 @@ function AuthScreen({ navigation }) {
       <View style={styles.imageContainer}>
         <Image
           style={styles.image}
-          source={require("../assets/roune_routes_logo.png")}
+          source={require("../assets/icon/AppFaceLogo3.png")}
           resizeMode="contain"
         />
       </View>
