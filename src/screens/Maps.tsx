@@ -196,15 +196,15 @@ const Maps: React.FC = () => {
     <Modal
       visible={isViewingMarker}
       animationType="slide"
-      transparent={true}
       onRequestClose={() => setIsViewingMarker(false)}
+      transparent={true}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           {selectedMarker && (
             <>
               <Text style={styles.modalTitle}>{selectedMarker.title}</Text>
-              
+
               {selectedMarker.imageUri ? (
                 <Image
                   source={{ uri: selectedMarker.imageUri }}
@@ -215,19 +215,19 @@ const Maps: React.FC = () => {
                   <Text style={styles.noImageText}>No image uploaded</Text>
                 </View>
               )}
-              
+
               <Text style={styles.descriptionLabel}>Description:</Text>
               <Text style={styles.descriptionText}>{selectedMarker.description}</Text>
-              
+
               <View style={styles.markerButtonContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.button, styles.deleteButton]}
                   onPress={() => handleDeleteMarker(selectedMarker.id)}
                 >
                   <Text style={styles.buttonText}>Delete Marker</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.button, styles.closeButton]}
                   onPress={() => setIsViewingMarker(false)}
                 >
@@ -285,7 +285,7 @@ const Maps: React.FC = () => {
                 })
                 .catch(err => console.warn("Error fetching location:", err));
         }, LOCATION_UPDATE_INTERVAL);
-    
+
         return () => clearInterval(interval);
     }, []);
 
@@ -293,25 +293,25 @@ const Maps: React.FC = () => {
         const interval = setInterval(() => {
             setUserLocation((prevLocation) => {
                 if (!prevLocation || !staticPolygon) return prevLocation;
-                
+
                 // chomp checker: y axis
-                const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);           
-                const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);         
+                const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);
+                const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);
                 // chomp checker: x axis
                 const rightUser = point([prevLocation.longitude, (prevLocation.latitude + CHOMP_DIAMETER/8)]);
                 const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
-    
+
                 if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
                     console.log("USER OUTSIDE POLYGON");
                     subtractPoly();
                 } else {
                     console.log("USER INSIDE POLYGON");
                 }
-    
+
                 return prevLocation; // React won't re-render if state doesn't change
             });
         }, LOCATION_UPDATE_INTERVAL);
-    
+
         return () => clearInterval(interval);
     }, [staticPolygon]);
 
@@ -375,7 +375,7 @@ const Maps: React.FC = () => {
               <MarkerView key={marker.id} coordinate={[marker.longitude, marker.latitude]}>
                 <TouchableOpacity
                 onPress={() => handleMarkerPress(marker)}
-                style={styles.markerContainer}
+                style={styles.markerViewContainer}
                 >
                 <Image
                   source={DefaultPin}
@@ -419,7 +419,52 @@ const Maps: React.FC = () => {
                 </View>
               </View>
             </Modal>
-          <ViewMarkerModal /> 
+          <Modal
+                visible={isViewingMarker}
+                animationType="slide"
+                onRequestClose={() => setIsViewingMarker(false)}
+                transparent={true}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    {selectedMarker && (
+                      <>
+                        <Text style={styles.modalTitle}>{selectedMarker.title}</Text>
+
+                        {selectedMarker.imageUri ? (
+                          <Image
+                            source={{ uri: selectedMarker.imageUri }}
+                            style={styles.markerImage}
+                          />
+                        ) : (
+                          <View style={styles.noImageContainer}>
+                            <Text style={styles.noImageText}>No image uploaded</Text>
+                          </View>
+                        )}
+
+                        <Text style={styles.descriptionLabel}>Description:</Text>
+                        <Text style={styles.descriptionText}>{selectedMarker.description}</Text>
+
+                        <View style={styles.markerButtonContainer}>
+                          <TouchableOpacity
+                            style={[styles.button, styles.deleteButton]}
+                            onPress={() => handleDeleteMarker(selectedMarker.id)}
+                          >
+                            <Text style={styles.buttonText}>Delete Marker</Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={[styles.button, styles.closeButton]}
+                            onPress={() => setIsViewingMarker(false)}
+                          >
+                            <Text style={styles.buttonText}>Close</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
+                  </View>
+                </View>
+              </Modal>
         </MapView>
       </View>
     );
