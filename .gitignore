@@ -78,3 +78,9 @@ yarn-error.log
 
 # Dotenv
 /.env
+
+# Gradle
+/gradle
+
+# App
+/app
