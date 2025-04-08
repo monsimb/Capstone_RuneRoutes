@@ -16,8 +16,8 @@ router.post('/login', checkJwt, async (req, res) => {
       // Pull user info from the token
       const { sub, nickname, picture } = req.auth.payload;
   
-      // Call your addUser function (see next step)
-      // await addUser(sub, nickname, [picture]);
+      // Call addUser function
+      // await addUser(sub, nickname, [picture]); bla bla bla
   
       res.json({ message: 'User synced successfully', userId: sub });
     } catch (error) {
