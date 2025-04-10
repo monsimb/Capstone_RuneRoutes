@@ -68,7 +68,4 @@ app.post('/users', async (req, res) => {
   }
 });
 
-// Render requires listening on 0.0.0.0
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// app.listen only needs to be called twice. Removed and this is note to self

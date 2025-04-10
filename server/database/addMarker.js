@@ -30,6 +30,7 @@ async function addMarker(userId, userName, avatarSelections, travelDistance) {
 }
 
 addUser('id', 'name', 'avatar', 'travelDistance');
+console.log('addUser should have run');
 
 // Connect to MongoDB
 /*

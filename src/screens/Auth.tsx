@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } fr
 import { useAuth0 } from 'react-native-auth0';
 import { styles } from "../styles/UI";
 
-const API_URL = "https://capstone-runeroutes.onrender.com"; // Replace with your Render API URL
+const API_URL = "https://capstone-runeroutes-wgp6.onrender.com"; // Replace with your Render API URL
 
 function AuthScreen({ navigation }) {
   const { authorize, clearSession, user, isAuthenticated } = useAuth0();
@@ -21,7 +21,7 @@ function AuthScreen({ navigation }) {
   // Function to send user data to backend
   const addUserToDB = async (userId, userName, avatarSelections, travelDistance, coordinates) => {
     try {
-      const response = await fetch("https://capstone-runeroutes.onrender.com/users", {
+      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
