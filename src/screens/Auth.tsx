@@ -35,9 +35,10 @@ function AuthScreen({ navigation }) {
           lon: coordinates.lon,
         }),
       });
-  
+      
+      const text = await response.text();
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        throw new Error(`Server error: ${response.status}: ${text}`);
       }
   
       const data = await response.json();
@@ -54,13 +55,22 @@ function AuthScreen({ navigation }) {
     setIsLoading(true);
     try {
       await authorize();
-
+      if(user) {
+        setUserId(user.sub);
+        await addUserToDB(
+          user.sub,
+          user.name,
+          ['slipknot'],
+          10,
+          { lat: 40.7128, lon: -74.0060 }
+        );
+      }
+      navigation.navigate("Home");
     } catch (e) {
       console.error(e);
     } finally {
       setIsLoading(false);
     }
-    navigation.navigate("Home");
   };
 
 

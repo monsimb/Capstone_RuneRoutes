@@ -29,12 +29,10 @@ mongoose.connect(process.env.MONGODB_URI)
 // POST /users - Add a new user
 app.post('/users', async (req, res) => {
   try {
-    const { userId, userName, avatarSelections, lat, lon } = req.body;
+    const { userId, userName, avatarSelections, travelDistance, lat, lon } = req.body;
 
-    // Check if user exists
-    const existingUser = await User.findOne({ userId });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+    if(!userId || !userName || lat === undefined || lon === undefined) {
+      return res.status(400).json({ message: 'Missing required fields' });
     }
 
     // Ensure avatarSelections is an array
@@ -48,19 +46,28 @@ app.post('/users', async (req, res) => {
       lon: parseFloat(lon),
     };
 
-    // Create and save new user
-    const newUser = new User({
-      userId,
-      userName,
-      avatarSelections: avatarsArray,
-      coordinates,
+    const updatedUser = await User.findOneAndUpdate(
+      { userID },
+      {
+        userId,
+        userName,
+        avatarSelections: avatarsArray,
+        travelDistance,
+        coordinates: {lat: parseFloat(lat), lon: parseFloat(lon)}
+      },
+      {
+        new: true,
+        upsert: true, // This will create new if it doesn't exist yet
+      }
+    );
+
+    res.status(200).json({ // Success
+      message: 'User created/updated successfully',
+      user: updatedUser
     });
 
-    await newUser.save();
-    res.status(201).json({ message: 'User added successfully', user: newUser });
-
   } catch (err) {
-    console.error('❌ Error adding user:', err);
+    console.error('Error adding/updating user:', err);
     if (err.name === 'ValidationError') {
       return res.status(400).json({ error: err.message });
     }
