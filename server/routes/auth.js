@@ -2,7 +2,7 @@ const express = require('express');
 const { auth } = require('express-oauth2-jwt-bearer');
 const router = express.Router();
 require('dotenv').config({ path: '../.env' });
-const User = require('./database/schema/userModel.js'); // Import User model
+const User = require('../database/schema/userModel.js'); // Import User model
 
 // Auth0 JWT verification middleware
 const checkJwt = auth({
