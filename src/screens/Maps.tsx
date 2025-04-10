@@ -66,7 +66,7 @@ const Maps: React.FC = () => {
           console.warn("No user ID found for location sync");
           return;
         }
-
+        console.log("AccessToken sent:", accessToken);
         await updateBackendLocation(accessToken, user.sub, lat, lon);
       } catch (err) { 
         console.error(' Failed to sync location:', err);

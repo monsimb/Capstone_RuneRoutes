@@ -27,6 +27,7 @@ mongoose.connect(process.env.MONGODB_URI) // CONNECTS TO MONGO
 
 const authRoutes = require('./routes/auth'); // LINKS AUTH WHICH VERIFIES THEN UPDATES USER INFO
 app.use('/auth', authRoutes);
+
 app.get("/auth", (req, res) => {
   res.send("Auth is up and fresh");
 });

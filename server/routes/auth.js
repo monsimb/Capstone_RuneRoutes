@@ -96,7 +96,7 @@ router.post('/location', checkJwt, async (req, res) => {
       coordinates: updatedUser.coordinates
     });
   } catch(err) {
-    console.lerror('Error updating location:', err.message);
+    console.error('Error updating location:', err.message);
     res.status(500).json({error: 'Internal Server Error'});
   }
 });

@@ -40,12 +40,11 @@ function AuthScreen({ navigation }) {
         }),
       });
       
-      const text = await response.text();
+      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}: ${text}`);
+        throw new Error(`Server error: ${response.status}: ${JSON.stringify(data)}`);
       }
-      const data = await response.json();
       console.log("User added: ", data);
     } catch (err) {
       console.error("Error sending user to backend:", err.message);
@@ -58,16 +57,12 @@ function AuthScreen({ navigation }) {
   const handleLogin = async () => {
     setIsLoading(true);
     try {
-      await authorize();
+      await authorize({
+        audience: 'https://capstone-runeroutes-wgp6.onrender.com', // 👈 or your Auth0 API identifier
+        scope: 'openid profile email offline_access',
+      });
       if(user) {
         setUserId(user.sub);
-        await addUserToDB(
-          user.sub,
-          user.name,
-          ['slipknot'],
-          10,
-          { lat: 40.7128, lon: -74.0060 }
-        );
       }
       navigation.navigate("Home");
     } catch (e) {
