@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGODB_URI) // CONNECTS TO MONGO
     process.exit(1); // Exit if unable to connect
   });
 
-const authroutes = require('./routes/auth'); // LINKS AUTH WHICH VERIFIES THEN UPDATES USER INFO
+const authRoutes = require('./routes/auth'); // LINKS AUTH WHICH VERIFIES THEN UPDATES USER INFO
 app.use('/auth', authRoutes);
 
 app.get("/", (req, res) => {
