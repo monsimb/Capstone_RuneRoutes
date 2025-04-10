@@ -31,7 +31,8 @@ function AuthScreen({ navigation }) {
           userName,
           avatarSelections,
           travelDistance,
-          coordinates
+          lat: coordinates.lat,
+          lon: coordinates.lon,
         }),
       });
   
