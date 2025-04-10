@@ -8,7 +8,7 @@ export const updateBackendLocation = async (
     lon: number
   ) => {
     try {
-      const response = await fetch('https://capstone-runeroutes-wgp6.onrender.com/auth/location', {
+      const response = await fetch('https://capstone-runeroutes-wgp6.onrender.com/location', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -22,9 +22,9 @@ function AuthScreen({ navigation }) {
   const addUserToDB = async (userId, userName, avatarSelections, travelDistance, coordinates) => {
     try {
       const credentials = await getCredentials();
-      const token = credentials.accessToken;
+      const token = credentials?.accessToken;
 
-      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/users", {
+      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/auth/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +45,7 @@ function AuthScreen({ navigation }) {
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}: ${text}`);
       }
-      const data = JSON.parse(text);
+      const data = await response.json();
       console.log("User added: ", data);
     } catch (err) {
       console.error("Error sending user to backend:", err.message);

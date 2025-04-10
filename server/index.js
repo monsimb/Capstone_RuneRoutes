@@ -4,7 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');  // Allows frontend to connect
 
-const User = require('./database/schema/userModel.js'); // Import User model
+
 
 const app = express();
 app.use(express.json()); // Middleware to parse JSON data
@@ -27,6 +27,10 @@ mongoose.connect(process.env.MONGODB_URI) // CONNECTS TO MONGO
 
 const authRoutes = require('./routes/auth'); // LINKS AUTH WHICH VERIFIES THEN UPDATES USER INFO
 app.use('/auth', authRoutes);
+app.get("/auth", (req, res) => {
+  res.send("Auth is up and fresh");
+});
+  
 
 app.get("/", (req, res) => {
   res.send("Backend is up and fresh");
