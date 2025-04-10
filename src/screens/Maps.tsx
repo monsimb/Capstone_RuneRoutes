@@ -12,6 +12,11 @@ import { styles } from '../styles/Map';
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import DefaultPin from '../assets/defaultPin.png';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { useAuth0 } from 'react-native-auth0';
+import { updateBackendLocation } from '../api/updateLocation';
+
+
+
 
 const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
@@ -22,6 +27,7 @@ const OFFSET = 0.0005;                  // Increase this to make the polygon lar
 
 
 const Maps: React.FC = () => {
+    const { getCredentials, user } = useAuth0();
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
@@ -45,6 +51,22 @@ const Maps: React.FC = () => {
         setIsViewingMarker(false);
         setSelectedMarker(null);
       };
+
+    const syncLocationToBackend = async (lat: number, lon: number) => {
+      try {
+        const creds = await getCredentials(); 
+        const accessToken = creds.accessToken;
+
+        if(!user?.sub) {
+          console.warn("No user ID found for location sync");
+          return;
+        }
+
+        await updateBackendLocation(accessToken, user.sub, lat, lon);
+      } catch (err) { 
+        console.error(' Failed to sync location:', err);
+      }
+    };
 
     // Function to create a polygon around a given location
     const createPolygon = (longitude: number, latitude: number) => {
@@ -87,7 +109,7 @@ const Maps: React.FC = () => {
     
         if (newFogLayer) {
           setStaticPolygon(newFogLayer);
-          console.log('Updated fog layer!!!!');
+          //console.log('Updated fog layer!!!!');
     
         } else {
           console.warn("Difference operation returned null, check polygon validity!");
@@ -260,6 +282,7 @@ const Maps: React.FC = () => {
                 .then(location => {
                     setUserLocation(location); // Save location to state
 
+
                     // Set initial location (on load) ONCE, never again
                     if (!initialUserLocation) {
                         setInitialUserLocation(location); // Initial location has been set
@@ -281,6 +304,7 @@ const Maps: React.FC = () => {
                 .then((location) => {
                     if (location) {
                         setUserLocation(location);
+                        syncLocationToBackend(location.latitude, location.longitude);
                     }
                 })
                 .catch(err => console.warn("Error fetching location:", err));
@@ -302,10 +326,10 @@ const Maps: React.FC = () => {
                 const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
 
                 if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
-                    console.log("USER OUTSIDE POLYGON");
+                    //console.log("USER OUTSIDE POLYGON");
                     subtractPoly();
                 } else {
-                    console.log("USER INSIDE POLYGON");
+                    //console.log("USER INSIDE POLYGON");
                 }
 
                 return prevLocation; // React won't re-render if state doesn't change

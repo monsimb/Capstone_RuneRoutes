@@ -6,7 +6,7 @@ import { styles } from "../styles/UI";
 const API_URL = "https://capstone-runeroutes-wgp6.onrender.com"; // Replace with your Render API URL
 
 function AuthScreen({ navigation }) {
-  const { authorize, clearSession, user, isAuthenticated } = useAuth0();
+  const { authorize, clearSession, user, isAuthenticated, getCredentials } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState(null);
 
@@ -21,10 +21,14 @@ function AuthScreen({ navigation }) {
   // Function to send user data to backend
   const addUserToDB = async (userId, userName, avatarSelections, travelDistance, coordinates) => {
     try {
+      const credentials = await getCredentials();
+      const token = credentials.accessToken;
+
       const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, 
         },
         body: JSON.stringify({
           userId,
@@ -37,6 +41,7 @@ function AuthScreen({ navigation }) {
       });
       
       const text = await response.text();
+      
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}: ${text}`);
       }
