@@ -40,11 +40,10 @@ function AuthScreen({ navigation }) {
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}: ${text}`);
       }
-  
-      const data = await response.json();
-      console.log("User added:", data);
+      const data = JSON.parse(text);
+      console.log("User added: ", data);
     } catch (err) {
-      console.error("Error sending user to backend:", err);
+      console.error("Error sending user to backend:", err.message);
     }
   };
   

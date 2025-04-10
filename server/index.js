@@ -25,6 +25,11 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1); // Exit if unable to connect
   });
 
+app.get("/", (req, res) => {
+  res.send("Backend is up and fresh");
+});
+  
+
 // API route to add a user
 // POST /users - Add a new user
 app.post('/users', async (req, res) => {
@@ -47,7 +52,7 @@ app.post('/users', async (req, res) => {
     };
 
     const updatedUser = await User.findOneAndUpdate(
-      { userID },
+      { userId },
       {
         userId,
         userName,
