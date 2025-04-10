@@ -55,7 +55,12 @@ const Maps: React.FC = () => {
     const syncLocationToBackend = async (lat: number, lon: number) => {
       try {
         const creds = await getCredentials(); 
-        const accessToken = creds.accessToken;
+        const accessToken = creds?.accessToken;
+
+        if (!accessToken) {
+          console.warn("No access token available.");
+          return;
+        }
 
         if(!user?.sub) {
           console.warn("No user ID found for location sync");
