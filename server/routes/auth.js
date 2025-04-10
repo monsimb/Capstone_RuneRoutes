@@ -18,7 +18,7 @@ router.get('/protected', checkJwt, (req, res) => {
 
 // API route to add a user
 // POST /users - Add a new user
-app.post('/users', async (req, res) => {
+router.post('/users', async (req, res) => {
   try {
     const { userId, userName, avatarSelections, travelDistance, lat, lon } = req.body;
 
