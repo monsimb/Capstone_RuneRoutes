@@ -83,7 +83,7 @@ router.post('/location', checkJwt, async (req, res) => {
             lon: parseFloat(lon)
           }
         }
-      }
+      },
       { new: true }
     );
 
