@@ -155,7 +155,7 @@ function Profile({ navigation, route }) {
 
       {/* User Stats */}
       <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} km</Text>
+        <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} km^2</Text>
         <Text style={styles.statsText}>POIs Discovered: {userStats.poisDiscovered}</Text>
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>
