@@ -11,13 +11,20 @@ import { area } from "@turf/area";
 import { styles } from '../styles/Map';
 import { Feature, Point, GeoJsonProperties } from 'geojson';
 import DefaultPin from '../assets/defaultPin.png';
+import StoreIcon from '../assets/icon/shopIcon.png';
+import ParkIcon from '../assets/icon/parkIcon.png';
 import { launchImageLibrary } from 'react-native-image-picker';
+
+import axios from 'axios'; // Import Axios
+
 
 const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
+const GOOGLE_PLACES_API_KEY = "AIzaSyCVeCV1ESGhQLLhWIkGZpjecanTjTMhaXA"; // REPLACE!!!
+
 const CHOMP_DIAMETER = 0.025;           // amount radius increases with movement
-const LOCATION_UPDATE_INTERVAL = 100;  // 1000 = 1 second interval
+const LOCATION_UPDATE_INTERVAL = 1000;  // 1000 = 1 second interval
 const OFFSET = 0.0005;                  // Increase this to make the polygon larger (OFFSET from the user location)
 
 
@@ -45,6 +52,57 @@ const Maps: React.FC = () => {
         setIsViewingMarker(false);
         setSelectedMarker(null);
       };
+    const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number }[]>([]);
+
+
+
+    // Fetch POIs from Google Places API
+    const fetchPOIs = async (latitude: number, longitude: number) => {
+      try {
+          const response = await axios.get(
+              `https://maps.googleapis.com/maps/api/place/nearbysearch/json`,
+              {
+                  params: {
+                      location: `${latitude},${longitude}`,
+                      radius: 1000, // Radius in meters
+                      type: 'point_of_interest',
+                      key: GOOGLE_PLACES_API_KEY,
+                  },
+              }
+          );
+          // console.log(response);
+
+          if (response.data.results) {
+              const fetchedPois = response.data.results.map((poi: any) => ({
+                  id: poi.place_id,
+                  name: poi.name,
+                  latitude: poi.geometry.location.lat,
+                  longitude: poi.geometry.location.lng,
+                  types: poi.types || [],
+              }));
+              setPois(fetchedPois);
+          }
+      } catch (error) {
+          console.error("Error fetching POIs:", error);
+      }
+  };
+  // Function to determine the icon based on POI type
+  const getPoiIcon = (types: string[]) => {
+    console.log(types);
+    if (types.includes('store')) {
+      // console.log('store found');
+      return StoreIcon;
+    } else if (types.includes('park')) {
+      return ParkIcon;
+    }
+    return DefaultPin; // Default icon
+  };
+
+    useEffect(() => {
+      if (userLocation) {
+          fetchPOIs(userLocation.latitude, userLocation.longitude);
+      }
+    }, [userLocation]);
 
     // Function to create a polygon around a given location
     const createPolygon = (longitude: number, latitude: number) => {
@@ -302,10 +360,10 @@ const Maps: React.FC = () => {
                 const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
 
                 if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
-                    console.log("USER OUTSIDE POLYGON");
+                    // console.log("USER OUTSIDE POLYGON");
                     subtractPoly();
                 } else {
-                    console.log("USER INSIDE POLYGON");
+                    // console.log("USER INSIDE POLYGON");
                 }
 
                 return prevLocation; // React won't re-render if state doesn't change
@@ -351,6 +409,20 @@ const Maps: React.FC = () => {
                 radius: 50.0,
               }}
             />
+            {/* Render POI markers */}
+            {pois.map((poi) => (
+                    <MarkerView key={poi.id} coordinate={[poi.longitude, poi.latitude]}>
+                        <TouchableOpacity style={styles.markerViewContainer}>
+                            <Image
+                                source={getPoiIcon(poi.types)} // function to get diff icons 
+                                style={{ width: 40, height: 40 }}
+                            />
+                            <View style={styles.markerTitleContainer}>
+                                <Text style={styles.markerTitle}>{poi.name}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </MarkerView>
+                ))}
             
             <ShapeSource id="userPolygon" shape={staticPolygon}>
                 <LineLayer
