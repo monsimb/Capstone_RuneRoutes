@@ -27,7 +27,6 @@ const Maps: React.FC = () => {
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
-
     const [newTitle, setNewTitle] = useState('');
     const [newDescription, setNewDescription] = useState('');
     const [newImageUri, setNewImageUri] = useState<string | null>(null);
@@ -40,64 +39,44 @@ const Maps: React.FC = () => {
         description: string;
         imageUri: string | null;
       }[]>([]); // Store custom markers
-      const [modalVisible, setModalVisible] = useState(false);
-      const [isViewingMarker, setIsViewingMarker] = useState(false);
-      const handleDeleteMarker = (markerId: string) => {
-        setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
-        setIsViewingMarker(false);
-        setSelectedMarker(null);
-      };
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isViewingMarker, setIsViewingMarker] = useState(false);
+    const handleDeleteMarker = (markerId: string) => {
+      setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
+      setIsViewingMarker(false);
+      setSelectedMarker(null);
+    };
     const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number }[]>([]);
+        //Marker State
+        const [selectedMarker, setSelectedMarker] = useState<{
+          id: string;
+          title: string;
+          description: string;
+          imageUri: string | null;
+        } | null>(null);
 
 
-    useEffect(() => {
-      if (userLocation) {
-          fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
-      }
-    }, [userLocation]);
-
-    
     // Function to chomp away at fog polygon
     function subtractPoly() {
-        if (!userLocation || !staticPolygon) return;
-    
-        const rad = CHOMP_DIAMETER;
-        const centerPtn = point([userLocation.longitude, userLocation.latitude]);
-        const playerCircle = circle(centerPtn, rad);
-    
-        // Subtract circle from fog polygon
-        const fog = staticPolygon;
-        const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
-    
-        if (newFogLayer) {
-          setStaticPolygon(newFogLayer);
-          console.log('Updated fog layer!!!!');
-    
-        } else {
-          console.warn("Difference operation returned null, check polygon validity!");
-        }
-      };
-
-    // Marker touch interaction handler
-    const handlePress = (e: any) => {
-        console.log("Map pressed", e);
-        const coordinates = e.geometry ? e.geometry.coordinates : null;
-
-        if (coordinates) {
-            const [longitude, latitude] = coordinates;
-            if(booleanPointInPolygon(coordinates, staticPolygon)) {
-            console.log("MARKER IN POLYGON!!!!")
-            }
-            //console.log("Coordinates:", longitude, latitude); // Log coordinates
-            setCurrentCoordinates({ longitude, latitude });
-            setModalVisible(true);
-        } else {
-            console.error("No coordinates found in event:", e);
-        }
+      if (!userLocation || !staticPolygon) return;
+  
+      const rad = CHOMP_DIAMETER;
+      const centerPtn = point([userLocation.longitude, userLocation.latitude]);
+      const playerCircle = circle(centerPtn, rad);
+  
+      // Subtract circle from fog polygon
+      const fog = staticPolygon;
+      const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
+  
+      if (newFogLayer) {
+        setStaticPolygon(newFogLayer);
+        console.log('Updated fog layer!!!!');
+  
+      } else {
+        console.warn("Difference operation returned null, check polygon validity!");
+      }
     };
-
-    
-    // User uploaded images
+    // User uploaded images (markers)
     const pickImage = () => {
     launchImageLibrary({
         mediaType: 'photo',
@@ -109,121 +88,71 @@ const Maps: React.FC = () => {
         setNewImageUri(response.assets[0].uri || null);
         }
     });
-  };
-
-  // Place markrer function
-  const handleAddMarker = () => {
-    if (currentCoordinates) {
-      setMarkers((prevMarkers) => [
-        ...prevMarkers,
-        {
-          id: Math.random().toString(),
-          longitude: currentCoordinates.longitude,
-          latitude: currentCoordinates.latitude,
-          title: newTitle,
-          description: newDescription,
-          imageUri: newImageUri,
-        },
-      ]);
-    }
-    setModalVisible(false);
-    setNewTitle('');
-    setNewDescription('');
-    setNewImageUri(null);
-  };
-  const geoJson = staticPolygon ? staticPolygon : null;
-
-  const handleMove = () => {
-    if(userLocation) {
-      setUserLocation(prev => ({
-        latitude: prev!.latitude,
-        longitude: prev!.longitude + 0.001, // Simulating movement for testing purposes
-        }));
-    }
-    console.log(userLocation);
-    if (userLocation && geoJson) {
-      const pt = point([userLocation.longitude, userLocation.latitude]);
-      if (booleanPointInPolygon(pt, geoJson)) {
-        console.log("USER IN POLYGON");
-        subtractPoly();
+    };
+    // Place marker functionality
+    const handleAddMarker = () => {
+      if (currentCoordinates) {
+        setMarkers((prevMarkers) => [
+          ...prevMarkers,
+          {
+            id: Math.random().toString(),
+            longitude: currentCoordinates.longitude,
+            latitude: currentCoordinates.latitude,
+            title: newTitle,
+            description: newDescription,
+            imageUri: newImageUri,
+          },
+        ]);
       }
-    }
-    // const pt = point([userLocation.longitude, userLocation.latitude]);
-    // if(booleanPointInPolygon(pt,geoJson))
-    // {
-    //   console.log("USER IN POLYGON")
-    // }
-  };
+      setModalVisible(false);
+      setNewTitle('');
+      setNewDescription('');
+      setNewImageUri(null);
+    };
+    // Handles clicking on markers
+    const handleMarkerPress = (marker: {
+      id: string;
+      longitude: number;
+      latitude: number;
+      title: string;
+      description: string;
+      imageUri: string | null;
+    }) => {
+      setSelectedMarker(marker);
+      setIsViewingMarker(true); // Show view modal instead of add modal
+    };
+    // Handles clicking on map to create markers
+    const handlePress = (e: any) => {
+        // console.log("Map pressed", e);
+        const coordinates = e.geometry ? e.geometry.coordinates : null;
 
-  //Marker State
-  const [selectedMarker, setSelectedMarker] = useState<{
-    id: string;
-    title: string;
-    description: string;
-    imageUri: string | null;
-  } | null>(null);
+        if (coordinates) {
+            const [longitude, latitude] = coordinates;
+            if(booleanPointInPolygon(coordinates, staticPolygon)) {
+            // console.log("MARKER IN POLYGON!!!!")
+            }
+            //console.log("Coordinates:", longitude, latitude); // Log coordinates
+            setCurrentCoordinates({ longitude, latitude });
+            setModalVisible(true);
+        } else {
+            console.error("No coordinates found in event:", e);
+        }
+    };
+  
 
-  //Marker click handler
-  const handleMarkerPress = (marker: {
-    id: string;
-    longitude: number;
-    latitude: number;
-    title: string;
-    description: string;
-    imageUri: string | null;
-  }) => {
-    setSelectedMarker(marker);
-    setIsViewingMarker(true); // Show view modal instead of add modal
-  };
 
-  const ViewMarkerModal = () => (
-    <Modal
-      visible={isViewingMarker}
-      animationType="slide"
-      onRequestClose={() => setIsViewingMarker(false)}
-      transparent={true}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          {selectedMarker && (
-            <>
-              <Text style={styles.modalTitle}>{selectedMarker.title}</Text>
 
-              {selectedMarker.imageUri ? (
-                <Image
-                  source={{ uri: selectedMarker.imageUri }}
-                  style={styles.markerImage}
-                />
-              ) : (
-                <View style={styles.noImageContainer}>
-                  <Text style={styles.noImageText}>No image uploaded</Text>
-                </View>
-              )}
 
-              <Text style={styles.descriptionLabel}>Description:</Text>
-              <Text style={styles.descriptionText}>{selectedMarker.description}</Text>
 
-              <View style={styles.markerButtonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.deleteButton]}
-                  onPress={() => handleDeleteMarker(selectedMarker.id)}
-                >
-                  <Text style={styles.buttonText}>Delete Marker</Text>
-                </TouchableOpacity>
+    useEffect(() => {
+      if (userLocation) {
+          fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
+      }
+    }, [userLocation]);
 
-                <TouchableOpacity
-                  style={[styles.button, styles.closeButton]}
-                  onPress={() => setIsViewingMarker(false)}
-                >
-                  <Text style={styles.buttonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
-        </View>
-      </View>
-    </Modal>
-  );
+    
+
+
 
 
 
@@ -377,7 +306,7 @@ const Maps: React.FC = () => {
                 >
                 <Image
                   source={DefaultPin}
-                  style={{ width: 50, height: 50, borderRadius: 25 }}
+                  style={{ width: 30, height: 30 , borderRadius: 15 }}
                 />
                 <View style={styles.markerTitleContainer}>
                   <Text style={styles.markerTitle}>{marker.title}</Text>
