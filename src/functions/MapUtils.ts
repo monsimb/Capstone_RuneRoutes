@@ -42,9 +42,9 @@ export const createPolygon = (longitude, latitude) => {
   const OFFSET = 0.0005;
   const outerBoundary = [
     [-180, -90],
-    [190, -90],
-    [190, 90],
-    [-170, 90],
+    [180, -90],
+    [180, 90],
+    [-180, 90],
     [-180, -90],
   ];
   const hole = [

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Button, Modal, TextInput, Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
 import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import { MapView } from '@rnmapbox/maps';
@@ -10,7 +10,7 @@ import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf
 import { circle } from "@turf/circle";
 import { Feature } from 'geojson';
 import { point } from "@turf/helpers";
-// import { area } from "@turf/area";
+import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
 
 import { styles } from '../styles/Map';
@@ -56,9 +56,8 @@ const Maps: React.FC = () => {
       description: string;
       imageUri: string | null;
     } | null>(null);
-    type RouteParams = {
-        fogOpacity?: number;
-    };
+    type RouteParams = {fogOpacity?: number;};
+    const [chompedArea, setChompedArea] = useState(0);
 
     const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
     const { fogOpacity = 0.8 } = route.params || {}; // Default to 0.8 if no value is passed
@@ -73,10 +72,25 @@ const Maps: React.FC = () => {
       const playerCircle = circle(centerPtn, rad);
   
       // Subtract circle from fog polygon
-      const fog = staticPolygon;
+      const fog = staticPolygon;  // starting poly
       const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
   
       if (newFogLayer) {
+        //  !! currently doest account for the initial square !!
+
+        const originalFogArea = area(fog);
+
+        // Calculate the area of the new fog polygon
+        const newFogArea = area(newFogLayer);
+
+        // Calculate the area that has been chomped
+        const chomped = originalFogArea - newFogArea;
+
+        console.log(`Original fog area: ${originalFogArea} square meters`);
+        console.log(`New fog area: ${newFogArea} square meters`);
+        console.log(`Chomped area: ${chompedArea} square meters`);
+
+        setChompedArea(chomped); // Update state with the chomped area
         setStaticPolygon(newFogLayer);
         // console.log('Updated fog layer!!!!');
   
@@ -146,6 +160,7 @@ const Maps: React.FC = () => {
             console.error("No coordinates found in event:", e);
         }
     };
+    
   
 
 
