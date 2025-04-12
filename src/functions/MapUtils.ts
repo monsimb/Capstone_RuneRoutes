@@ -1,6 +1,9 @@
+// includes functions for retrieving POI's, setting POI's icon, and creating initial polygon
+
+
 import axios from 'axios';
 import { polygon } from '@turf/helpers';
-import { ICONS } from '../functions/constants';
+import { ICONS } from './constants';
 import { GOOGLE_PLACES_ACCESS_TOKEN } from '@env';
 
 export const fetchPOIs = async (latitude, longitude, setPois) => {

@@ -1,9 +1,11 @@
 //maps.tsx
 
 import React, { useEffect, useState } from 'react';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { Button, Modal, TextInput, Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
-import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
+import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
+import { MapView } from '@rnmapbox/maps';
 import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
 import { Feature } from 'geojson';
@@ -48,12 +50,18 @@ const Maps: React.FC = () => {
     };
     const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number }[]>([]);
         //Marker State
-        const [selectedMarker, setSelectedMarker] = useState<{
-          id: string;
-          title: string;
-          description: string;
-          imageUri: string | null;
-        } | null>(null);
+    const [selectedMarker, setSelectedMarker] = useState<{
+      id: string;
+      title: string;
+      description: string;
+      imageUri: string | null;
+    } | null>(null);
+    type RouteParams = {
+        fogOpacity?: number;
+    };
+
+    const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
+    const { fogOpacity = 0.8 } = route.params || {}; // Default to 0.8 if no value is passed
 
 
     // Function to chomp away at fog polygon
@@ -70,7 +78,7 @@ const Maps: React.FC = () => {
   
       if (newFogLayer) {
         setStaticPolygon(newFogLayer);
-        console.log('Updated fog layer!!!!');
+        // console.log('Updated fog layer!!!!');
   
       } else {
         console.warn("Difference operation returned null, check polygon validity!");
@@ -148,17 +156,8 @@ const Maps: React.FC = () => {
       if (userLocation) {
           fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
       }
+      // console.log(pois);
     }, [userLocation]);
-
-    
-
-
-
-
-
-
-
-
 
     // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
@@ -230,6 +229,7 @@ const Maps: React.FC = () => {
 
 
 
+
     if (!userLocation) {
     return <View style={{ flex: 1 }} />; // Return blank until location is fetched
     }
@@ -270,7 +270,7 @@ const Maps: React.FC = () => {
                         <TouchableOpacity style={styles.markerViewContainer}>
                             <Image
                                 source={getPoiIcon(poi.types)} // function to get diff icons 
-                                style={{ width: 40, height: 40 }}
+                                style={{ width: 30, height: 30 }}
                             />
                             <View style={styles.markerTitleContainer}>
                                 <Text style={styles.markerTitle}>{poi.name}</Text>
@@ -284,7 +284,7 @@ const Maps: React.FC = () => {
                 sourceID="feature"
                 id="reqId"
                 style={{
-                    lineColor: '#ffffff',
+                    lineColor: '#504ad4',
                     lineWidth: 5,
                 }}
                 />
@@ -293,7 +293,7 @@ const Maps: React.FC = () => {
                 id="feat"
                 style={{
                     fillColor: '#000000', // Color of the filled area
-                    fillOpacity: 0.8,
+                    fillOpacity: fogOpacity,
                 }}
                 />
             </ShapeSource>
