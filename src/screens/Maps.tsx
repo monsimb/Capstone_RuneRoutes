@@ -4,28 +4,23 @@ import React, { useEffect, useState } from 'react';
 import { Button, Modal, TextInput, Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
 import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
-import { booleanTouches, booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
+import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
-import { feature, polygon, point } from "@turf/helpers";
-import { area } from "@turf/area";
-import { styles } from '../styles/Map';
-import { Feature, Point, GeoJsonProperties } from 'geojson';
-import DefaultPin from '../assets/defaultPin.png';
-import StoreIcon from '../assets/icon/shopIcon.png';
-import ParkIcon from '../assets/icon/parkIcon.png';
+import { Feature } from 'geojson';
+import { point } from "@turf/helpers";
+// import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
 
-import axios from 'axios'; // Import Axios
+import { styles } from '../styles/Map';
+import DefaultPin from '../assets/defaultPin.png';
+
+import { fetchPOIs, getPoiIcon, createPolygon } from '../functions/MapUtils';
+
+import { MAP_BOX_ACCESS_TOKEN } from '@env';
+import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
 
 
-const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
-
-const GOOGLE_PLACES_API_KEY = "AIzaSyCVeCV1ESGhQLLhWIkGZpjecanTjTMhaXA"; // REPLACE!!!
-
-const CHOMP_DIAMETER = 0.025;           // amount radius increases with movement
-const LOCATION_UPDATE_INTERVAL = 1000;  // 1000 = 1 second interval
-const OFFSET = 0.0005;                  // Increase this to make the polygon larger (OFFSET from the user location)
 
 
 const Maps: React.FC = () => {
@@ -55,81 +50,12 @@ const Maps: React.FC = () => {
     const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number }[]>([]);
 
 
-
-    // Fetch POIs from Google Places API
-    const fetchPOIs = async (latitude: number, longitude: number) => {
-      try {
-          const response = await axios.get(
-              `https://maps.googleapis.com/maps/api/place/nearbysearch/json`,
-              {
-                  params: {
-                      location: `${latitude},${longitude}`,
-                      radius: 1000, // Radius in meters
-                      type: 'point_of_interest',
-                      key: GOOGLE_PLACES_API_KEY,
-                  },
-              }
-          );
-          // console.log(response);
-
-          if (response.data.results) {
-              const fetchedPois = response.data.results.map((poi: any) => ({
-                  id: poi.place_id,
-                  name: poi.name,
-                  latitude: poi.geometry.location.lat,
-                  longitude: poi.geometry.location.lng,
-                  types: poi.types || [],
-              }));
-              setPois(fetchedPois);
-          }
-      } catch (error) {
-          console.error("Error fetching POIs:", error);
-      }
-  };
-  // Function to determine the icon based on POI type
-  const getPoiIcon = (types: string[]) => {
-    console.log(types);
-    if (types.includes('store')) {
-      // console.log('store found');
-      return StoreIcon;
-    } else if (types.includes('park')) {
-      return ParkIcon;
-    }
-    return DefaultPin; // Default icon
-  };
-
     useEffect(() => {
       if (userLocation) {
-          fetchPOIs(userLocation.latitude, userLocation.longitude);
+          fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
       }
     }, [userLocation]);
 
-    // Function to create a polygon around a given location
-    const createPolygon = (longitude: number, latitude: number) => {
-        // Define the OFFSET for the polygon
-        // const OFFSET = 0.0001; // Increase this to make the polygon larger
-
-        // Outer boundary which covers the whole world
-        const outerBoundary = [
-            [-180, -90],
-            [190, -90],
-            [190, 90],
-            [-170, 90],
-            [-180, -90]
-        ];
-
-        // Inner hole. User's 'explored area'
-        const hole = [
-            [longitude - OFFSET, latitude - OFFSET],
-            [longitude + OFFSET, latitude - OFFSET],
-            [longitude + OFFSET, latitude + OFFSET],
-            [longitude - OFFSET, latitude + OFFSET],
-            [longitude - OFFSET, latitude - OFFSET]
-        ];
-
-        const turfPolygon = polygon([outerBoundary, hole]);
-        return turfPolygon;
-        };
     
     // Function to chomp away at fog polygon
     function subtractPoly() {
@@ -390,8 +316,8 @@ const Maps: React.FC = () => {
           >
             <Camera
               defaultSettings={{
-                centerCoordinate: [-77.036086, 38.910233],
-                zoomLevel: 8,
+                centerCoordinate: DEFAULT_MAP_CENTER,
+                zoomLevel: DEFAULT_ZOOM_LEVEL,
               }}
               followUserLocation={true}
               followUserMode={UserTrackingMode.Follow}
