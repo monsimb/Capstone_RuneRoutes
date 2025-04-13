@@ -71,9 +71,9 @@ export const styles = StyleSheet.create({
 //    zIndex: 3,
   },
   BottomPart: {
-    width: 121,   // change the size of the bottom
+    width: 118,   // change the size of the bottom
     height: 135,
-    left: 0,
+    left: 1,
     top: -422,    // change the position of the bottom
 //    zIndex: 1,
   },
