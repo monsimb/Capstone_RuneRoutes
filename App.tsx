@@ -2,15 +2,15 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Maps from './src/screens/Maps.tsx'
-import Friends from './src/screens/Friends.tsx'
-import AuthScreen from './src/screens/Auth.tsx'
+import Maps from './src/screens/Maps.tsx';
+import Friends from './src/screens/Friends.tsx';
+import AuthScreen from './src/screens/Auth.tsx';
 import Profile from './src/screens/Profile.tsx';
 import Setting from './src/screens/Setting.tsx';
 import { Auth0Provider } from 'react-native-auth0';
 import { View, StyleSheet, Settings } from "react-native";
 import Ionicons from 'react-native-vector-icons/FontAwesome6';
-
+import { ProfileProvider } from './src/context/ProfileContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -57,12 +57,14 @@ function App() {
     <Auth0Provider 
       domain={"dev-r3fzkkn3e0cei0co.us.auth0.com"} 
       clientId={"63jqpjQZkZYz91XhIGkxDr401zJX4h3b"}>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Welcome" component={AuthScreen} />
-          <Stack.Screen name="Home" component={MainTabs} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <ProfileProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Welcome" component={AuthScreen} />
+            <Stack.Screen name="Home" component={MainTabs} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ProfileProvider>
     </Auth0Provider>
   );
  }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from '../styles/Profile';
+import { useProfileContext } from '../context/ProfileContext';
 
 const skins = [
   require("../assets/skins/skin1.png"),
@@ -49,21 +50,23 @@ const bottoms = [
   require("../assets/bottoms/bottom6.png"),
 ];
 
-function Profile({ navigation, route }) {
-  const { chompedArea = 0 } = route.params || {}; // Default to 0 if not passed
+function Profile({ navigation }) {
+  // const { chompedArea = 0 } = route.params || {}; // Default to 0 if not passed
   const [currentSkinIndex, setCurrentSkinIndex] = useState(0);
   const [currentHatIndex, setCurrentHatIndex] = useState(0);
   const [currentFaceIndex, setCurrentFaceIndex] = useState(0);
   const [currentTopIndex, setCurrentTopIndex] = useState(0);
   const [currentBottomIndex, setCurrentBottomIndex] = useState(0);
+  const { totalExploredArea } = useProfileContext();
 
 
   // ADD BACKEND (THIS IS TEMPORARY STATS)
   const userStats = {
-    distanceTraveled: chompedArea, 
+    distanceTraveled: totalExploredArea.toFixed(2), 
     poisDiscovered: 4, 
     currentStreak: 7, 
   };
+  console.log('total explored area:', totalExploredArea)
 
 
   const handleNext = (type) => {
@@ -155,7 +158,7 @@ function Profile({ navigation, route }) {
 
       {/* User Stats */}
       <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} km^2</Text>
+        <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} m^2</Text>
         <Text style={styles.statsText}>POIs Discovered: {userStats.poisDiscovered}</Text>
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>

@@ -20,7 +20,7 @@ import { fetchPOIs, getPoiIcon, createPolygon } from '../functions/MapUtils';
 
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
 import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
-
+import { useProfileContext } from '../context/ProfileContext';
 
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
@@ -56,12 +56,12 @@ const Maps: React.FC = () => {
       description: string;
       imageUri: string | null;
     } | null>(null);
-    type RouteParams = {fogOpacity?: number;};
     const [chompedArea, setChompedArea] = useState(0);
-
+    type RouteParams = {fogOpacity?: number;};
     const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
     const { fogOpacity = 0.8 } = route.params || {}; // Default to 0.8 if no value is passed
 
+    const { setTotalExploredArea } = useProfileContext();
 
     // Function to chomp away at fog polygon
     function subtractPoly() {
@@ -73,18 +73,15 @@ const Maps: React.FC = () => {
   
       // Subtract circle from fog polygon
       const fog = staticPolygon;  // starting poly
-      const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
+      const newFogLayer = difference(featureCollection([fog, playerCircle])); // subtract circle from fog
   
       if (newFogLayer) {
-        //  !! currently doest account for the initial square !!
+        //  !! CURRENTLY DOESN'T account for the initial square !!
 
-        const originalFogArea = area(fog);
+        const originalFogArea = area(fog);            // Calculate the area that was already cleared
+        const newFogArea = area(newFogLayer);         // Calculate the area of the new fog polygon
 
-        // Calculate the area of the new fog polygon
-        const newFogArea = area(newFogLayer);
-
-        // Calculate the area that has been chomped
-        const chomped = originalFogArea - newFogArea;
+        const chomped = originalFogArea - newFogArea; // Calculate the area that has been chomped
 
         console.log(`Original fog area: ${originalFogArea} square meters`);
         console.log(`New fog area: ${newFogArea} square meters`);
@@ -92,6 +89,8 @@ const Maps: React.FC = () => {
 
         setChompedArea(chomped); // Update state with the chomped area
         setStaticPolygon(newFogLayer);
+        setTotalExploredArea((prevTotal) => prevTotal + chomped); // Add the chomped area to the total
+
         // console.log('Updated fog layer!!!!');
   
       } else {
