@@ -64,7 +64,8 @@ const hatTopOffsets = [
   -355, // hat8: 130
 ];
 
-function Profile({ navigation }) {
+function Profile({ navigation, route }) {
+  const { chompedArea = 0 } = route.params || {}; // Default to 0 if not passed
   const [currentSkinIndex, setCurrentSkinIndex] = useState(0);
   const [currentHatIndex, setCurrentHatIndex] = useState(0);
   const [currentFaceIndex, setCurrentFaceIndex] = useState(0);
@@ -74,7 +75,7 @@ function Profile({ navigation }) {
 
   // ADD BACKEND (THIS IS TEMPORARY STATS)
   const userStats = {
-    distanceTraveled: 120.5, 
+    distanceTraveled: chompedArea, 
     poisDiscovered: 4, 
     currentStreak: 7, 
   };
@@ -192,7 +193,7 @@ function Profile({ navigation }) {
 
       {/* User Stats */}
       <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} km</Text>
+        <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} km^2</Text>
         <Text style={styles.statsText}>POIs Discovered: {userStats.poisDiscovered}</Text>
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>

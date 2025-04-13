@@ -1,3 +1,10 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json"
+  "extends": "./node_modules/@react-native-community/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-native", // Use "react-native" for React Native projects
+    "strict": true,        // Enable strict type-checking options
+    "esModuleInterop": true, // Ensure compatibility with CommonJS modules
+    "skipLibCheck": true,  // Skip type checking of declaration files for faster builds
+    "resolveJsonModule": true // Allow importing JSON files
+  }
 }
