@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   HatPart: {
-    width: 140,   // change the size of the hat
+    width: 135,   // change the size of the hat
     height: 120,
     padding: 10,
     left: 0,

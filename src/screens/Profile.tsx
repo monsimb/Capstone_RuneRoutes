@@ -24,6 +24,7 @@ const hats = [
   require("../assets/hats/hat6.png"),
   require("../assets/hats/hat7.png"),
   require("../assets/hats/hat8.png"),
+  require("../assets/hats/hat9.png"),
 ];
 
 const faces = [
@@ -58,12 +59,13 @@ const bottoms = [
 const hatTopOffsets = [
   -337, // hat1: 87
   -380, // hat2: 100
-  -320, // hat3: 100
+  -316, // hat3: 100
   -343, // hat4: 98
-  -317, // hat5: 100
-  -334, // hat6: 76
-  -344, // hat7: 100
-  -356, // hat8: 130
+  -316, // hat5: 100
+  -333, // hat6: 76
+  -343, // hat7: 100
+  -355, // hat8: 130
+  -325, // hat9: 100
 ];
 
 function Profile({ navigation, route }) {
