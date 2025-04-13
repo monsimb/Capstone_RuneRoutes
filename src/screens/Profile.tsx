@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, Image, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from '../styles/Profile';
 
@@ -42,8 +44,6 @@ const tops = [
   require("../assets/tops/top5.png"),
   require("../assets/tops/top6.png"),
   require("../assets/tops/top7.png"),
-  require("../assets/tops/top8.png"),
-  require("../assets/tops/top9.png"),
 ];
 
 const bottoms = [
@@ -55,7 +55,18 @@ const bottoms = [
   require("../assets/bottoms/bottom6.png"),
 ];
 
-function Profile({ }) {
+const hatTopOffsets = [
+  -337, // hat1: 87
+  -370, // hat2: 65
+  -300, // hat3: 87
+  -343, // hat4: 98
+  -307, // hat5: 87
+  -330, // hat6: 76
+  -337, // hat7: 87
+  -355, // hat8: 130
+];
+
+function Profile({ navigation }) {
   const [currentSkinIndex, setCurrentSkinIndex] = useState(0);
   const [currentHatIndex, setCurrentHatIndex] = useState(0);
   const [currentFaceIndex, setCurrentFaceIndex] = useState(0);
@@ -111,7 +122,13 @@ function Profile({ }) {
         <TouchableOpacity onPress={() => handlePrevious('hat')} style={styles.buttonHat}>
           <Ionicons name="chevron-back" size={60} color="black" />
         </TouchableOpacity>
-        <Image source={hats[currentHatIndex]} style={styles.HatPart} resizeMode="contain" />
+
+        <Image 
+          source={hats[currentHatIndex]} 
+          style={[styles.HatPart, { top: hatTopOffsets[currentHatIndex] }]} 
+          resizeMode="contain" 
+        />
+        
         <TouchableOpacity onPress={() => handleNext('hat')} style={styles.buttonHat}>
           <Ionicons name="chevron-forward" size={60} color="black" />
         </TouchableOpacity>
@@ -128,24 +145,30 @@ function Profile({ }) {
         </TouchableOpacity>
       </View>
 
-      {/* Top Selector */}
-      <View style={styles.selector}>
-        <TouchableOpacity onPress={() => handlePrevious('top')} style={styles.buttonTop}>
-          <Ionicons name="chevron-back" size={60} color="black" />
-        </TouchableOpacity>
-        <Image source={tops[currentTopIndex]} style={styles.TopPart} resizeMode="contain" />
-        <TouchableOpacity onPress={() => handleNext('top')} style={styles.buttonTop}>
-          <Ionicons name="chevron-forward" size={60} color="black" />
-        </TouchableOpacity>
-      </View>
+      
 
       {/* Bottom Selector */}
       <View style={styles.selector}>
         <TouchableOpacity onPress={() => handlePrevious('bottom')} style={styles.buttonBottom}>
           <Ionicons name="chevron-back" size={60} color="black" />
         </TouchableOpacity>
+
         <Image source={bottoms[currentBottomIndex]} style={styles.BottomPart} resizeMode="contain" />
+        
         <TouchableOpacity onPress={() => handleNext('bottom')} style={styles.buttonBottom}>
+          <Ionicons name="chevron-forward" size={60} color="black" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Top Selector */}
+      <View style={styles.selector}>
+        <TouchableOpacity onPress={() => handlePrevious('top')} style={styles.buttonTop}>
+          <Ionicons name="chevron-back" size={60} color="black" />
+        </TouchableOpacity>
+
+        <Image source={tops[currentTopIndex]} style={styles.TopPart} resizeMode="contain" />
+        
+        <TouchableOpacity onPress={() => handleNext('top')} style={styles.buttonTop}>
           <Ionicons name="chevron-forward" size={60} color="black" />
         </TouchableOpacity>
       </View>
@@ -179,5 +202,4 @@ function Profile({ }) {
     </ScrollView>
   );
 }
-
 export default Profile;
