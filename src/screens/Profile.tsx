@@ -196,7 +196,7 @@ function Profile({ navigation, route }) {
           );
         })}
       </View>
-
+      
       {/* Cape Toggle */}
       <View style={styles.toggleContainer}>
           <Text style={styles.toggleText}>Cape</Text>
@@ -205,6 +205,17 @@ function Profile({ navigation, route }) {
               onValueChange={toggleCape}
               trackColor={{ false: "#767577", true: "#605795" }}
               thumbColor={isCape ? "#ffffff" : "#f4f3f4"} />
+      </View>
+
+      {/* Avatar with Cape */}
+      <View style={styles.selector}>
+        {isCape && (
+          <Image
+            source={require("../assets/cape.png")} // Path to the cape image
+            style={styles.CapePart} // Add a style for the cape
+            resizeMode="contain"
+          />
+        )}
       </View>
 
       {/* User Stats */}

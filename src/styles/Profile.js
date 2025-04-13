@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 20,
-    marginTop: '-140%',
+    marginTop: '-138%',
   },
   toggleText: {
     fontSize: 18,
@@ -51,8 +51,8 @@ export const styles = StyleSheet.create({
   avatarPart: {
     width: 100,
     height: 300,
-    padding: 10,
     top: 50,
+    zIndex: 1,
   },
   avatarContainer: {
     position: 'relative',
@@ -66,6 +66,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     left: 0,
     top: -330,    // change the position of the hat
+    zIndex: 1,
   },
   FacePart: {
     width: 50,    // change the size of the face
@@ -73,17 +74,26 @@ export const styles = StyleSheet.create({
     padding: 10,
     right: 6,
     top: -423,    // change the position of the face
+    zIndex: 2,
   },
   TopPart: {
     width: 100,     // change the size of the top
     height: 165,
     top: -628,    // change the position of the top
+    zIndex: 3,
   },
   BottomPart: {
     width: 118,   // change the size of the bottom
     height: 135,
     left: 1,
     top: -422,    // change the position of the bottom
+    zIndex: 2,
+  },
+  CapePart: {
+    width: 135,
+    height: 285,
+    top: -440,
+    zIndex: 0, // Place it behind the avatar
   },
   skinButton: {
     width: 50,
