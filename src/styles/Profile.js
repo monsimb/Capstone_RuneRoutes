@@ -6,22 +6,21 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-space-between',
     alignItems: "center",
     backgroundColor: 'rgba(208,188,180,1)',
-    padding: 20,
   },
   title: {
     fontSize: 36,
     fontWeight: "bold",
-    color: 'rgba(32, 0, 36, 0.75)',
-    marginTop: 10,
+    color: '#605795',
+    marginTop: 30,
     marginBottom: 30,
   },
   statsContainer: {
     position: 'absolute',
-    marginTop: '163%',
+    marginTop: '150%',
     alignItems: 'center',
   },
   statsText: {
-    fontSize: 22,
+    fontSize: 18,
     color: 'rgba(0, 0, 0, 0.75)',
     marginVertical: 5,
   },
@@ -35,13 +34,25 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     position: 'absolute',
-    bottom: '25%',
+    marginTop: '125%',
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 20,
+    marginTop: '-138%',
+  },
+  toggleText: {
+    fontSize: 18,
+    marginRight: 10,
+    color: "black",
+    zIndex: 3,
   },
   avatarPart: {
     width: 100,
     height: 300,
-    padding: 10,
     top: 50,
+    zIndex: 1,
   },
   avatarContainer: {
     position: 'relative',
@@ -55,31 +66,38 @@ export const styles = StyleSheet.create({
     padding: 10,
     left: 0,
     top: -330,    // change the position of the hat
-    zIndex: 0,
+    zIndex: 1,
   },
   FacePart: {
     width: 50,    // change the size of the face
     height: 50,
     padding: 10,
-    left: 0,
-    top: -422,    // change the position of the face
+    right: 6,
+    top: -423,    // change the position of the face
+    zIndex: 2,
   },
   TopPart: {
     width: 100,     // change the size of the top
     height: 165,
     top: -628,    // change the position of the top
-//    zIndex: 3,
+    zIndex: 3,
   },
   BottomPart: {
     width: 118,   // change the size of the bottom
     height: 135,
     left: 1,
     top: -422,    // change the position of the bottom
-//    zIndex: 1,
+    zIndex: 2,
+  },
+  CapePart: {
+    width: 135,
+    height: 285,
+    top: -440,
+    zIndex: 0, // Place it behind the avatar
   },
   skinButton: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     marginHorizontal: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -88,17 +106,17 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
   selectedSkinButton: {
-    borderColor: 'purple',
+    borderColor: '#605795',
   },
   skinPreview: {
     width: 60,
     height: 60,
   },
   buttonHat: {
-    top: -340, // change the position of the hat button
+    top: -360, // change the position of the hat button
   },
   buttonFace: {
-    top: -420, // change the position of the face button
+    top: -430, // change the position of the face button
     padding: 45,
   },
   buttonTop: {
@@ -107,6 +125,6 @@ export const styles = StyleSheet.create({
   },
   buttonBottom: {
     top: -390, // change the position of the bottom button
-    padding: 15,
+    padding: 10,
   },
 });

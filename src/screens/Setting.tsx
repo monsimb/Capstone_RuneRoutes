@@ -77,7 +77,7 @@ return (
 
       {/* Image placeholder */}
       <View style={styles.imageContainer}>
-        <Image style={styles.image} source={require('../assets/icon/AppFaceLogo3.png')} resizeMode="contain" />
+        <Image style={styles.image} source={require('../assets/icon/logo_1.png')} resizeMode="contain" />
       </View>
 
       {/* User information */}
@@ -90,7 +90,7 @@ return (
             <Switch
                 value={isDriveMode}
                 onValueChange={toggleDriveMode}
-                trackColor={{ false: "#767577", true: "#fcba03" }}
+                trackColor={{ false: "#767577", true: "#f3d88b" }}
                 thumbColor={isDriveMode ? "#ffffff" : "#f4f3f4"} />
         </View>
     
