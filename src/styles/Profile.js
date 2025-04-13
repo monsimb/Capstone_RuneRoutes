@@ -71,10 +71,10 @@ export const styles = StyleSheet.create({
 //    zIndex: 3,
   },
   BottomPart: {
-    width: 118,   // change the size of the bottom
+    width: 121,   // change the size of the bottom
     height: 135,
     left: 0,
-    top: -404,    // change the position of the bottom
+    top: -422,    // change the position of the bottom
 //    zIndex: 1,
   },
   skinButton: {
