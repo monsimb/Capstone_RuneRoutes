@@ -63,23 +63,19 @@ export const styles = StyleSheet.create({
     padding: 10,
     left: 0,
     top: -422,    // change the position of the face
-    zIndex: 1,
   },
   TopPart: {
-    width: 98,     // change the size of the top
-    height: 110,
-    padding: 10,
-    left: 0,
-    top: -600,    // change the position of the top
-    zIndex: 3,
+    width: 100,     // change the size of the top
+    height: 165,
+    top: -628,    // change the position of the top
+//    zIndex: 3,
   },
   BottomPart: {
-    width: 86,   // change the size of the bottom
-    height: 100,
-    padding: 10,
-    left: -0,
-    top: -395,    // change the position of the bottom
-    zIndex: 2,
+    width: 118,   // change the size of the bottom
+    height: 135,
+    left: 0,
+    top: -404,    // change the position of the bottom
+//    zIndex: 1,
   },
   skinButton: {
     width: 60,
@@ -106,7 +102,7 @@ export const styles = StyleSheet.create({
     padding: 45,
   },
   buttonTop: {
-    top: -610, // change the position of the top button
+    top: -655, // change the position of the top button
     padding: 15,
   },
   buttonBottom: {

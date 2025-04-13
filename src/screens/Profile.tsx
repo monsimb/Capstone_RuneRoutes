@@ -35,6 +35,7 @@ const faces = [
 ];
 
 const tops = [
+  require("../assets/tops/top00.png"),
   require("../assets/tops/top1.png"),
   require("../assets/tops/top2.png"),
   require("../assets/tops/top3.png"),
@@ -42,6 +43,7 @@ const tops = [
   require("../assets/tops/top5.png"),
   require("../assets/tops/top6.png"),
   require("../assets/tops/top7.png"),
+  require("../assets/tops/top9.png"),
 ];
 
 const bottoms = [
