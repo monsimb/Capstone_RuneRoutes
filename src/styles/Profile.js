@@ -49,31 +49,32 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   HatPart: {
-    width: 140,
+    width: 140,   // change the size of the hat
     height: 120,
     padding: 10,
     left: 0,
-    top: -330,
+    top: -330,    // change the position of the hat
   },
   FacePart: {
-    width: 50,
+    width: 50,    // change the size of the face
     height: 50,
     padding: 10,
-    top: -422,
+    left: 0,
+    top: -422,    // change the position of the face
   },
   TopPart: {
-    width: 110,
+    width: 98,     // change the size of the top
     height: 110,
     padding: 10,
     left: 0,
-    top: -475,
+    top: -600,    // change the position of the top
   },
   BottomPart: {
-    width: 100,
+    width: 86,   // change the size of the bottom
     height: 100,
     padding: 10,
     left: -0,
-    top: -520,
+    top: -395,    // change the position of the bottom
   },
   skinButton: {
     width: 60,
@@ -100,11 +101,11 @@ export const styles = StyleSheet.create({
     padding: 45,
   },
   buttonTop: {
-    top: -490, // change the position of the hat button
+    top: -610, // change the position of the top button
     padding: 15,
   },
   buttonBottom: {
-    top: -520, // change the position of the hat button
+    top: -390, // change the position of the bottom button
     padding: 15,
   },
 });
