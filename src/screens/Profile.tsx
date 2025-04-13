@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView, Switch } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from '../styles/Profile';
 
@@ -25,6 +25,7 @@ const hats = [
   require("../assets/hats/hat7.png"),
   require("../assets/hats/hat8.png"),
   require("../assets/hats/hat9.png"),
+  null,
 ];
 
 const faces = [
@@ -113,8 +114,12 @@ function Profile({ navigation, route }) {
     }
   };
 
+  const [isCape, setCape] = useState(false);
+  const toggleCape = () => setCape((prevState) => !prevState);
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    // <ScrollView contentContainerStyle={{ flexGrow: 1 }}>     // not working rn
+    <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
       <View style={styles.selector}>
         <Image source={skins[currentSkinIndex]} style={styles.avatarPart} resizeMode="contain" />
@@ -187,10 +192,19 @@ function Profile({ navigation, route }) {
                 currentSkinIndex === index && styles.selectedSkinButton,
               ]}
             >
-              {/* <Image source={skin} style={styles.skinPreview} resizeMode="contain" /> */}
             </TouchableOpacity>
           );
         })}
+      </View>
+
+      {/* Cape Toggle */}
+      <View style={styles.toggleContainer}>
+          <Text style={styles.toggleText}>Cape</Text>
+          <Switch
+              value={isCape}
+              onValueChange={toggleCape}
+              trackColor={{ false: "#767577", true: "#fcba03" }}
+              thumbColor={isCape ? "#ffffff" : "#f4f3f4"} />
       </View>
 
       {/* User Stats */}
@@ -200,7 +214,8 @@ function Profile({ navigation, route }) {
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>
 
-    </ScrollView>
+    </View>
+    // </ScrollView>
   );
 }
 export default Profile;
