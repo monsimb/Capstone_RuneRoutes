@@ -63,7 +63,7 @@ const hatTopOffsets = [
   -317, // hat5: 100
   -334, // hat6: 76
   -344, // hat7: 100
-  -355, // hat8: 130
+  -356, // hat8: 130
 ];
 
 function Profile({ navigation, route }) {
