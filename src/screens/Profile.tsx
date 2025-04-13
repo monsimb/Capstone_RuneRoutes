@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { Text, View, Image, TouchableOpacity, ScrollView } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { styles } from '../styles/Profile';
 
 const skins = [
   require("../assets/skins/skin1.png"),
   require("../assets/skins/skin2.png"),
   require("../assets/skins/skin3.png"),
 ];
+
+const colors = [
+  '#F5CBA7', // Light skin tone
+  '#D2B48C', // Tan skin tone
+  '#8D5524', // Dark skin tone
+]
 
 const hats = [
   require("../assets/hats/hat1.png"),
@@ -48,7 +55,7 @@ const bottoms = [
   require("../assets/bottoms/bottom6.png"),
 ];
 
-function Profile({ navigation }) {
+function Profile({ }) {
   const [currentSkinIndex, setCurrentSkinIndex] = useState(0);
   const [currentHatIndex, setCurrentHatIndex] = useState(0);
   const [currentFaceIndex, setCurrentFaceIndex] = useState(0);
@@ -93,18 +100,10 @@ function Profile({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Profile</Text>
-
-      {/* Skin Selector */}
       <View style={styles.selector}>
-        <TouchableOpacity onPress={() => handlePrevious('skin')} style={styles.buttonSkin}>
-          <Ionicons name="chevron-back" size={80} color="black" />
-        </TouchableOpacity>
         <Image source={skins[currentSkinIndex]} style={styles.avatarPart} resizeMode="contain" />
-        <TouchableOpacity onPress={() => handleNext('skin')} style={styles.buttonSkin}>
-          <Ionicons name="chevron-forward" size={80} color="black" />
-        </TouchableOpacity>
       </View>
 
       {/* Hat Selector */}
@@ -151,6 +150,25 @@ function Profile({ navigation }) {
         </TouchableOpacity>
       </View>
 
+      {/* Skin Selector */}
+      <View style={styles.skinSelector}>
+        {skins.map((skin, index) => {
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setCurrentSkinIndex(index)}
+              style={[
+                styles.skinButton,
+                { backgroundColor: colors[index] },
+                currentSkinIndex === index && styles.selectedSkinButton,
+              ]}
+            >
+              {/* <Image source={skin} style={styles.skinPreview} resizeMode="contain" /> */}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
       {/* User Stats */}
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} km</Text>
@@ -158,104 +176,8 @@ function Profile({ navigation }) {
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>
 
-    </View>
+    </ScrollView>
   );
 }
 
 export default Profile;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: "center",
-    backgroundColor: 'rgba(208,188,180,1)',
-    padding: 20,
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: "bold",
-    color: 'rgba(32, 0, 36, 0.75)',
-    marginBottom: 20,
-  },
-  statsContainer: {
-    position: 'absolute',
-    bottom: 100,
-    alignItems: 'center',
-  },
-  statsText: {
-    fontSize: 22,
-    color: 'rgba(0, 0, 0, 0.75)',
-    marginVertical: 5,
-  },
-  selector: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  skinSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-    position: 'absolute',
-    bottom: 20,
-  },
-  avatarPart: {
-    width: 100,
-    height: 300,
-    padding: 10,
-    top: 50,
-  },
-  avatarContainer: {
-    position: 'relative',
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-  },
-  HatPart: {
-    width: 140,
-    height: 120,
-    padding: 10,
-    left: 0,
-    top: -330,
-  },
-  FacePart: {
-    width: 50,
-    height: 50,
-    padding: 10,
-    left: 0,
-    top: -422,
-  },
-  TopPart: {
-    width: 110,
-    height: 110,
-    padding: 10,
-    left: 0,
-    top: -475,
-  },
-  BottomPart: {
-    width: 100,
-    height: 100,
-    padding: 10,
-    left: -0,
-    top: -520,
-  },
-  buttonSkin: {
-    top: 250,  // change the position of the skin button
-  },
-  buttonHat: {
-    top: -340, // change the position of the hat button
-  },
-  buttonFace: {
-    top: -420, // change the position of the face button
-    padding: 45,
-  },
-  buttonTop: {
-    top: -490, // change the position of the hat button
-    padding: 15,
-  },
-  buttonBottom: {
-    top: -520, // change the position of the hat button
-    padding: 15,
-  },
-});
