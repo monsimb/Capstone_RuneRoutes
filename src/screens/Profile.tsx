@@ -55,12 +55,12 @@ const bottoms = [
 
 const hatTopOffsets = [
   -337, // hat1: 87
-  -370, // hat2: 65
-  -300, // hat3: 87
+  -380, // hat2: 100
+  -320, // hat3: 100
   -343, // hat4: 98
-  -307, // hat5: 87
-  -330, // hat6: 76
-  -337, // hat7: 87
+  -317, // hat5: 100
+  -334, // hat6: 76
+  -344, // hat7: 100
   -355, // hat8: 130
 ];
 
@@ -142,9 +142,7 @@ function Profile({ navigation, route }) {
         <TouchableOpacity onPress={() => handleNext('face')} style={styles.buttonFace}>
           <Ionicons name="chevron-forward" size={60} color="black" />
         </TouchableOpacity>
-      </View>
-
-      
+      </View>      
 
       {/* Bottom Selector */}
       <View style={styles.selector}>

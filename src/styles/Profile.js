@@ -13,10 +13,11 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     color: 'rgba(32, 0, 36, 0.75)',
     marginTop: 10,
+    marginBottom: 30,
   },
   statsContainer: {
     position: 'absolute',
-    marginTop: '155%',
+    marginTop: '163%',
     alignItems: 'center',
   },
   statsText: {
@@ -34,7 +35,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     position: 'absolute',
-    bottom: '29%',
+    bottom: '25%',
   },
   avatarPart: {
     width: 100,
@@ -54,6 +55,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     left: 0,
     top: -330,    // change the position of the hat
+    zIndex: 0,
   },
   FacePart: {
     width: 50,    // change the size of the face
@@ -61,6 +63,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     left: 0,
     top: -422,    // change the position of the face
+    zIndex: 1,
   },
   TopPart: {
     width: 98,     // change the size of the top
@@ -68,6 +71,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     left: 0,
     top: -600,    // change the position of the top
+    zIndex: 3,
   },
   BottomPart: {
     width: 86,   // change the size of the bottom
@@ -75,6 +79,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     left: -0,
     top: -395,    // change the position of the bottom
+    zIndex: 2,
   },
   skinButton: {
     width: 60,
