@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -35,8 +35,6 @@ const tops = [
   require("../assets/tops/top5.png"),
   require("../assets/tops/top6.png"),
   require("../assets/tops/top7.png"),
-  require("../assets/tops/top8.png"),
-  require("../assets/tops/top9.png"),
 ];
 
 const bottoms = [
@@ -46,6 +44,17 @@ const bottoms = [
   require("../assets/bottoms/bottom4.png"),
   require("../assets/bottoms/bottom5.png"),
   require("../assets/bottoms/bottom6.png"),
+];
+
+const hatTopOffsets = [
+  -337, // hat1: 87
+  -370, // hat2: 65
+  -300, // hat3: 87
+  -343, // hat4: 98
+  -307, // hat5: 87
+  -330, // hat6: 76
+  -337, // hat7: 87
+  -355, // hat8: 130
 ];
 
 function Profile({ navigation }) {
@@ -112,7 +121,13 @@ function Profile({ navigation }) {
         <TouchableOpacity onPress={() => handlePrevious('hat')} style={styles.buttonHat}>
           <Ionicons name="chevron-back" size={60} color="black" />
         </TouchableOpacity>
-        <Image source={hats[currentHatIndex]} style={styles.HatPart} resizeMode="contain" />
+
+        <Image 
+          source={hats[currentHatIndex]} 
+          style={[styles.HatPart, { top: hatTopOffsets[currentHatIndex] }]} 
+          resizeMode="contain" 
+        />
+        
         <TouchableOpacity onPress={() => handleNext('hat')} style={styles.buttonHat}>
           <Ionicons name="chevron-forward" size={60} color="black" />
         </TouchableOpacity>
@@ -129,24 +144,30 @@ function Profile({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Top Selector */}
-      <View style={styles.selector}>
-        <TouchableOpacity onPress={() => handlePrevious('top')} style={styles.buttonTop}>
-          <Ionicons name="chevron-back" size={60} color="black" />
-        </TouchableOpacity>
-        <Image source={tops[currentTopIndex]} style={styles.TopPart} resizeMode="contain" />
-        <TouchableOpacity onPress={() => handleNext('top')} style={styles.buttonTop}>
-          <Ionicons name="chevron-forward" size={60} color="black" />
-        </TouchableOpacity>
-      </View>
+      
 
       {/* Bottom Selector */}
       <View style={styles.selector}>
         <TouchableOpacity onPress={() => handlePrevious('bottom')} style={styles.buttonBottom}>
           <Ionicons name="chevron-back" size={60} color="black" />
         </TouchableOpacity>
+
         <Image source={bottoms[currentBottomIndex]} style={styles.BottomPart} resizeMode="contain" />
+        
         <TouchableOpacity onPress={() => handleNext('bottom')} style={styles.buttonBottom}>
+          <Ionicons name="chevron-forward" size={60} color="black" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Top Selector */}
+      <View style={styles.selector}>
+        <TouchableOpacity onPress={() => handlePrevious('top')} style={styles.buttonTop}>
+          <Ionicons name="chevron-back" size={60} color="black" />
+        </TouchableOpacity>
+
+        <Image source={tops[currentTopIndex]} style={styles.TopPart} resizeMode="contain" />
+        
+        <TouchableOpacity onPress={() => handleNext('top')} style={styles.buttonTop}>
           <Ionicons name="chevron-forward" size={60} color="black" />
         </TouchableOpacity>
       </View>
@@ -184,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statsText: {
-    fontSize: 22,
+    fontSize: 22,   // stats text size
     color: 'rgba(0, 0, 0, 0.75)',
     marginVertical: 5,
   },
@@ -213,32 +234,32 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   HatPart: {
-    width: 140,
+    width: 140,   // change the size of the hat
     height: 120,
     padding: 10,
     left: 0,
-    top: -330,
+    top: -330,    // change the position of the hat
   },
   FacePart: {
-    width: 50,
+    width: 50,    // change the size of the face
     height: 50,
     padding: 10,
     left: 0,
-    top: -422,
+    top: -422,    // change the position of the face
   },
   TopPart: {
-    width: 110,
+    width: 98,     // change the size of the top
     height: 110,
     padding: 10,
     left: 0,
-    top: -475,
+    top: -600,    // change the position of the top
   },
   BottomPart: {
-    width: 100,
+    width: 86,   // change the size of the bottom
     height: 100,
     padding: 10,
     left: -0,
-    top: -520,
+    top: -395,    // change the position of the bottom
   },
   buttonSkin: {
     top: 250,  // change the position of the skin button
@@ -251,11 +272,11 @@ const styles = StyleSheet.create({
     padding: 45,
   },
   buttonTop: {
-    top: -490, // change the position of the hat button
+    top: -610, // change the position of the top button
     padding: 15,
   },
   buttonBottom: {
-    top: -520, // change the position of the hat button
+    top: -390, // change the position of the bottom button
     padding: 15,
   },
 });
