@@ -10,13 +10,13 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: "bold",
-    color: 'rgba(32, 0, 36, 0.75)',
+    color: '#605795',
     marginTop: 30,
     marginBottom: 30,
   },
   statsContainer: {
     position: 'absolute',
-    marginTop: '148%',
+    marginTop: '150%',
     alignItems: 'center',
   },
   statsText: {
@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 20,
-    marginTop: '135%',
+    marginTop: '-140%',
   },
   toggleText: {
     fontSize: 18,
@@ -96,7 +96,7 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
   selectedSkinButton: {
-    borderColor: 'purple',
+    borderColor: '#605795',
   },
   skinPreview: {
     width: 60,

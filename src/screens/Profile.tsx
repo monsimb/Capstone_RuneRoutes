@@ -203,7 +203,7 @@ function Profile({ navigation, route }) {
           <Switch
               value={isCape}
               onValueChange={toggleCape}
-              trackColor={{ false: "#767577", true: "#fcba03" }}
+              trackColor={{ false: "#767577", true: "#605795" }}
               thumbColor={isCape ? "#ffffff" : "#f4f3f4"} />
       </View>
 
