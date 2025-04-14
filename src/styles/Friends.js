@@ -14,11 +14,12 @@ export const styles = StyleSheet.create({
     color: "white",
     justifyContent: "top",
     alignItems: "center",
-    marginBottom: "8%",
+    marginBottom: "5%",
   },
   listContainer: {
     width: "100%",
     marginBottom: 20,
+    alignItems: 'center',
   },
   friendCard: {
     flexDirection: "row",
@@ -27,7 +28,7 @@ export const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 15,
     marginBottom: 12,
-    height: 70,
+    height: 110,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -35,8 +36,8 @@ export const styles = StyleSheet.create({
     elevation: 3,
   },
   friendIcon: {
-    width: 70,
-    height: 70,
+    width: 50,
+    height: 90,
     borderRadius: 1,
     marginRight: 10,
   },
