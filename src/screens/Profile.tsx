@@ -4,71 +4,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from '../styles/Profile';
 import { useProfileContext } from '../context/ProfileContext';
 
-const skins = [
-  require("../assets/skins/skin1.png"),
-  require("../assets/skins/skin2.png"),
-  require("../assets/skins/skin3.png"),
-];
+import { skins, colors, hats, faces, tops, bottoms, hatTopOffsets } from '../functions/constants';
 
-const colors = [
-  '#F5CBA7', // Light skin tone
-  '#D2B48C', // Tan skin tone
-  '#8D5524', // Dark skin tone
-]
-
-const hats = [
-  require("../assets/hats/hat1.png"),
-  require("../assets/hats/hat2.png"),
-  require("../assets/hats/hat3.png"),
-  require("../assets/hats/hat4.png"),
-  require("../assets/hats/hat5.png"),
-  require("../assets/hats/hat6.png"),
-  require("../assets/hats/hat7.png"),
-  require("../assets/hats/hat8.png"),
-  require("../assets/hats/hat9.png"),
-  null,
-];
-
-const faces = [
-  require("../assets/faces/face1.png"),
-  require("../assets/faces/face2.png"),
-  require("../assets/faces/face3.png"),
-  require("../assets/faces/face4.png"),
-  require("../assets/faces/face5.png"),
-];
-
-const tops = [
-  require("../assets/tops/top00.png"),
-  require("../assets/tops/top1.png"),
-  require("../assets/tops/top2.png"),
-  require("../assets/tops/top3.png"),
-  require("../assets/tops/top4.png"), 
-  require("../assets/tops/top5.png"),
-  require("../assets/tops/top6.png"),
-  require("../assets/tops/top7.png"),
-  require("../assets/tops/top9.png"),
-];
-
-const bottoms = [
-  require("../assets/bottoms/bottom1.png"),
-  require("../assets/bottoms/bottom2.png"),
-  require("../assets/bottoms/bottom3.png"),
-  require("../assets/bottoms/bottom4.png"),
-  require("../assets/bottoms/bottom5.png"),
-  require("../assets/bottoms/bottom6.png"),
-];
-
-const hatTopOffsets = [
-  -337, // hat1: 87
-  -380, // hat2: 100
-  -316, // hat3: 100
-  -343, // hat4: 98
-  -316, // hat5: 100
-  -333, // hat6: 76
-  -343, // hat7: 100
-  -355, // hat8: 130
-  -325, // hat9: 100
-];
 
 function Profile({ navigation }) {
   // const { chompedArea = 0 } = route.params || {}; // Default to 0 if not passed
