@@ -11,8 +11,9 @@ export const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: "bold",
     color: '#605795',
-    marginTop: 30,
-    marginBottom: 30,
+    justifyContent: "top",
+    marginTop: '6%',
+    marginBottom: "8%",
   },
   statsContainer: {
     position: 'absolute',
