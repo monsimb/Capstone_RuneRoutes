@@ -21,30 +21,28 @@ function FriendsList({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Title */}
-      <Text style={styles.title}>Friends List</Text>
-
-      {/* Friends List */}
-      <ScrollView style={styles.listContainer}>
+      <ScrollView contentContainerStyle={styles.listContainer}>
+        {/* Title */}
+          <Text style={styles.title}>Friends List</Text>
 
         {friendsData.map((friend) => (
           <View key={friend.id} style={styles.friendCard}>
 
-            <Image source={friend.icon} style={styles.friendIcon} />
+            <Image source={friend.icon} style={styles.friendIcon} resizeMode="center"/>
             <View style={styles.friendInfo}>
 
               <Text style={styles.friendName}>{friend.name}</Text>
               <Text style={styles.friendMiles}>{friend.milesSquared} mi² explored</Text>
-            
+
             </View>
           </View>
         ))}
-      </ScrollView>
 
-      {/* Add Friend Button */}
+        {/* Add Friend Button */}
       <TouchableOpacity style={styles.addButton} onPress={addFriend}>
         <Text style={styles.buttonText}>Add Friend</Text>
       </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 }
