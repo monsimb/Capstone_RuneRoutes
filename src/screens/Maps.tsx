@@ -22,6 +22,7 @@ import { MAP_BOX_ACCESS_TOKEN } from '@env';
 import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
 import { useProfileContext } from '../context/ProfileContext';
 
+
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
 

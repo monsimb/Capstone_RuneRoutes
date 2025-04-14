@@ -32,6 +32,7 @@
     "react-native-safe-area-context": "^4.14.0",
     "react-native-screens": "^4.3.0",
     "react-native-vector-icons": "^10.2.0",
+    "react-native-view-shot": "^4.0.3",
     "turf": "^3.0.14"
   },
   "devDependencies": {
