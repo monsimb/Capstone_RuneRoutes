@@ -136,4 +136,15 @@ export const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
     },
+    recenterButtonContainer: {
+      position: 'absolute',
+      bottom: 15,
+      right: 15,
+    },
+    recenterButton: {
+      backgroundColor: '#ffecb5',
+      opacity: 0.9,
+      padding: 3,
+      elevation: 5,
+    }
   });
