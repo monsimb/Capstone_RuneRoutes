@@ -63,7 +63,7 @@ const Maps: React.FC = () => {
     const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
     const { fogOpacity = 0.8 } = route.params || {}; // Default to 0.8 if no value is passed
     const { setTotalExploredArea } = useProfileContext();
-    const [recenter, setRecenter] = useState(true);
+    const [recenter, setRecenter] = useState(false);
     const cameraRef = useRef<Camera>(null);
     const recenterMap = () => {
       setRecenter(true);
@@ -185,7 +185,7 @@ const Maps: React.FC = () => {
 
     useEffect(() => {
       if (userLocation) {
-          fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
+          // fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
       }
     // }, []); // only on startup for now
     }, [userLocation]);
