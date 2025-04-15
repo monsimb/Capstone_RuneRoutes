@@ -59,7 +59,52 @@ function Profile({ navigation }) {
   const { getCredentials, user } = useAuth0();
   const userId = user?.sub;
 
-  
+  useEffect(() => { 
+    const fetchProfile = async () => {
+      try {
+        const creds = await getCredentials();
+        const token = creds?.accessToken;
+        if(!token || !user?.sub) {
+          console.warn("Missing access token or user ID");
+          return;
+        }
+
+        const response = await fetch(`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${user.sub}`, {
+          method: "GET",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if(!response.ok) {
+          const errorText = await response.text();
+          console.warn(`Server error ${response.status}:`, errorText);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Profile data fetched:", data);
+        setProfileData(data);
+
+        // If avatarSelections exist, update the local indices to match
+        if (data.avatarSelections && Array.isArray(data.avatarSelections)) {
+          setCurrentSkinIndex(data.avatarSelections[0] ?? 0);
+          setCurrentHatIndex(data.avatarSelections[1] ?? 0);
+          setCurrentFaceIndex(data.avatarSelections[2] ?? 0);
+          setCurrentTopIndex(data.avatarSelections[3] ?? 0);
+          setCurrentBottomIndex(data.avatarSelections[4] ?? 0);
+        }
+
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
+    };
+
+    if(user && user.sub) {
+      fetchProfile();
+    }
+  }, [user, userId, getCredentials]);
 
   const updateAvatar = async (userId, avatarSelections) => {
     try {
@@ -128,42 +173,7 @@ function Profile({ navigation }) {
     }
   };
 
-  useEffect(() => { 
-    const fetchProfile = async () => {
-      try {
-        const creds = await getCredentials();
-        const token = creds?.accessToken;
-        if(!token || !user?.sub) {
-          console.warn("Missing access token or user ID");
-          return;
-        }
-
-        const response = await fetch(`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${user.sub}`, {
-          method: "GET",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
-
-        if(!response.ok) {
-          const errorText = await response.text();
-          console.warn(`Server error ${response.status}:`, errorText);
-          return;
-        }
-
-        const data = await response.json();
-        console.log("Profile data fetched:", data);
-        setProfileData(data);
-      } catch (err) {
-        console.error("Error fetching profile:", err);
-      }
-    };
-
-    if(user && user.sub) {
-      fetchProfile();
-    }
-  }, [user]);
+  
 
   if (!profileData) {
     return (

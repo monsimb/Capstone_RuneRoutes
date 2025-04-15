@@ -16,7 +16,7 @@ router.get('/protected', checkJwt, (req, res) => {
 });
 
 // Get userId for getting profile
-router.get('users/:userId', checkJwt, async (req, res) => {
+router.get('/users/:userId', checkJwt, async (req, res) => {
   try {
     const { userId } = req.params;
     const userProfile = await User.findOne({ userId });
