@@ -79,6 +79,7 @@ function Profile({ navigation }) {
       const data = await response.json();
       
       if (!response.ok) {
+        console.log("Squiggle doo");
         throw new Error(`Server error: ${response.status}: ${JSON.stringify(data)}`);
       }
       console.log("Avatar updated: ", data);
