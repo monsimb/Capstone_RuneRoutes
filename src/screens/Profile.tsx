@@ -62,7 +62,6 @@ function Profile({ navigation }) {
     try {
       const credentials = await getCredentials();
       const token = credentials?.accessToken;
-      console.log("Token in addUserToDB: ", token);
 
       const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/auth/update-avatar", {
         method: "POST",
@@ -77,9 +76,9 @@ function Profile({ navigation }) {
       });
       
       const data = await response.json();
-      
+      console.log(data);
+      console.log("Schmeh");
       if (!response.ok) {
-        console.log("Squiggle doo");
         throw new Error(`Server error: ${response.status}: ${JSON.stringify(data)}`);
       }
       console.log("Avatar updated: ", data);
@@ -192,10 +191,8 @@ function Profile({ navigation }) {
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>
 
-      <View>
-        <TouchableOpacity style={styles.changeMe} onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])}>
-        <Text style={styles.changeMeText}>Save Profile</Text>
-        </TouchableOpacity>
+      <View style={styles.changeMeContainer}>
+        <Button title="Save Profile" onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])} /> 
       </View>
     </View>
   );
@@ -297,15 +294,9 @@ const styles = StyleSheet.create({
     top: -520, // change the position of the hat button
     padding: 15,
   },
-  changeMe: {
-    color:'rgba(0,0,0,0)',
-    width: 100,
-    height: 100,
-    padding: 10,
+  changeMeContainer: {
+    position: 'absolute',
+    bottom: 30,
+    alignItems: 'center',
   },
-  changeMeText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  }
 });

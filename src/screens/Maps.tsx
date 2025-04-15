@@ -311,7 +311,7 @@ const Maps: React.FC = () => {
         const location = await Location.getLatestLocation({ enableHighAccuracy: true });
         if (location) {
           setUserLocation(location);
-          await syncLocationToBackend(location.latitude, location.longitude);
+          //await syncLocationToBackend(location.latitude, location.longitude);
         }
       }, LOCATION_UPDATE_INTERVAL);
     
