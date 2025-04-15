@@ -64,7 +64,7 @@ function Profile({ navigation }) {
       const token = credentials?.accessToken;
       console.log("Token in addUserToDB: ", token);
 
-      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/profile/update-avatar", {
+      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/auth/update-avatar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

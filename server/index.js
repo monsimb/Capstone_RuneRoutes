@@ -30,15 +30,8 @@ app.use('/auth', authRoutes);
 
 app.get("/auth", (req, res) => {
   res.send("Auth is up and fresh");
-});
+});  
 
-const profileRoutes = require('./routes/profile');
-app.use('/profile', profileRoutes);
-
-app.get("/profile", (req, res) => {
-  res.send("Profile is up and fresh");
-})
-  
 
 app.get("/", (req, res) => {
   res.send("Backend is up and fresh");
