@@ -187,7 +187,6 @@ const Maps: React.FC = () => {
       if (userLocation) {
           fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
       }
-    // }, []); // only on startup for now
     }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.

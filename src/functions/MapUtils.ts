@@ -14,40 +14,69 @@ export const fetchPOIs = async (latitude, longitude, setPois) => {
       longitude + delta, // maxLon
       latitude + delta   // maxLat
     ].join(',');
-    const response = await axios.get(
-      `https://api.mapbox.com/search/searchbox/v1/suggest?`,
+
+    // Retrieving places with an outdoors tag
+    const response_a = await axios.get(
+      `https://api.mapbox.com/search/searchbox/v1/category/outdoors?`,
       {
         params: {
-          q: `food`,
+          // q: `monument`,
           proximity: `${longitude},${latitude}`,
           limit: 10,
           bbox: bbox,
-          session_token: 'tempUUID',
+          // session_token: 'tempUUID',
           access_token: MAP_BOX_ACCESS_TOKEN,
         },
       }
     );
-
-    const pois = response.data.suggestions.map((poi) => ({
-      name: poi.name, // Use `name` or fallback to `text`
-      id: poi.mapbox_id,
-      types: poi.poi_category || [], // Use `categories` for types
+    const pois_outdoors = response_a.data.features.map((poi) => ({
+      name: poi.properties.name, // Use `name` or fallback to `text`
+      types: poi.properties.poi_category || [], // Use `categories` for types
+      longitude: poi.geometry.coordinates[0],
+      latitude: poi.geometry.coordinates[1],
     }));
 
-    const featurePromises = pois.map(poi => fetchFeature(poi.id));
-    const features = await Promise.all(featurePromises);
+    // Retrieving places with a food_and_drink tag
+    const response_b = await axios.get(
+      `https://api.mapbox.com/search/searchbox/v1/category/food_and_drink?`,
+      {
+        params: {
+          // q: `monument`,
+          proximity: `${longitude},${latitude}`,
+          limit: 10,
+          bbox: bbox,
+          // session_token: 'tempUUID',
+          access_token: MAP_BOX_ACCESS_TOKEN,
+        },
+      }
+    );
+    const pois_food = response_b.data.features.map((poi) => ({
+      name: poi.properties.name, // Use `name` or fallback to `text`
+      types: poi.properties.poi_category || [], // Use `categories` for types
+      longitude: poi.geometry.coordinates[0],
+      latitude: poi.geometry.coordinates[1],
+    }));
+
+    // const pois = response.data.suggestions.map((poi) => ({
+    //   name: poi.name, // Use `name` or fallback to `text`
+    //   id: poi.mapbox_id,
+    //   types: poi.poi_category || [], // Use `categories` for types
+    // }));
+
+    // const featurePromises = pois.map(poi => fetchFeature(poi.id));
+    // const features = await Promise.all(featurePromises);
     
-    const enriched_pois = features.map((feature) => ({
-      name: feature.name,
-      id: feature.mapbox_id,
-      longitude: feature.coordinates[0],
-      latitude: feature.coordinates[1],
-      types: feature.types || [],
-    }));
-    console.log(enriched_pois)
+    // const enriched_pois = features.map((feature) => ({
+    //   name: feature.name,
+    //   id: feature.mapbox_id,
+    //   longitude: feature.coordinates[0],
+    //   latitude: feature.coordinates[1],
+    //   types: feature.types || [],
+    // }));
 
-
-    setPois(enriched_pois);
+    console.log("! POI HIT !")
+    const pois = [...pois_outdoors, ...pois_food];
+    setPois(pois);
 
   } catch (error) {
     console.error("Error fetching POIs:", error);
