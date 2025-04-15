@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuth0 } from 'react-native-auth0';
@@ -55,8 +55,11 @@ function Profile({ navigation }) {
   const [currentFaceIndex, setCurrentFaceIndex] = useState(0);
   const [currentTopIndex, setCurrentTopIndex] = useState(0);
   const [currentBottomIndex, setCurrentBottomIndex] = useState(0);
+  const [profileData, setProfileData] = useState(null);
   const { getCredentials, user } = useAuth0();
   const userId = user?.sub;
+
+  
 
   const updateAvatar = async (userId, avatarSelections) => {
     try {
@@ -124,6 +127,51 @@ function Profile({ navigation }) {
       setCurrentBottomIndex((prevIndex) => (prevIndex - 1 + bottoms.length) % bottoms.length);
     }
   };
+
+  useEffect(() => { 
+    const fetchProfile = async () => {
+      try {
+        const creds = await getCredentials();
+        const token = creds?.accessToken;
+        if(!token || !user?.sub) {
+          console.warn("Missing access token or user ID");
+          return;
+        }
+
+        const response = await fetch(`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${user.sub}`, {
+          method: "GET",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if(!response.ok) {
+          const errorText = await response.text();
+          console.warn(`Server error ${response.status}:`, errorText);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Profile data fetched:", data);
+        setProfileData(data);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
+    };
+
+    if(user && user.sub) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  if (!profileData) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading profile...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

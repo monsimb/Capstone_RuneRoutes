@@ -15,6 +15,22 @@ router.get('/protected', checkJwt, (req, res) => {
   res.send(` Hello ${req.auth.payload.sub}, you are authenticated`);
 });
 
+// Get userId for getting profile
+router.get('users/:userId', checkJwt, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userProfile = await User.findOne({ userId });
+
+    if(!userProfile) {
+      return res.status(404). json({ message: 'User not found'});
+    }
+    res.status(200).json(userProfile);
+  } catch (err) {
+    console.error('Error retrieving profile', err.message);
+    res.status(500).json({ error: 'Internal server error'});
+  }
+});
+
 
 // API route to add a user
 // POST /users - Add a new user
