@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useAuth0 } from 'react-native-auth0';
 
 const skins = [
   require("../assets/skins/skin1.png"),
@@ -54,6 +55,38 @@ function Profile({ navigation }) {
   const [currentFaceIndex, setCurrentFaceIndex] = useState(0);
   const [currentTopIndex, setCurrentTopIndex] = useState(0);
   const [currentBottomIndex, setCurrentBottomIndex] = useState(0);
+  const { getCredentials, user } = useAuth0();
+  const userId = user?.sub;
+
+  const updateAvatar = async (userId, avatarSelections) => {
+    try {
+      const credentials = await getCredentials();
+      const token = credentials?.accessToken;
+      console.log("Token in addUserToDB: ", token);
+
+      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/profile/update-avatar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, 
+        },
+        body: JSON.stringify({
+          userId,
+          avatarSelections,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}: ${JSON.stringify(data)}`);
+      }
+      console.log("Avatar updated: ", data);
+    } catch (err) {
+      console.error("Error sending user to backend:", err.message);
+    }
+  };
+
 
 
   // ADD BACKEND (THIS IS TEMPORARY STATS)
@@ -158,6 +191,11 @@ function Profile({ navigation }) {
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>
 
+      <View>
+        <TouchableOpacity style={styles.changeMe} onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])}>
+        <Text style={styles.changeMeText}>Save Profile</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -258,4 +296,15 @@ const styles = StyleSheet.create({
     top: -520, // change the position of the hat button
     padding: 15,
   },
+  changeMe: {
+    color:'rgba(0,0,0,0)',
+    width: 100,
+    height: 100,
+    padding: 10,
+  },
+  changeMeText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  }
 });

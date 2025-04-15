@@ -13,8 +13,9 @@ function AuthScreen({ navigation }) {
   // Extract and set user ID when the user is authenticated
   useEffect(() => {
     if (user) {
+      console.log("User: ", user);
       setUserId(user.sub); // 'sub' is the unique identifier from Auth0
-      addUserToDB(user.sub, user.name, ['slipknot'], 10, { lat: 40.7128, lon: -74.0060 });
+      addUserToDB(user.sub, user.name, [0,0,0,0,0], 10, { lat: 40.7128, lon: -74.0060 });
     }
   }, [user]);
 
@@ -23,6 +24,7 @@ function AuthScreen({ navigation }) {
     try {
       const credentials = await getCredentials();
       const token = credentials?.accessToken;
+      console.log("Token in addUserToDB: ", token);
 
       const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/auth/users", {
         method: "POST",
@@ -57,19 +59,24 @@ function AuthScreen({ navigation }) {
   const handleLogin = async () => {
     setIsLoading(true);
     try {
-      await authorize({
-        audience: 'https://capstone-runeroutes-wgp6.onrender.com', // 👈 or your Auth0 API identifier
+      const result = await authorize({
+        audience: 'https://dev-r3fzkkn3e0cei0co.us.auth0.com/api/v2/', // 👈 or your Auth0 API identifier
         scope: 'openid profile email offline_access',
       });
-      if(user) {
+      console.log("Auth result: ", result);
+      if(user && result?.accessToken) {
         setUserId(user.sub);
       }
-      navigation.navigate("Home");
+      else{
+        console.log("Failed to setUserId");
+      }
+
     } catch (e) {
       console.error(e);
     } finally {
       setIsLoading(false);
     }
+    navigation.navigate("Home");
   };
 
 

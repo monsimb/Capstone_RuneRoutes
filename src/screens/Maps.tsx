@@ -27,7 +27,7 @@ const OFFSET = 0.0005;                  // Increase this to make the polygon lar
 
 
 const Maps: React.FC = () => {
-    const { getCredentials, user } = useAuth0();
+    const { authorize, getCredentials, user } = useAuth0();
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
@@ -56,6 +56,7 @@ const Maps: React.FC = () => {
       try {
         const creds = await getCredentials(); 
         const accessToken = creds?.accessToken;
+        //console.log("Token: ", accessToken);
 
         if (!accessToken) {
           console.warn("No access token available.");
@@ -66,7 +67,7 @@ const Maps: React.FC = () => {
           console.warn("No user ID found for location sync");
           return;
         }
-        console.log("AccessToken sent:", accessToken);
+        //console.log("AccessToken sent:", accessToken);
         await updateBackendLocation(accessToken, user.sub, lat, lon);
       } catch (err) { 
         console.error(' Failed to sync location:', err);
@@ -304,19 +305,19 @@ const Maps: React.FC = () => {
 
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            Location.getLatestLocation({ enableHighAccuracy: true })
-                .then((location) => {
-                    if (location) {
-                        setUserLocation(location);
-                        syncLocationToBackend(location.latitude, location.longitude);
-                    }
-                })
-                .catch(err => console.warn("Error fetching location:", err));
-        }, LOCATION_UPDATE_INTERVAL);
-
-        return () => clearInterval(interval);
-    }, []);
+      const interval = setInterval(async () => {
+        if (!user) return; // <- User not authenticated, bail out
+    
+        const location = await Location.getLatestLocation({ enableHighAccuracy: true });
+        if (location) {
+          setUserLocation(location);
+          await syncLocationToBackend(location.latitude, location.longitude);
+        }
+      }, LOCATION_UPDATE_INTERVAL);
+    
+      return () => clearInterval(interval);
+    }, [user]); // Only run this effect once user is available
+    
 
     useEffect(() => {
         const interval = setInterval(() => {
