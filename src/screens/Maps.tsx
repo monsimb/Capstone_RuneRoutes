@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity } from 'react-native';
+import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
 import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import { MapView } from '@rnmapbox/maps';
@@ -430,8 +430,16 @@ const Maps: React.FC = () => {
                   </View>
                 </View>
               </Modal>
+            
         </MapView>
-        <Button title="Recenter" onPress={recenterMap} />
+        <View style={styles.recenterButtonContainer}>
+          <TouchableOpacity style={styles.recenterButton} onPress={recenterMap}>
+            <Image
+              source={require("../assets/icon/recenter.png")}
+              style={{ width: 35, height: 35 }}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     );
 };
