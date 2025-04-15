@@ -10,8 +10,14 @@ export const DEFAULT_ZOOM_LEVEL = 8;
 export const ICONS = {
   STORE: require('../assets/icon/shopIcon.png'),
   PARK: require('../assets/icon/parkIcon.png'),
-  DEFAULT: require('../assets/defaultPin.png'),
+  CAFE: require('../assets/icon/cafeIcon.png'),
+  FOOD: require('../assets/icon/foodIcon.png'),
+  DEFAULT: require('../assets/icon/signpostIcon.png'),
+  CUSTOM: require('../assets/icon/defaultIcon.png')
 };
+
+// Icon Width and Height
+export const ICON_SIZE = 50;
 
 // User Customization
 export const skins = [

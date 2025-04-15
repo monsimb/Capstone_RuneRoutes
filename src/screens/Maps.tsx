@@ -14,7 +14,7 @@ import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
 
 import { styles } from '../styles/Map';
-import DefaultPin from '../assets/defaultPin.png';
+import { ICONS, ICON_SIZE } from '../functions/constants';
 
 import { fetchPOIs, getPoiIcon, createPolygon } from '../functions/MapUtils';
 
@@ -24,6 +24,7 @@ import { useProfileContext } from '../context/ProfileContext';
 
 
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
+
 
 
 const Maps: React.FC = () => {
@@ -49,7 +50,7 @@ const Maps: React.FC = () => {
       setIsViewingMarker(false);
       setSelectedMarker(null);
     };
-    const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number }[]>([]);
+    const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number, types: [] }[]>([]);
         //Marker State
     const [selectedMarker, setSelectedMarker] = useState<{
       id: string;
@@ -84,9 +85,9 @@ const Maps: React.FC = () => {
 
         const chomped = originalFogArea - newFogArea; // Calculate the area that has been chomped
 
-        console.log(`Original fog area: ${originalFogArea} square meters`);
-        console.log(`New fog area: ${newFogArea} square meters`);
-        console.log(`Chomped area: ${chompedArea} square meters`);
+        // console.log(`Original fog area: ${originalFogArea} square meters`);
+        // console.log(`New fog area: ${newFogArea} square meters`);
+        // console.log(`Chomped area: ${chompedArea} square meters`);
 
         setChompedArea(chomped); // Update state with the chomped area
         setStaticPolygon(newFogLayer);
@@ -100,16 +101,16 @@ const Maps: React.FC = () => {
     };
     // User uploaded images (markers)
     const pickImage = () => {
-    launchImageLibrary({
-        mediaType: 'photo',
-        includeBase64: false,
-        maxHeight: 1200,
-        maxWidth: 1200,
-    }, (response) => {
-        if (response.assets && response.assets.length > 0) {
-        setNewImageUri(response.assets[0].uri || null);
-        }
-    });
+      launchImageLibrary({
+          mediaType: 'photo',
+          includeBase64: false,
+          maxHeight: 1200,
+          maxWidth: 1200,
+      }, (response) => {
+          if (response.assets && response.assets.length > 0) {
+          setNewImageUri(response.assets[0].uri || null);
+          }
+      });
     };
     // Place marker functionality
     const handleAddMarker = () => {
@@ -160,7 +161,7 @@ const Maps: React.FC = () => {
             console.error("No coordinates found in event:", e);
         }
     };
-    
+
   
 
 
@@ -171,8 +172,8 @@ const Maps: React.FC = () => {
       if (userLocation) {
           fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
       }
-      // console.log(pois);
-    }, [userLocation]);
+    }, []); // only on startup for now
+    // }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
@@ -201,46 +202,48 @@ const Maps: React.FC = () => {
         .catch(err => console.warn('Permission denied:', err));
     }, []); // will trigger only on load
 
-
+    // Discover 'fog chomp' main logic
     useEffect(() => {
-        const interval = setInterval(() => {
-            Location.getLatestLocation({ enableHighAccuracy: true })
-                .then((location) => {
-                    if (location) {
-                        setUserLocation(location);
-                    }
-                })
-                .catch(err => console.warn("Error fetching location:", err));
-        }, LOCATION_UPDATE_INTERVAL);
+      const interval = setInterval(() => {
+          setUserLocation((prevLocation) => {
+              if (!prevLocation || !staticPolygon) return prevLocation;
 
-        return () => clearInterval(interval);
-    }, []);
+              // chomp checker: y axis
+              const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);
+              const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);
+              // chomp checker: x axis
+              const rightUser = point([prevLocation.longitude, (prevLocation.latitude + CHOMP_DIAMETER/8)]);
+              const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setUserLocation((prevLocation) => {
-                if (!prevLocation || !staticPolygon) return prevLocation;
+              if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
+                  // console.log("USER OUTSIDE POLYGON");
+                  subtractPoly();
+              } else {
+                  // console.log("USER INSIDE POLYGON");
+              }
 
-                // chomp checker: y axis
-                const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);
-                const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);
-                // chomp checker: x axis
-                const rightUser = point([prevLocation.longitude, (prevLocation.latitude + CHOMP_DIAMETER/8)]);
-                const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
+              return prevLocation; // React won't re-render if state doesn't change
+          });
+      }, LOCATION_UPDATE_INTERVAL);
 
-                if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
-                    // console.log("USER OUTSIDE POLYGON");
-                    subtractPoly();
-                } else {
-                    // console.log("USER INSIDE POLYGON");
-                }
+      return () => clearInterval(interval);
+  }, [staticPolygon]);
 
-                return prevLocation; // React won't re-render if state doesn't change
-            });
-        }, LOCATION_UPDATE_INTERVAL);
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         Location.getLatestLocation({ enableHighAccuracy: true })
+    //             .then((location) => {
+    //                 if (location) {
+    //                     setUserLocation(location);
+    //                 }
+    //             })
+    //             .catch(err => console.warn("Error fetching location:", err));
+    //     }, LOCATION_UPDATE_INTERVAL);
 
-        return () => clearInterval(interval);
-    }, [staticPolygon]);
+    //     return () => clearInterval(interval);
+    // }, []);
+
+
 
 
 
@@ -281,11 +284,15 @@ const Maps: React.FC = () => {
             />
             {/* Render POI markers */}
             {pois.map((poi) => (
-                    <MarkerView key={poi.id} coordinate={[poi.longitude, poi.latitude]}>
-                        <TouchableOpacity style={styles.markerViewContainer}>
+                    <MarkerView 
+                      key={poi.id} 
+                      coordinate={[poi.longitude, poi.latitude]}>
+                        <TouchableOpacity 
+                        style={styles.markerViewContainer}
+                        >
                             <Image
-                                source={getPoiIcon(poi.types)} // function to get diff icons 
-                                style={{ width: 30, height: 30 }}
+                                source={poi.types ? getPoiIcon(poi.types) : ICONS.DEFAULT} // function to get diff icons 
+                                style={{ width: 50, height: 50 }}
                             />
                             <View style={styles.markerTitleContainer}>
                                 <Text style={styles.markerTitle}>{poi.name}</Text>
@@ -320,8 +327,8 @@ const Maps: React.FC = () => {
                 style={styles.markerViewContainer}
                 >
                 <Image
-                  source={DefaultPin}
-                  style={{ width: 30, height: 30 , borderRadius: 15 }}
+                  source={ICONS.CUSTOM}
+                  style={{ width: 50, height: 50 , borderRadius: 15 }}
                 />
                 <View style={styles.markerTitleContainer}>
                   <Text style={styles.markerTitle}>{marker.title}</Text>
