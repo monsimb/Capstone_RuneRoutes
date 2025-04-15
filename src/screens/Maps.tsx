@@ -1,6 +1,6 @@
 //maps.tsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
@@ -62,8 +62,13 @@ const Maps: React.FC = () => {
     type RouteParams = {fogOpacity?: number;};
     const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
     const { fogOpacity = 0.8 } = route.params || {}; // Default to 0.8 if no value is passed
-
     const { setTotalExploredArea } = useProfileContext();
+    const [recenter, setRecenter] = useState(true);
+    const cameraRef = useRef<Camera>(null);
+    const recenterMap = () => {
+      setRecenter(true);
+    };
+
 
     // Function to chomp away at fog polygon
     function subtractPoly() {
@@ -165,15 +170,25 @@ const Maps: React.FC = () => {
   
 
 
-
-
+    // Camera re-center
+    useEffect(() => {
+      if (userLocation && cameraRef.current && recenter){
+        cameraRef.current?.flyTo([userLocation.longitude, userLocation.latitude], 1000); // Fly to the user's location
+        cameraRef.current?.setCamera({
+          centerCoordinate: [userLocation.longitude, userLocation.latitude],
+          zoomLevel: 20,
+          animationMode: 'flyTo',
+        });
+        setRecenter(false);
+      }
+    }, [recenter]);
 
     useEffect(() => {
       if (userLocation) {
           fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
       }
-    }, []); // only on startup for now
-    // }, [userLocation]);
+    // }, []); // only on startup for now
+    }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
@@ -261,15 +276,16 @@ const Maps: React.FC = () => {
             showUserLocation={true} // Show user location on map
             onPress={handlePress} // Handle press to add custom marker
           >
-            <Camera
+            <Camera 
+              ref={cameraRef}
               defaultSettings={{
                 centerCoordinate: DEFAULT_MAP_CENTER,
                 zoomLevel: DEFAULT_ZOOM_LEVEL,
               }}
-              followUserLocation={true}
+              followUserLocation={!recenter}
               followUserMode={UserTrackingMode.Follow}
               followZoomLevel={20}
-            />
+              />
             <LocationPuck
               puckBearing ='heading'
               bearingImage = 'compass'
@@ -415,6 +431,7 @@ const Maps: React.FC = () => {
                 </View>
               </Modal>
         </MapView>
+        <Button title="Recenter" onPress={recenterMap} />
       </View>
     );
 };
