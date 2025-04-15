@@ -114,7 +114,7 @@ router.post('/update-avatar', checkJwt, async (req, res) => {
       { avatarSelections },
       { new: true }
     );
-
+    console.log(avatarSelections);
     if(!updatedUser) {
       return res.status(404).json({message: `User not found`});
     }
