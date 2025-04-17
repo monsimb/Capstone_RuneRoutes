@@ -45,13 +45,6 @@ const Maps: React.FC = () => {
         description: string;
         imageUri: string | null;
       }[]>([]); // Store custom markers
-      const [modalVisible, setModalVisible] = useState(false);
-      const [isViewingMarker, setIsViewingMarker] = useState(false);
-      const handleDeleteMarker = (markerId: string) => {
-        setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
-        setIsViewingMarker(false);
-        setSelectedMarker(null);
-      };
 
     const syncLocationToBackend = async (lat: number, lon: number) => {
       try {
