@@ -44,11 +44,12 @@ router.post('/users', async (req, res) => {
     const updatedUser = await User.findOneAndUpdate(
       { userId },
       {
-        userId,
-        userName,
-        avatarSelections: flatAvatars,
-        travelDistance,
-        coordinates: {lat: parseFloat(lat), lon: parseFloat(lon)}
+        $setOnInsert: {
+          userName,
+          avatarSelections: [0,0,0,0,0],
+          travelDistance: 0,
+          coordinates: { lat: parseFloat(lat) || 0, lon: parseFloat(lon) || 0 }
+        }
       },
       {
         new: true,
@@ -138,7 +139,7 @@ router.post('/update-avatar', checkJwt, async (req, res) => {
     if(!userId || !Array.isArray(avatarSelections)) {
       return res.status(400).json({ message: 'Missing or invalid fields' });
     }
-    
+
     const flatAvatars = avatarSelections.flat();
     const updatedUser = await User.findOneAndUpdate(
       { userId },
