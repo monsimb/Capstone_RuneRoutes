@@ -15,7 +15,7 @@ function AuthScreen({ navigation }) {
     if (user) {
       console.log("User: ", user);
       setUserId(user.sub); // 'sub' is the unique identifier from Auth0
-      addUserToDB(user.sub, user.name, [0,0,0,0,0], 10, { lat: 40.7128, lon: -74.0060 });
+      //addUserToDB(user.sub, user.name, [0,0,0,0,0], 10, { lat: 40.7128, lon: -74.0060 });
     }
   }, [user]);
 

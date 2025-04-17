@@ -175,7 +175,10 @@ function Profile({ navigation }) {
 
   
 
-  if (!profileData) {
+  if (
+    !profileData ||
+    [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex].some(i => i === null || i === undefined)
+  ) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Loading profile...</Text>

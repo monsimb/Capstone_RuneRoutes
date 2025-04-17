@@ -15,50 +15,38 @@ router.get('/protected', checkJwt, (req, res) => {
   res.send(` Hello ${req.auth.payload.sub}, you are authenticated`);
 });
 
-// Get userId for getting profile
-router.get('/users/:userId', checkJwt, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const userProfile = await User.findOne({ userId });
 
-    if(!userProfile) {
-      return res.status(404). json({ message: 'User not found'});
-    }
-    res.status(200).json(userProfile);
-  } catch (err) {
-    console.error('Error retrieving profile', err.message);
-    res.status(500).json({ error: 'Internal server error'});
-  }
-});
-
+// ####################################################################### USERS
 
 // API route to add a user
 // POST /users - Add a new user
 router.post('/users', async (req, res) => {
   try {
-    const { userId, userName, avatarSelections, travelDistance, lat, lon } = req.body;
+    const { 
+      userId, 
+      userName,
+      avatarSelections, // We have to possibly prepare for flattening. Could be [] or [[]]
+      travelDistance, 
+      lat, 
+      lon 
+    } = req.body;
 
     if(!userId || !userName || lat === undefined || lon === undefined) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
     // Ensure avatarSelections is an array
-    const avatarsArray = Array.isArray(avatarSelections)
-      ? avatarSelections
-      : [avatarSelections];
+    const flatAvatars = Array.isArray(avatarSelections)
+      ? avatarSelections.flat()
+      : [];
 
-    // Parse coordinates to numbers
-    const coordinates = {
-      lat: parseFloat(lat),
-      lon: parseFloat(lon),
-    };
 
     const updatedUser = await User.findOneAndUpdate(
       { userId },
       {
         userId,
         userName,
-        avatarSelections: avatarsArray,
+        avatarSelections: flatAvatars,
         travelDistance,
         coordinates: {lat: parseFloat(lat), lon: parseFloat(lon)}
       },
@@ -82,6 +70,25 @@ router.post('/users', async (req, res) => {
   }
 });
 
+// Get userId for getting profile
+router.get('/users/:userId', checkJwt, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userProfile = await User.findOne({ userId });
+
+    if(!userProfile) {
+      return res.status(404). json({ message: 'User not found'});
+    }
+    res.status(200).json(userProfile);
+  } catch (err) {
+    console.error('Error retrieving profile', err.message);
+    res.status(500).json({ error: 'Internal server error'});
+  }
+});
+
+// ####################################################################### USERS(END)
+
+// ####################################################################### LOCATION
 router.post('/location', checkJwt, async (req, res) => {
   try {
     const {userId, lat, lon} = req.body;
@@ -117,9 +124,16 @@ router.post('/location', checkJwt, async (req, res) => {
   }
 });
 
+// ####################################################################### LOCATION(END)
+
+// ####################################################################### AVATAR
+
 router.post('/update-avatar', checkJwt, async (req, res) => {
   try {
-    const {userId, avatarSelections} = req.body;
+    const {
+      userId, 
+      avatarSelections
+    } = req.body;
 
     if(!userId || !Array.isArray(avatarSelections)) {
       return res.status(400).json({ message: 'Missing or invalid fields' });
@@ -127,10 +141,12 @@ router.post('/update-avatar', checkJwt, async (req, res) => {
 
     const updatedUser = await User.findOneAndUpdate(
       { userId },
-      { avatarSelections },
+      { avatarSelections: flatAvatars },
       { new: true }
     );
-    console.log(avatarSelections);
+
+    console.log(avatarSelections); // REMOVE EVENTUALLY
+
     if(!updatedUser) {
       return res.status(404).json({message: `User not found`});
     }
@@ -144,5 +160,7 @@ router.post('/update-avatar', checkJwt, async (req, res) => {
     res.status(500).json({error: 'Internal Server Error'});
   }
 });
+
+// ####################################################################### AVATAR(END)
   
 module.exports = router;
