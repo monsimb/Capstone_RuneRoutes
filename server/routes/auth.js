@@ -153,7 +153,7 @@ router.post('/update-avatar', checkJwt, async (req, res) => {
 
     res.status(200).json({
       message: 'Avatar updated successfully',
-      coordinates: updatedUser.avatarSelections
+      avatarSelections: updatedUser.avatarSelections
     });
   } catch(err) {
     console.error('Error updating avatar:', err.message);
