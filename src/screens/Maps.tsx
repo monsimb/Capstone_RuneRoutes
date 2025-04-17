@@ -1,29 +1,31 @@
 //maps.tsx
 
-import React, { useEffect, useState } from 'react';
-import { Button, Modal, TextInput, Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
-import Mapbox, { MapView, Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
-import { booleanTouches, booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
+import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
+import { MapView } from '@rnmapbox/maps';
+import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
-import { feature, polygon, point } from "@turf/helpers";
+import { Feature } from 'geojson';
+import { point } from "@turf/helpers";
 import { area } from "@turf/area";
-import { styles } from '../styles/Map';
-import { Feature, Point, GeoJsonProperties } from 'geojson';
-import DefaultPin from '../assets/defaultPin.png';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useAuth0 } from 'react-native-auth0';
 import { updateBackendLocation } from '../api/updateLocation';
+import { styles } from '../styles/Map';
+import { ICONS, ICON_SIZE } from '../functions/constants';
+
+import { fetchPOIs, getPoiIcon, createPolygon } from '../functions/MapUtils';
+
+import { MAP_BOX_ACCESS_TOKEN } from '@env';
+import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
+import { useProfileContext } from '../context/ProfileContext';
 
 
-
-
-const MAP_BOX_ACCESS_TOKEN = "pk.eyJ1IjoiYnJ5bGVyMSIsImEiOiJjbTM0MnFqdXkxcmR0MmtxM3FvOWZwbjQwIn0.PpuCmHlaCvyWyD5Kid9aPw";
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
-const CHOMP_DIAMETER = 0.025;           // amount radius increases with movement
-const LOCATION_UPDATE_INTERVAL = 100;  // 1000 = 1 second interval
-const OFFSET = 0.0005;                  // Increase this to make the polygon larger (OFFSET from the user location)
 
 
 const Maps: React.FC = () => {
@@ -31,7 +33,6 @@ const Maps: React.FC = () => {
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
-
     const [newTitle, setNewTitle] = useState('');
     const [newDescription, setNewDescription] = useState('');
     const [newImageUri, setNewImageUri] = useState<string | null>(null);
@@ -101,36 +102,121 @@ const Maps: React.FC = () => {
         return turfPolygon;
         };
     
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isViewingMarker, setIsViewingMarker] = useState(false);
+    const handleDeleteMarker = (markerId: string) => {
+      setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
+      setIsViewingMarker(false);
+      setSelectedMarker(null);
+    };
+    const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number, types: [] }[]>([]);
+        //Marker State
+    const [selectedMarker, setSelectedMarker] = useState<{
+      id: string;
+      title: string;
+      description: string;
+      imageUri: string | null;
+    } | null>(null);
+    const [chompedArea, setChompedArea] = useState(0);
+    type RouteParams = {fogOpacity?: number;};
+    const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
+    const { fogOpacity = 0.8 } = route.params || {}; // Default to 0.8 if no value is passed
+    const { setTotalExploredArea } = useProfileContext();
+    const [recenter, setRecenter] = useState(false);
+    const cameraRef = useRef<Camera>(null);
+    const recenterMap = () => {
+      setRecenter(true);
+    };
+
+
     // Function to chomp away at fog polygon
     function subtractPoly() {
-        if (!userLocation || !staticPolygon) return;
-    
-        const rad = CHOMP_DIAMETER;
-        const centerPtn = point([userLocation.longitude, userLocation.latitude]);
-        const playerCircle = circle(centerPtn, rad);
-    
-        // Subtract circle from fog polygon
-        const fog = staticPolygon;
-        const newFogLayer = difference(featureCollection([fog, playerCircle])); // Subtract circle from fog
-    
-        if (newFogLayer) {
-          setStaticPolygon(newFogLayer);
-          //console.log('Updated fog layer!!!!');
-    
-        } else {
-          console.warn("Difference operation returned null, check polygon validity!");
-        }
-      };
+      if (!userLocation || !staticPolygon) return;
+  
+      const rad = CHOMP_DIAMETER;
+      const centerPtn = point([userLocation.longitude, userLocation.latitude]);
+      const playerCircle = circle(centerPtn, rad);
+  
+      // Subtract circle from fog polygon
+      const fog = staticPolygon;  // starting poly
+      const newFogLayer = difference(featureCollection([fog, playerCircle])); // subtract circle from fog
+  
+      if (newFogLayer) {
+        //  !! CURRENTLY DOESN'T account for the initial square !!
 
-    // Marker touch interaction handler
+        const originalFogArea = area(fog);            // Calculate the area that was already cleared
+        const newFogArea = area(newFogLayer);         // Calculate the area of the new fog polygon
+
+        const chomped = originalFogArea - newFogArea; // Calculate the area that has been chomped
+
+        // console.log(`Original fog area: ${originalFogArea} square meters`);
+        // console.log(`New fog area: ${newFogArea} square meters`);
+        // console.log(`Chomped area: ${chompedArea} square meters`);
+
+        setChompedArea(chomped); // Update state with the chomped area
+        setStaticPolygon(newFogLayer);
+        setTotalExploredArea((prevTotal) => prevTotal + chomped); // Add the chomped area to the total
+
+        // //console.log('Updated fog layer!!!!');
+  
+      } else {
+        console.warn("Difference operation returned null, check polygon validity!");
+      }
+    };
+    // User uploaded images (markers)
+    const pickImage = () => {
+      launchImageLibrary({
+          mediaType: 'photo',
+          includeBase64: false,
+          maxHeight: 1200,
+          maxWidth: 1200,
+      }, (response) => {
+          if (response.assets && response.assets.length > 0) {
+          setNewImageUri(response.assets[0].uri || null);
+          }
+      });
+    };
+    // Place marker functionality
+    const handleAddMarker = () => {
+      if (currentCoordinates) {
+        setMarkers((prevMarkers) => [
+          ...prevMarkers,
+          {
+            id: Math.random().toString(),
+            longitude: currentCoordinates.longitude,
+            latitude: currentCoordinates.latitude,
+            title: newTitle,
+            description: newDescription,
+            imageUri: newImageUri,
+          },
+        ]);
+      }
+      setModalVisible(false);
+      setNewTitle('');
+      setNewDescription('');
+      setNewImageUri(null);
+    };
+    // Handles clicking on markers
+    const handleMarkerPress = (marker: {
+      id: string;
+      longitude: number;
+      latitude: number;
+      title: string;
+      description: string;
+      imageUri: string | null;
+    }) => {
+      setSelectedMarker(marker);
+      setIsViewingMarker(true); // Show view modal instead of add modal
+    };
+    // Handles clicking on map to create markers
     const handlePress = (e: any) => {
-        console.log("Map pressed", e);
+        // console.log("Map pressed", e);
         const coordinates = e.geometry ? e.geometry.coordinates : null;
 
         if (coordinates) {
             const [longitude, latitude] = coordinates;
             if(booleanPointInPolygon(coordinates, staticPolygon)) {
-            console.log("MARKER IN POLYGON!!!!")
+            // console.log("MARKER IN POLYGON!!!!")
             }
             //console.log("Coordinates:", longitude, latitude); // Log coordinates
             setCurrentCoordinates({ longitude, latitude });
@@ -140,140 +226,28 @@ const Maps: React.FC = () => {
         }
     };
 
-    
-    // User uploaded images
-    const pickImage = () => {
-    launchImageLibrary({
-        mediaType: 'photo',
-        includeBase64: false,
-        maxHeight: 1200,
-        maxWidth: 1200,
-    }, (response) => {
-        if (response.assets && response.assets.length > 0) {
-        setNewImageUri(response.assets[0].uri || null);
-        }
-    });
-  };
+  
 
-  // Place markrer function
-  const handleAddMarker = () => {
-    if (currentCoordinates) {
-      setMarkers((prevMarkers) => [
-        ...prevMarkers,
-        {
-          id: Math.random().toString(),
-          longitude: currentCoordinates.longitude,
-          latitude: currentCoordinates.latitude,
-          title: newTitle,
-          description: newDescription,
-          imageUri: newImageUri,
-        },
-      ]);
-    }
-    setModalVisible(false);
-    setNewTitle('');
-    setNewDescription('');
-    setNewImageUri(null);
-  };
-  const geoJson = staticPolygon ? staticPolygon : null;
 
-  const handleMove = () => {
-    if(userLocation) {
-      setUserLocation(prev => ({
-        latitude: prev!.latitude,
-        longitude: prev!.longitude + 0.001, // Simulating movement for testing purposes
-        }));
-    }
-    console.log(userLocation);
-    if (userLocation && geoJson) {
-      const pt = point([userLocation.longitude, userLocation.latitude]);
-      if (booleanPointInPolygon(pt, geoJson)) {
-        console.log("USER IN POLYGON");
-        subtractPoly();
+    // Camera re-center
+    useEffect(() => {
+      if (userLocation && cameraRef.current && recenter){
+        cameraRef.current?.flyTo([userLocation.longitude, userLocation.latitude], 1000); // Fly to the user's location
+        cameraRef.current?.setCamera({
+          centerCoordinate: [userLocation.longitude, userLocation.latitude],
+          zoomLevel: 20,
+          animationMode: 'flyTo',
+        });
+        setRecenter(false);
       }
-    }
-    // const pt = point([userLocation.longitude, userLocation.latitude]);
-    // if(booleanPointInPolygon(pt,geoJson))
-    // {
-    //   console.log("USER IN POLYGON")
-    // }
-  };
+    }, [recenter]);
 
-  //Marker State
-  const [selectedMarker, setSelectedMarker] = useState<{
-    id: string;
-    title: string;
-    description: string;
-    imageUri: string | null;
-  } | null>(null);
-
-  //Marker click handler
-  const handleMarkerPress = (marker: {
-    id: string;
-    longitude: number;
-    latitude: number;
-    title: string;
-    description: string;
-    imageUri: string | null;
-  }) => {
-    setSelectedMarker(marker);
-    setIsViewingMarker(true); // Show view modal instead of add modal
-  };
-
-  const ViewMarkerModal = () => (
-    <Modal
-      visible={isViewingMarker}
-      animationType="slide"
-      onRequestClose={() => setIsViewingMarker(false)}
-      transparent={true}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          {selectedMarker && (
-            <>
-              <Text style={styles.modalTitle}>{selectedMarker.title}</Text>
-
-              {selectedMarker.imageUri ? (
-                <Image
-                  source={{ uri: selectedMarker.imageUri }}
-                  style={styles.markerImage}
-                />
-              ) : (
-                <View style={styles.noImageContainer}>
-                  <Text style={styles.noImageText}>No image uploaded</Text>
-                </View>
-              )}
-
-              <Text style={styles.descriptionLabel}>Description:</Text>
-              <Text style={styles.descriptionText}>{selectedMarker.description}</Text>
-
-              <View style={styles.markerButtonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.deleteButton]}
-                  onPress={() => handleDeleteMarker(selectedMarker.id)}
-                >
-                  <Text style={styles.buttonText}>Delete Marker</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.button, styles.closeButton]}
-                  onPress={() => setIsViewingMarker(false)}
-                >
-                  <Text style={styles.buttonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
-        </View>
-      </View>
-    </Modal>
-  );
-
-
-
-
-
-
+    useEffect(() => {
+      if (userLocation) {
+          // fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
+      }
+    // }, []); // only on startup for now
+    }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
@@ -319,31 +293,49 @@ const Maps: React.FC = () => {
     }, [user]); // Only run this effect once user is available
     
 
+    // Discover 'fog chomp' main logic
     useEffect(() => {
-        const interval = setInterval(() => {
-            setUserLocation((prevLocation) => {
-                if (!prevLocation || !staticPolygon) return prevLocation;
+      const interval = setInterval(() => {
+          setUserLocation((prevLocation) => {
+              if (!prevLocation || !staticPolygon) return prevLocation;
 
-                // chomp checker: y axis
-                const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);
-                const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);
-                // chomp checker: x axis
-                const rightUser = point([prevLocation.longitude, (prevLocation.latitude + CHOMP_DIAMETER/8)]);
-                const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
+              // chomp checker: y axis
+              const upUser = point([(prevLocation.longitude + CHOMP_DIAMETER/8), prevLocation.latitude]);
+              const downUser = point([(prevLocation.longitude - CHOMP_DIAMETER/8), prevLocation.latitude]);
+              // chomp checker: x axis
+              const rightUser = point([prevLocation.longitude, (prevLocation.latitude + CHOMP_DIAMETER/8)]);
+              const leftUser = point([prevLocation.longitude, (prevLocation.latitude - CHOMP_DIAMETER/8)]);
 
-                if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
-                    //console.log("USER OUTSIDE POLYGON");
-                    subtractPoly();
-                } else {
-                    //console.log("USER INSIDE POLYGON");
-                }
+              if (booleanPointInPolygon(upUser, staticPolygon) || booleanPointInPolygon(downUser, staticPolygon) || booleanPointInPolygon(rightUser, staticPolygon) || booleanPointInPolygon(leftUser, staticPolygon)) {
+                  // console.log("USER OUTSIDE POLYGON");
+                  subtractPoly();
+              } else {
+                  // console.log("USER INSIDE POLYGON");
+              }
 
-                return prevLocation; // React won't re-render if state doesn't change
-            });
-        }, LOCATION_UPDATE_INTERVAL);
+              return prevLocation; // React won't re-render if state doesn't change
+          });
+      }, LOCATION_UPDATE_INTERVAL);
 
-        return () => clearInterval(interval);
-    }, [staticPolygon]);
+      return () => clearInterval(interval);
+  }, [staticPolygon]);
+
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         Location.getLatestLocation({ enableHighAccuracy: true })
+    //             .then((location) => {
+    //                 if (location) {
+    //                     setUserLocation(location);
+    //                 }
+    //             })
+    //             .catch(err => console.warn("Error fetching location:", err));
+    //     }, LOCATION_UPDATE_INTERVAL);
+
+    //     return () => clearInterval(interval);
+    // }, []);
+
+
+
 
 
 
@@ -360,15 +352,16 @@ const Maps: React.FC = () => {
             showUserLocation={true} // Show user location on map
             onPress={handlePress} // Handle press to add custom marker
           >
-            <Camera
+            <Camera 
+              ref={cameraRef}
               defaultSettings={{
-                centerCoordinate: [-77.036086, 38.910233],
-                zoomLevel: 8,
+                centerCoordinate: DEFAULT_MAP_CENTER,
+                zoomLevel: DEFAULT_ZOOM_LEVEL,
               }}
-              followUserLocation={true}
+              followUserLocation={!recenter}
               followUserMode={UserTrackingMode.Follow}
               followZoomLevel={20}
-            />
+              />
             <LocationPuck
               puckBearing ='heading'
               bearingImage = 'compass'
@@ -381,13 +374,31 @@ const Maps: React.FC = () => {
                 radius: 50.0,
               }}
             />
+            {/* Render POI markers */}
+            {pois.map((poi) => (
+                    <MarkerView 
+                      key={poi.id} 
+                      coordinate={[poi.longitude, poi.latitude]}>
+                        <TouchableOpacity 
+                        style={styles.markerViewContainer}
+                        >
+                            <Image
+                                source={poi.types ? getPoiIcon(poi.types) : ICONS.DEFAULT} // function to get diff icons 
+                                style={{ width: 50, height: 50 }}
+                            />
+                            <View style={styles.markerTitleContainer}>
+                                <Text style={styles.markerTitle}>{poi.name}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </MarkerView>
+                ))}
             
             <ShapeSource id="userPolygon" shape={staticPolygon}>
                 <LineLayer
                 sourceID="feature"
                 id="reqId"
                 style={{
-                    lineColor: '#ffffff',
+                    lineColor: '#504ad4',
                     lineWidth: 5,
                 }}
                 />
@@ -396,7 +407,7 @@ const Maps: React.FC = () => {
                 id="feat"
                 style={{
                     fillColor: '#000000', // Color of the filled area
-                    fillOpacity: 0.8,
+                    fillOpacity: fogOpacity,
                 }}
                 />
             </ShapeSource>
@@ -408,8 +419,8 @@ const Maps: React.FC = () => {
                 style={styles.markerViewContainer}
                 >
                 <Image
-                  source={DefaultPin}
-                  style={{ width: 50, height: 50, borderRadius: 25 }}
+                  source={ICONS.CUSTOM}
+                  style={{ width: 50, height: 50 , borderRadius: 15 }}
                 />
                 <View style={styles.markerTitleContainer}>
                   <Text style={styles.markerTitle}>{marker.title}</Text>
@@ -495,7 +506,16 @@ const Maps: React.FC = () => {
                   </View>
                 </View>
               </Modal>
+            
         </MapView>
+        <View style={styles.recenterButtonContainer}>
+          <TouchableOpacity style={styles.recenterButton} onPress={recenterMap}>
+            <Image
+              source={require("../assets/icon/recenter.png")}
+              style={{ width: 35, height: 35 }}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     );
 };

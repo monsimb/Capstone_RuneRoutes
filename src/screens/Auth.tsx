@@ -99,7 +99,7 @@ function AuthScreen({ navigation }) {
       <View style={styles.imageContainer}>
         <Image
           style={styles.image}
-          source={require("../assets/icon/AppFaceLogo3.png")}
+          source={require("../assets/icon/logo_1.png")}
           resizeMode="contain"
         />
       </View>

@@ -6,10 +6,11 @@ import { styles } from "../styles/UI";
 function Settings({ navigation }) {
     const { clearSession, user, isAuthenticated } = useAuth0();
     const [isDriveMode, setIsDriveMode] = useState(false);
-    const [fogOption, setFogOption] = useState("None");
+    const [fogOption, setFogOption] = useState("Light");
+    const [fogOpacity, setFogOpacity] = useState(0); // New state for fog opacity
 
 
-    // toggle function
+    // Toggle function
     const toggleDriveMode = () => setIsDriveMode((prevState) => !prevState);
 
     // Logout function
@@ -22,8 +23,28 @@ function Settings({ navigation }) {
         }
     };
 
-    // fog options
+    // Fog options
     const fogOptions = ["None", "Light", "Heavy"];
+
+    const handleFogOptionChange = (option) => {
+        setFogOption(option);
+        let opacity = 0;
+        switch (option) {
+            case "None":
+                opacity = 0; // No fog
+                break;
+            case "Light":
+                opacity = 0.7; // Light fog
+                break;
+            case "Heavy":
+                opacity = 1.0; // Heavy fog
+                break;
+        }
+        setFogOpacity(opacity);
+    
+        // Pass fogOpacity to Maps screen
+        navigation.navigate("Maps", { fogOpacity: opacity });
+    };
 
 //     return (
 //             {/* {isAuthenticated ? ( */}
@@ -56,7 +77,7 @@ return (
 
       {/* Image placeholder */}
       <View style={styles.imageContainer}>
-        <Image style={styles.image} source={require('../assets/icon/AppFaceLogo3.png')} resizeMode="contain" />
+        <Image style={styles.image} source={require('../assets/icon/logo_1.png')} resizeMode="contain" />
       </View>
 
       {/* User information */}
@@ -69,34 +90,34 @@ return (
             <Switch
                 value={isDriveMode}
                 onValueChange={toggleDriveMode}
-                trackColor={{ false: "#767577", true: "#fcba03" }}
+                trackColor={{ false: "#767577", true: "#f3d88b" }}
                 thumbColor={isDriveMode ? "#ffffff" : "#f4f3f4"} />
         </View>
     
         <View style={styles.fogOptionsContainer}>
-            <View style={styles.toggleContainer}>
-                <Text style={styles.toggleText}>Fog Level</Text>
-                {fogOptions.map((option) => (
-                    <TouchableOpacity
+        <View style={styles.toggleContainer}>
+            <Text style={styles.toggleText}>Fog Level</Text>
+            {fogOptions.map((option) => (
+                <TouchableOpacity
                     key={option}
                     style={[
                         styles.fogOptionButton,
                         fogOption === option && styles.fogOptionSelected,
                     ]}
-                    onPress={() => setFogOption(option)}
-                    >
+                    onPress={() => handleFogOptionChange(option)} // Use handleFogOptionChange here
+                >
                     <Text
                         style={[
-                        styles.fogOptionText,
-                        fogOption === option && styles.fogOptionTextSelected,
+                            styles.fogOptionText,
+                            fogOption === option && styles.fogOptionTextSelected,
                         ]}
                     >
                         {option}
                     </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+                </TouchableOpacity>
+            ))}
         </View>
+    </View>
 
 
 
