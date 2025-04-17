@@ -12,7 +12,8 @@ import { Feature } from 'geojson';
 import { point } from "@turf/helpers";
 import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
-
+import { useAuth0 } from 'react-native-auth0';
+import { updateBackendLocation } from '../api/updateLocation';
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
 
@@ -28,6 +29,7 @@ Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
 
 const Maps: React.FC = () => {
+    const { authorize, getCredentials, user } = useAuth0();
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
@@ -43,6 +45,63 @@ const Maps: React.FC = () => {
         description: string;
         imageUri: string | null;
       }[]>([]); // Store custom markers
+      const [modalVisible, setModalVisible] = useState(false);
+      const [isViewingMarker, setIsViewingMarker] = useState(false);
+      const handleDeleteMarker = (markerId: string) => {
+        setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
+        setIsViewingMarker(false);
+        setSelectedMarker(null);
+      };
+
+    const syncLocationToBackend = async (lat: number, lon: number) => {
+      try {
+        const creds = await getCredentials(); 
+        const accessToken = creds?.accessToken;
+        //console.log("Token: ", accessToken);
+
+        if (!accessToken) {
+          console.warn("No access token available.");
+          return;
+        }
+
+        if(!user?.sub) {
+          console.warn("No user ID found for location sync");
+          return;
+        }
+        //console.log("AccessToken sent:", accessToken);
+        await updateBackendLocation(accessToken, user.sub, lat, lon);
+      } catch (err) { 
+        console.error(' Failed to sync location:', err);
+      }
+    };
+
+    // Function to create a polygon around a given location
+    const createPolygon = (longitude: number, latitude: number) => {
+        // Define the OFFSET for the polygon
+        // const OFFSET = 0.0001; // Increase this to make the polygon larger
+
+        // Outer boundary which covers the whole world
+        const outerBoundary = [
+            [-180, -90],
+            [190, -90],
+            [190, 90],
+            [-170, 90],
+            [-180, -90]
+        ];
+
+        // Inner hole. User's 'explored area'
+        const hole = [
+            [longitude - OFFSET, latitude - OFFSET],
+            [longitude + OFFSET, latitude - OFFSET],
+            [longitude + OFFSET, latitude + OFFSET],
+            [longitude - OFFSET, latitude + OFFSET],
+            [longitude - OFFSET, latitude - OFFSET]
+        ];
+
+        const turfPolygon = polygon([outerBoundary, hole]);
+        return turfPolygon;
+        };
+    
     const [modalVisible, setModalVisible] = useState(false);
     const [isViewingMarker, setIsViewingMarker] = useState(false);
     const handleDeleteMarker = (markerId: string) => {
@@ -98,7 +157,7 @@ const Maps: React.FC = () => {
         setStaticPolygon(newFogLayer);
         setTotalExploredArea((prevTotal) => prevTotal + chomped); // Add the chomped area to the total
 
-        // console.log('Updated fog layer!!!!');
+        // //console.log('Updated fog layer!!!!');
   
       } else {
         console.warn("Difference operation returned null, check polygon validity!");
@@ -203,6 +262,7 @@ const Maps: React.FC = () => {
                 .then(location => {
                     setUserLocation(location); // Save location to state
 
+
                     // Set initial location (on load) ONCE, never again
                     if (!initialUserLocation) {
                         setInitialUserLocation(location); // Initial location has been set
@@ -216,6 +276,22 @@ const Maps: React.FC = () => {
         })
         .catch(err => console.warn('Permission denied:', err));
     }, []); // will trigger only on load
+
+
+    useEffect(() => {
+      const interval = setInterval(async () => {
+        if (!user) return; // <- User not authenticated, bail out
+    
+        const location = await Location.getLatestLocation({ enableHighAccuracy: true });
+        if (location) {
+          setUserLocation(location);
+          //await syncLocationToBackend(location.latitude, location.longitude);
+        }
+      }, LOCATION_UPDATE_INTERVAL);
+    
+      return () => clearInterval(interval);
+    }, [user]); // Only run this effect once user is available
+    
 
     // Discover 'fog chomp' main logic
     useEffect(() => {
