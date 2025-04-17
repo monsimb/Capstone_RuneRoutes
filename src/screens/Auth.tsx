@@ -63,20 +63,33 @@ function AuthScreen({ navigation }) {
         audience: 'https://dev-r3fzkkn3e0cei0co.us.auth0.com/api/v2/', // 👈 or your Auth0 API identifier
         scope: 'openid profile email offline_access',
       });
-      console.log("Auth result: ", result);
-      if(user && result?.accessToken) {
-        setUserId(user.sub);
-      }
-      else{
-        console.log("Failed to setUserId");
-      }
+      //console.log("Auth result: ", result);
+      const accessToken = result?.accessToken;
+      console.log('-> got tokens', result);
+
+      const userInfo = await fetch(
+        `https://dev-r3fzkkn3e0cei0co.us.auth0.com/userinfo`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      )
+      .then(res => res.json());
+      console.log('-> got userInfo', userInfo);
+
+      await addUserToDB(
+        userInfo.sub,
+        userInfo.name,
+        [0,0,0,0,0],
+        0,
+        { lat: 0, lon: 0 }
+      );
+
+      navigation.navigate("Home");
 
     } catch (e) {
       console.error(e);
     } finally {
       setIsLoading(false);
     }
-    navigation.navigate("Home");
+    
   };
 
 

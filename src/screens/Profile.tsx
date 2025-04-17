@@ -123,7 +123,13 @@ function Profile({ navigation }) {
         },
         body: JSON.stringify({
           userId,
-          avatarSelections,
+          avatarSelections: [
+            currentSkinIndex,
+            currentHatIndex,
+            currentFaceIndex,
+            currentTopIndex,
+            currentBottomIndex,
+          ],
         }),
       });
       
