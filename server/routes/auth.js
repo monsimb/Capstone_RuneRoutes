@@ -46,7 +46,7 @@ router.post('/users', async (req, res) => {
       {
         userId,
         userName,
-        avatarSelections: flatAvatars,
+        avatarSelections:
         travelDistance,
         coordinates: {lat: parseFloat(lat), lon: parseFloat(lon)}
       },

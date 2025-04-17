@@ -87,14 +87,18 @@ function Profile({ navigation }) {
         console.log("Profile data fetched:", data);
         setProfileData(data);
 
-        // If avatarSelections exist, update the local indices to match
-        if (data.avatarSelections && Array.isArray(data.avatarSelections)) {
-          setCurrentSkinIndex(data.avatarSelections[0] ?? 0);
-          setCurrentHatIndex(data.avatarSelections[1] ?? 0);
-          setCurrentFaceIndex(data.avatarSelections[2] ?? 0);
-          setCurrentTopIndex(data.avatarSelections[3] ?? 0);
-          setCurrentBottomIndex(data.avatarSelections[4] ?? 0);
-        }
+        const arr = Array.isArray(data.avatarSelections?.[0])
+          ? data.avatarSelections[0]
+          : data.avatarSelections;
+
+        // seed your indices from the returned array
+        const [skin, hat, face, top, bottom] = arr || [];
+        setCurrentSkinIndex(skin    ?? 0);
+        setCurrentHatIndex(hat      ?? 0);
+        setCurrentFaceIndex(face    ?? 0);
+        setCurrentTopIndex(top      ?? 0);
+        setCurrentBottomIndex(bottom?? 0);
+    
 
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -104,9 +108,9 @@ function Profile({ navigation }) {
     if(user && user.sub) {
       fetchProfile();
     }
-  }, [user, userId, getCredentials]);
+  }, [userId, getCredentials]);
 
-  const updateAvatar = async (userId, avatarSelections) => {
+  const updateAvatar = async (userId: string | undefined, avatarSelections: number[]) => {
     try {
       const credentials = await getCredentials();
       const token = credentials?.accessToken;
