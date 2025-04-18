@@ -17,7 +17,7 @@ import { updateBackendLocation } from '../api/updateLocation';
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
 
-import { fetchPOIs, getPoiIcon, createPolygon } from '../functions/MapUtils';
+import { fetchPOIs, getPoiIcon, createPolygon, getDirections } from '../functions/MapUtils';
 
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
 import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
@@ -110,6 +110,7 @@ const Maps: React.FC = () => {
       setSelectedMarker(null);
     };
     const [pois, setPois] = useState<{ id: string; name: string; latitude: number; longitude: number, types: [] }[]>([]);
+    const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
         //Marker State
     const [selectedMarker, setSelectedMarker] = useState<{
       id: string;
@@ -127,6 +128,7 @@ const Maps: React.FC = () => {
     const recenterMap = () => {
       setRecenter(true);
     };
+    const [routeCoords, setRouteCoords] = useState<number[][] | null>(null);
 
 
     // Function to chomp away at fog polygon
@@ -242,11 +244,50 @@ const Maps: React.FC = () => {
       }
     }, [recenter]);
 
+    // // Retrieving POI!
+    // useEffect(() => {
+    //   if (userLocation) {
+    //       fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
+    //   }
+    // }, [userLocation]);
+
+
+
+    // const lastFetchTimeRef = useRef<number>(0);
+
+    // useEffect(() => {
+    //   if (!userLocation) return;
+
+    //   const now = Date.now();
+    //   const timeSinceLastFetch = now - lastFetchTimeRef.current;
+
+    //   // uses at least 10 seconds + user movement to fetch poi....
+    //   if (timeSinceLastFetch > 10000) { // 10 seconds
+    //     // fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
+    //     console.log('poi fetched stand-in');
+    //     lastFetchTimeRef.current = now;
+    //   }
+    // }, [userLocation]);
+
+    function getTileId(lat: number, lon: number, tileSize = 0.001): string {
+      const latTile = Math.floor(lat / tileSize);
+      const lonTile = Math.floor(lon / tileSize);
+      return `${latTile}_${lonTile}`;
+    }
+    
+    const fetchedTilesRef = useRef<Set<string>>(new Set());
+    
     useEffect(() => {
-      if (userLocation) {
-          // fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
+      if (!userLocation) return;
+    
+      const tileId = getTileId(userLocation.latitude, userLocation.longitude);
+    
+      if (!fetchedTilesRef.current.has(tileId)) {
+        fetchPOIs(userLocation.latitude, userLocation.longitude, (data) => {
+          setPois((prev) => [...prev, ...data]); // or dedupe
+          fetchedTilesRef.current.add(tileId);
+        });
       }
-    // }, []); // only on startup for now
     }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
@@ -320,24 +361,6 @@ const Maps: React.FC = () => {
       return () => clearInterval(interval);
   }, [staticPolygon]);
 
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         Location.getLatestLocation({ enableHighAccuracy: true })
-    //             .then((location) => {
-    //                 if (location) {
-    //                     setUserLocation(location);
-    //                 }
-    //             })
-    //             .catch(err => console.warn("Error fetching location:", err));
-    //     }, LOCATION_UPDATE_INTERVAL);
-
-    //     return () => clearInterval(interval);
-    // }, []);
-
-
-
-
-
 
     if (!userLocation) {
     return <View style={{ flex: 1 }} />; // Return blank until location is fetched
@@ -380,6 +403,7 @@ const Maps: React.FC = () => {
                       key={poi.id} 
                       coordinate={[poi.longitude, poi.latitude]}>
                         <TouchableOpacity 
+                        onPress={() => setSelectedPOI(poi)}
                         style={styles.markerViewContainer}
                         >
                             <Image
@@ -392,6 +416,54 @@ const Maps: React.FC = () => {
                         </TouchableOpacity>
                     </MarkerView>
                 ))}
+            <Modal
+              visible={!!selectedPOI}
+              transparent
+              animationType="slide"
+              onRequestClose={() => setSelectedPOI(null)}
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>{selectedPOI?.title}</Text>
+                  <Text style={styles.modalText}>{selectedPOI?.description}</Text>
+                  <Text style={styles.modalText}>📍 Lat: {selectedPOI?.latitude.toFixed(5)}, Lon: {selectedPOI?.longitude.toFixed(5)}</Text>
+                  <Button title="Route" onPress={() =>{
+                    if (userLocation && selectedPOI) {
+                      getDirections(
+                        userLocation.latitude,
+                        userLocation.longitude,
+                        selectedPOI.latitude,
+                        selectedPOI.longitude,
+                        setRouteCoords 
+                      );
+                      setSelectedPOI(null);
+                  }}} />
+                  <Button title="Close" onPress={() => setSelectedPOI(null)} />
+                </View>
+              </View>
+            </Modal>
+            {routeCoords && <ShapeSource
+              id="routeSource"
+              shape={{
+                type: 'Feature',
+                geometry: {
+                  type: 'LineString',
+                  coordinates: routeCoords,
+                },
+              }}>
+                <LineLayer
+                  id="routeLine"
+                  style={{
+                    lineColor: '#007AFF',
+                    lineWidth: 5,
+                    lineJoin: 'round',
+                    lineCap: 'round',
+                }}
+              />
+              </ShapeSource>
+            
+            }
+
             
             <ShapeSource id="userPolygon" shape={staticPolygon}>
                 <LineLayer
