@@ -7,7 +7,7 @@ const User = mongoose.model('User');
 async function addMarker(userId, userName, avatarSelections, travelDistance) {
   try {
 
-    const existinguser = await User.findOne({userId});
+    const existingUser = await User.findOne({userId});
     if(existingUser) {
       console.log('User already exists.');
       return;
@@ -30,6 +30,7 @@ async function addMarker(userId, userName, avatarSelections, travelDistance) {
 }
 
 addUser('id', 'name', 'avatar', 'travelDistance');
+console.log('addUser should have run');
 
 // Connect to MongoDB
 /*

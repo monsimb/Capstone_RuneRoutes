@@ -128,4 +128,9 @@ export const styles = StyleSheet.create({
     top: -390, // change the position of the bottom button
     padding: 10,
   },
+  changeMeContainer: {
+    position: 'absolute',
+    bottom: 30,
+    alignItems: 'center',
+  },
 });
