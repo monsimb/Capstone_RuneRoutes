@@ -6,6 +6,10 @@ export const LOCATION_UPDATE_INTERVAL = 1000; // Interval for location updates i
 export const DEFAULT_MAP_CENTER = [-77.036086, 38.910233]; // Default center coordinates if we can't get user location
 export const DEFAULT_ZOOM_LEVEL = 8;
 
+// Caching
+const TILE_CACHE_KEY = 'fetchedTiles';
+const POI_CACHE_KEY = 'cachedPOIs';
+
 // Icon Paths
 export const ICONS = {
   STORE: require('../assets/icon/shopIcon.png'),
