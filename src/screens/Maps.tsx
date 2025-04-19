@@ -1,5 +1,6 @@
 //maps.tsx
 
+
 import React, { useEffect, useRef, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable } from 'react-native';
@@ -12,8 +13,10 @@ import { Feature } from 'geojson';
 import { point } from "@turf/helpers";
 import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
+
 import { useAuth0 } from 'react-native-auth0';
 import { updateBackendLocation } from '../api/updateLocation';
+
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
 
@@ -38,70 +41,13 @@ const Maps: React.FC = () => {
     const [newImageUri, setNewImageUri] = useState<string | null>(null);
     const [currentCoordinates, setCurrentCoordinates] = useState<{ longitude: number; latitude: number } | null>(null);
     const [markers, setMarkers] = useState<{
-        id: string;
-        longitude: number;
-        latitude: number;
-        title: string;
-        description: string;
-        imageUri: string | null;
-      }[]>([]); // Store custom markers
-      const [modalVisible, setModalVisible] = useState(false);
-      const [isViewingMarker, setIsViewingMarker] = useState(false);
-      const handleDeleteMarker = (markerId: string) => {
-        setMarkers(prevMarkers => prevMarkers.filter(marker => marker.id !== markerId));
-        setIsViewingMarker(false);
-        setSelectedMarker(null);
-      };
-
-    const syncLocationToBackend = async (lat: number, lon: number) => {
-      try {
-        const creds = await getCredentials(); 
-        const accessToken = creds?.accessToken;
-        //console.log("Token: ", accessToken);
-
-        if (!accessToken) {
-          console.warn("No access token available.");
-          return;
-        }
-
-        if(!user?.sub) {
-          console.warn("No user ID found for location sync");
-          return;
-        }
-        //console.log("AccessToken sent:", accessToken);
-        await updateBackendLocation(accessToken, user.sub, lat, lon);
-      } catch (err) { 
-        console.error(' Failed to sync location:', err);
-      }
-    };
-
-    // Function to create a polygon around a given location
-    const createPolygon = (longitude: number, latitude: number) => {
-        // Define the OFFSET for the polygon
-        // const OFFSET = 0.0001; // Increase this to make the polygon larger
-
-        // Outer boundary which covers the whole world
-        const outerBoundary = [
-            [-180, -90],
-            [190, -90],
-            [190, 90],
-            [-170, 90],
-            [-180, -90]
-        ];
-
-        // Inner hole. User's 'explored area'
-        const hole = [
-            [longitude - OFFSET, latitude - OFFSET],
-            [longitude + OFFSET, latitude - OFFSET],
-            [longitude + OFFSET, latitude + OFFSET],
-            [longitude - OFFSET, latitude + OFFSET],
-            [longitude - OFFSET, latitude - OFFSET]
-        ];
-
-        const turfPolygon = polygon([outerBoundary, hole]);
-        return turfPolygon;
-        };
-    
+      id: string;
+      longitude: number;
+      latitude: number;
+      title: string;
+      description: string;
+      imageUri: string | null;
+    }[]>([]); // Store custom markers
     const [modalVisible, setModalVisible] = useState(false);
     const [isViewingMarker, setIsViewingMarker] = useState(false);
     const handleDeleteMarker = (markerId: string) => {
@@ -130,6 +76,29 @@ const Maps: React.FC = () => {
     };
     const [routeCoords, setRouteCoords] = useState<number[][] | null>(null);
 
+
+
+    const syncLocationToBackend = async (lat: number, lon: number) => {
+      try {
+        const creds = await getCredentials(); 
+        const accessToken = creds?.accessToken;
+        //console.log("Token: ", accessToken);
+
+        if (!accessToken) {
+          console.warn("No access token available.");
+          return;
+        }
+
+        if(!user?.sub) {
+          console.warn("No user ID found for location sync");
+          return;
+        }
+        //console.log("AccessToken sent:", accessToken);
+        await updateBackendLocation(accessToken, user.sub, lat, lon);
+      } catch (err) { 
+        console.error(' Failed to sync location:', err);
+      }
+    };
 
     // Function to chomp away at fog polygon
     function subtractPoly() {
@@ -244,7 +213,7 @@ const Maps: React.FC = () => {
       }
     }, [recenter]);
 
-    // // Retrieving POI!
+    // // Retrieving POI! [og]
     // useEffect(() => {
     //   if (userLocation) {
     //       fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
@@ -252,42 +221,25 @@ const Maps: React.FC = () => {
     // }, [userLocation]);
 
 
-
-    // const lastFetchTimeRef = useRef<number>(0);
-
-    // useEffect(() => {
-    //   if (!userLocation) return;
-
-    //   const now = Date.now();
-    //   const timeSinceLastFetch = now - lastFetchTimeRef.current;
-
-    //   // uses at least 10 seconds + user movement to fetch poi....
-    //   if (timeSinceLastFetch > 10000) { // 10 seconds
-    //     // fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
-    //     console.log('poi fetched stand-in');
-    //     lastFetchTimeRef.current = now;
-    //   }
-    // }, [userLocation]);
-
     function getTileId(lat: number, lon: number, tileSize = 0.001): string {
       const latTile = Math.floor(lat / tileSize);
       const lonTile = Math.floor(lon / tileSize);
       return `${latTile}_${lonTile}`;
     }
     
+    // COMMENTED TO AVOID API HITS BEFORE WE FIGURE OUT TILESTS AND CACHEING
     const fetchedTilesRef = useRef<Set<string>>(new Set());
-    
     useEffect(() => {
       if (!userLocation) return;
     
       const tileId = getTileId(userLocation.latitude, userLocation.longitude);
     
-      if (!fetchedTilesRef.current.has(tileId)) {
-        fetchPOIs(userLocation.latitude, userLocation.longitude, (data) => {
-          setPois((prev) => [...prev, ...data]); // or dedupe
-          fetchedTilesRef.current.add(tileId);
-        });
-      }
+      // if (!fetchedTilesRef.current.has(tileId)) {
+      //   fetchPOIs(userLocation.latitude, userLocation.longitude, (data) => {
+      //     setPois((prev) => [...prev, ...data]); // or dedupe
+      //     fetchedTilesRef.current.add(tileId);
+      //   });
+      // }
     }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
@@ -408,7 +360,7 @@ const Maps: React.FC = () => {
                         >
                             <Image
                                 source={poi.types ? getPoiIcon(poi.types) : ICONS.DEFAULT} // function to get diff icons 
-                                style={{ width: 50, height: 50 }}
+                                style={{ width: ICON_SIZE, height: ICON_SIZE }}
                             />
                             <View style={styles.markerTitleContainer}>
                                 <Text style={styles.markerTitle}>{poi.name}</Text>
@@ -492,7 +444,7 @@ const Maps: React.FC = () => {
                 >
                 <Image
                   source={ICONS.CUSTOM}
-                  style={{ width: 50, height: 50 , borderRadius: 15 }}
+                  style={{ width: ICON_SIZE, height: ICON_SIZE , borderRadius: ICON_SIZE }}
                 />
                 <View style={styles.markerTitleContainer}>
                   <Text style={styles.markerTitle}>{marker.title}</Text>
