@@ -20,7 +20,7 @@ import { updateBackendLocation } from '../api/updateLocation';
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
 
-import { fetchPOIs, getPoiIcon, createPolygon, getDirections } from '../functions/MapUtils';
+import { fetchPOIs, getPoiIcon, createPolygon, getDirections, fetchRapidPlaces } from '../functions/MapUtils';
 
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
 import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
@@ -213,12 +213,12 @@ const Maps: React.FC = () => {
       }
     }, [recenter]);
 
-    // // Retrieving POI! [og]
-    // useEffect(() => {
-    //   if (userLocation) {
-    //       fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
-    //   }
-    // }, [userLocation]);
+    // Retrieving POI! [og]
+    useEffect(() => {
+      if (userLocation) {
+          fetchRapidPlaces(userLocation.latitude, userLocation.longitude, setPois);
+      }
+    }, []);
 
 
     function getTileId(lat: number, lon: number, tileSize = 0.001): string {
@@ -228,19 +228,19 @@ const Maps: React.FC = () => {
     }
     
     // COMMENTED TO AVOID API HITS BEFORE WE FIGURE OUT TILESTS AND CACHEING
-    const fetchedTilesRef = useRef<Set<string>>(new Set());
-    useEffect(() => {
-      if (!userLocation) return;
+    // const fetchedTilesRef = useRef<Set<string>>(new Set());
+    // useEffect(() => {
+    //   if (!userLocation) return;
     
-      const tileId = getTileId(userLocation.latitude, userLocation.longitude);
+    //   const tileId = getTileId(userLocation.latitude, userLocation.longitude);
     
-      // if (!fetchedTilesRef.current.has(tileId)) {
-      //   fetchPOIs(userLocation.latitude, userLocation.longitude, (data) => {
-      //     setPois((prev) => [...prev, ...data]); // or dedupe
-      //     fetchedTilesRef.current.add(tileId);
-      //   });
-      // }
-    }, [userLocation]);
+    //   if (!fetchedTilesRef.current.has(tileId)) {
+    //     fetchPOIs(userLocation.latitude, userLocation.longitude, (data) => {
+    //       setPois((prev) => [...prev, ...data]); // or dedupe
+    //       fetchedTilesRef.current.add(tileId);
+    //     });
+    //   }
+    // }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
@@ -376,9 +376,9 @@ const Maps: React.FC = () => {
             >
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>{selectedPOI?.title}</Text>
-                  <Text style={styles.modalText}>{selectedPOI?.description}</Text>
-                  <Text style={styles.modalText}>📍 Lat: {selectedPOI?.latitude.toFixed(5)}, Lon: {selectedPOI?.longitude.toFixed(5)}</Text>
+                  <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
+                  <Text style={styles.descriptionText}>{selectedPOI?.types}</Text>
+                  <Text style={styles.descriptionText}>📍 Rating: {selectedPOI?.rate}</Text>
                   <Button title="Route" onPress={() =>{
                     if (userLocation && selectedPOI) {
                       getDirections(

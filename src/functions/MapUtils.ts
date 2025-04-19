@@ -3,11 +3,82 @@
 
 import axios from 'axios';
 import { polygon } from '@turf/helpers';
-import { ICONS } from './constants';
+import { ICONS, OFFSET } from './constants';
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
+import { SetStateAction } from 'react';
+let count = 0;
 
 
 // RAPID API Local Business data to enrich information?
+export const fetchRapidPlaces = async(
+  latitude: number,
+  longitude: number,
+  setPois: { (value: SetStateAction<{ id: string; name: string; latitude: number; longitude: number; types: []; }[]>): void; (arg0: any[]): void; }) => 
+  {
+  if (count <=1){
+    const options = {
+      method: 'GET',
+      url: 'https://opentripmap-places-v1.p.rapidapi.com/en/places/bbox',
+      params: {
+        lon_max: longitude+OFFSET+.2,
+        lon_min: longitude-OFFSET-.2,
+        lat_min: latitude-OFFSET-.2,
+        lat_max: latitude+OFFSET+.2,
+        limit: '150',
+        rate: 1,
+    },
+      headers: {
+        'x-rapidapi-key': '98d848e108msh9774aeab8bdc785p14975fjsnb6f10e6bfe17',
+        'x-rapidapi-host': 'opentripmap-places-v1.p.rapidapi.com'
+      }
+    };
+    
+    try {
+      // console.log('latitudeMAX: ',latitude+OFFSET,'longitudeMAX :',longitude+OFFSET)
+      const response = await axios.request(options);
+      // console.log(response.data.features);
+      // console.log(response.data.features[0].properties);
+      const pois= response.data.features.map((poi) => ({
+        id: poi.properties.xid,
+        name: poi.properties.name, // Use `name` or fallback to `text`
+        rate: poi.properties.rate,
+        types: poi.properties.kinds || [], // Use `kinds` for types
+        longitude: poi.geometry.coordinates[0],
+        latitude: poi.geometry.coordinates[1],
+      }));
+      console.log(pois);
+      setPois(pois);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  count +=1;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //https://rapidapi.com/letscrape-6bRBa3QguO5/api/local-business-data
 export const fetchPOIs = async (latitude: number, longitude: number, setPois: { (value: SetStateAction<{ id: string; name: string; latitude: number; longitude: number; types: []; }[]>): void; (arg0: any[]): void; }) => {
   try {
@@ -100,7 +171,7 @@ export async function getDirections(
 };
 
 export const createPolygon = (longitude: number, latitude: number) => {
-  const OFFSET = 0.0005;
+
   const outerBoundary = [
     [-180, -90],
     [180, -90],
