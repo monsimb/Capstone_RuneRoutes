@@ -3,12 +3,13 @@
 
 import axios from 'axios';
 import { polygon } from '@turf/helpers';
-import { ICONS } from './constants';
+import { ICONS, OFFSET } from './constants';
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
+import { SetStateAction } from 'react';
+let count = 0;
 
 
-// RAPID API Local Business data to enrich information?
-//https://rapidapi.com/letscrape-6bRBa3QguO5/api/local-business-data
+// https://rapidapi.com/letscrape-6bRBa3QguO5/api/local-business-data ?? 
 export const fetchPOIs = async (latitude: number, longitude: number, setPois: { (value: SetStateAction<{ id: string; name: string; latitude: number; longitude: number; types: []; }[]>): void; (arg0: any[]): void; }) => {
   try {
     const delta = 0.2; // might need to be altered based on tilesetsize!!!!!!!!!!
@@ -100,7 +101,7 @@ export async function getDirections(
 };
 
 export const createPolygon = (longitude: number, latitude: number) => {
-  const OFFSET = 0.0005;
+
   const outerBoundary = [
     [-180, -90],
     [180, -90],

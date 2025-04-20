@@ -5,18 +5,15 @@ const Schema = mongoose.Schema;
 const url = process.env.MONGODB_URI; // Ensure your .env file contains MONGODB_URI
 
 if (!url) {
-  console.error('❌ MONGODB_URI not found. Ensure .env is configured.');
+  console.error('MONGODB_URI not found. Ensure .env is configured.');
   process.exit(1);
 }
 
 // Connect to MongoDB and specify database in URI
-mongoose.connect(url, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('✅ MongoDB Database connected successfully'))
+mongoose.connect(url)
+  .then(() => console.log('MongoDB Database connected successfully'))
   .catch((err) => {
-    console.error('❌ Error connecting to MongoDB:', err);
+    console.error('Error connecting to MongoDB:', err);
     process.exit(1);
   });
 

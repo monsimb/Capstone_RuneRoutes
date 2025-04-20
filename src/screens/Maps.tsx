@@ -1,5 +1,6 @@
 //maps.tsx
 
+
 import React, { useEffect, useRef, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable } from 'react-native';
@@ -13,6 +14,9 @@ import { point } from "@turf/helpers";
 import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { useAuth0 } from 'react-native-auth0';
+import { updateBackendLocation } from '../api/updateLocation';
 
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
@@ -29,6 +33,7 @@ Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
 
 const Maps: React.FC = () => {
+    const { authorize, getCredentials, user } = useAuth0();
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
@@ -37,13 +42,13 @@ const Maps: React.FC = () => {
     const [newImageUri, setNewImageUri] = useState<string | null>(null);
     const [currentCoordinates, setCurrentCoordinates] = useState<{ longitude: number; latitude: number } | null>(null);
     const [markers, setMarkers] = useState<{
-        id: string;
-        longitude: number;
-        latitude: number;
-        title: string;
-        description: string;
-        imageUri: string | null;
-      }[]>([]); // Store custom markers
+      id: string;
+      longitude: number;
+      latitude: number;
+      title: string;
+      description: string;
+      imageUri: string | null;
+    }[]>([]); // Store custom markers
     const [modalVisible, setModalVisible] = useState(false);
     const [isViewingMarker, setIsViewingMarker] = useState(false);
     const handleDeleteMarker = (markerId: string) => {
@@ -80,6 +85,28 @@ const Maps: React.FC = () => {
       const lonTile = Math.floor(lon / tileSize);
       return `${latTile}_${lonTile}`;       // ex. tileId = "3254_-9743"    when  lat = 32.54123 lon = -97.42187 tileSize = 0.01
     }
+    
+    const syncLocationToBackend = async (lat: number, lon: number) => {
+      try {
+        const creds = await getCredentials(); 
+        const accessToken = creds?.accessToken;
+        //console.log("Token: ", accessToken);
+
+        if (!accessToken) {
+          console.warn("No access token available.");
+          return;
+        }
+
+        if(!user?.sub) {
+          console.warn("No user ID found for location sync");
+          return;
+        }
+        //console.log("AccessToken sent:", accessToken);
+        await updateBackendLocation(accessToken, user.sub, lat, lon);
+      } catch (err) { 
+        console.error(' Failed to sync location:', err);
+      }
+    };
     // Function to chomp away at fog polygon
     function subtractPoly() {
       if (!userLocation || !staticPolygon) return;
@@ -108,7 +135,7 @@ const Maps: React.FC = () => {
         setStaticPolygon(newFogLayer);
         setTotalExploredArea((prevTotal) => prevTotal + chomped); // Add the chomped area to the total
 
-        // console.log('Updated fog layer!!!!');
+        // //console.log('Updated fog layer!!!!');
   
       } else {
         console.warn("Difference operation returned null, check polygon validity!");
@@ -195,36 +222,36 @@ const Maps: React.FC = () => {
 
 
 
-    // useEffect(() => {
-    //   if (!userLocation) return;
+    useEffect(() => {
+      if (!userLocation) return;
     
-    //   const fetchAndCacheTile = async () => {
-    //     const tileId = getTileId(userLocation.latitude, userLocation.longitude);
+      const fetchAndCacheTile = async () => {
+        const tileId = getTileId(userLocation.latitude, userLocation.longitude);
     
-    //     if (!fetchedTilesRef.current.has(tileId)) {
-    //       try {
-    //         const cached = await AsyncStorage.getItem(`poi_tile_${tileId}`);
-    //         if (cached) {
-    //           const pois = JSON.parse(cached);
-    //           setPois((prev) => [...prev, ...pois]); // or dedupe
-    //           fetchedTilesRef.current.add(tileId);
-    //           console.log('tile cached');
-    //         } else {
-    //           fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
-    //             setPois((prev) => [...prev, ...data]); // or dedupe
-    //             fetchedTilesRef.current.add(tileId);
-    //             await AsyncStorage.setItem(`poi_tile_${tileId}`, JSON.stringify(data));
-    //             console.log('tile fetched');
-    //           });
-    //         }
-    //       } catch (error) {
-    //         console.error('AsyncStorage error:', error);
-    //       }
-    //     }
-    //   };
+        if (!fetchedTilesRef.current.has(tileId)) {
+          try {
+            const cached = await AsyncStorage.getItem(`poi_tile_${tileId}`);
+            if (cached) {
+              const pois = JSON.parse(cached);
+              setPois((prev) => [...prev, ...pois]); // or dedupe
+              fetchedTilesRef.current.add(tileId);
+              console.log('tile cached');
+            } else {
+              fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
+                setPois((prev) => [...prev, ...data]); // or dedupe
+                fetchedTilesRef.current.add(tileId);
+                await AsyncStorage.setItem(`poi_tile_${tileId}`, JSON.stringify(data));
+                console.log('tile fetched');
+              });
+            }
+          } catch (error) {
+            console.error('AsyncStorage error:', error);
+          }
+        }
+      };
     
-    //   fetchAndCacheTile();
-    // }, [userLocation]);
+      fetchAndCacheTile();
+    }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
@@ -239,6 +266,7 @@ const Maps: React.FC = () => {
                 .then(location => {
                     setUserLocation(location); // Save location to state
 
+
                     // Set initial location (on load) ONCE, never again
                     if (!initialUserLocation) {
                         setInitialUserLocation(location); // Initial location has been set
@@ -251,7 +279,39 @@ const Maps: React.FC = () => {
             }
         })
         .catch(err => console.warn('Permission denied:', err));
-    }, []);     // will trigger only on load
+    }, []);         // will trigger only on load
+
+
+    useEffect(() => {
+      const interval = setInterval(async () => {
+        if (!user) return; // <- User not authenticated, bail out
+    
+        const location = await Location.getLatestLocation({ enableHighAccuracy: true });
+        if (location) {
+          setUserLocation(location);
+          //await syncLocationToBackend(location.latitude, location.longitude);
+        }
+      }, LOCATION_UPDATE_INTERVAL);
+    
+      return () => clearInterval(interval);
+    }, [user]); // Only run this effect once user is available
+    
+
+
+    useEffect(() => {
+      const interval = setInterval(async () => {
+        if (!user) return; // <- User not authenticated, bail out
+    
+        const location = await Location.getLatestLocation({ enableHighAccuracy: true });
+        if (location) {
+          setUserLocation(location);
+          //await syncLocationToBackend(location.latitude, location.longitude);
+        }
+      }, LOCATION_UPDATE_INTERVAL);
+    
+      return () => clearInterval(interval);
+    }, [user]); // Only run this effect once user is available
+    
 
     // Discover 'fog chomp' main logic
     useEffect(() => {
@@ -327,7 +387,7 @@ const Maps: React.FC = () => {
                         >
                             <Image
                                 source={poi.types ? getPoiIcon(poi.types) : ICONS.DEFAULT} // function to get diff icons 
-                                style={{ width: 50, height: 50 }}
+                                style={{ width: ICON_SIZE, height: ICON_SIZE }}
                             />
                             <View style={styles.markerTitleContainer}>
                                 <Text style={styles.markerTitle}>{poi.name}</Text>
@@ -345,7 +405,7 @@ const Maps: React.FC = () => {
                 <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
                   <Text style={styles.descriptionText}>{selectedPOI?.types}</Text>
-                  <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
+                  <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}: 'N/A'</Text>
                   <Button title="Route" onPress={() =>{
                     if (userLocation && selectedPOI) {
                       getDirections(
@@ -411,7 +471,7 @@ const Maps: React.FC = () => {
                 >
                 <Image
                   source={ICONS.CUSTOM}
-                  style={{ width: 50, height: 50 , borderRadius: 15 }}
+                  style={{ width: ICON_SIZE, height: ICON_SIZE , borderRadius: ICON_SIZE }}
                 />
                 <View style={styles.markerTitleContainer}>
                   <Text style={styles.markerTitle}>{marker.title}</Text>

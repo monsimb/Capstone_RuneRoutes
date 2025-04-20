@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView, Switch } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useAuth0 } from 'react-native-auth0';
 import { styles } from '../styles/Profile';
 import { useProfileContext } from '../context/ProfileContext';
 
 import { skins, colors, hats, faces, tops, bottoms, hatTopOffsets } from '../functions/constants';
 
 
-function Profile({ navigation }) {
+function Profile({ }) {
   // const { chompedArea = 0 } = route.params || {}; // Default to 0 if not passed
   const [currentSkinIndex, setCurrentSkinIndex] = useState(0);
   const [currentHatIndex, setCurrentHatIndex] = useState(0);
@@ -15,6 +16,96 @@ function Profile({ navigation }) {
   const [currentTopIndex, setCurrentTopIndex] = useState(0);
   const [currentBottomIndex, setCurrentBottomIndex] = useState(0);
   const { totalExploredArea } = useProfileContext();
+  const [profileData, setProfileData] = useState(null);
+  const { getCredentials, user } = useAuth0();
+  const userId = user?.sub;
+
+  useEffect(() => { 
+    const fetchProfile = async () => {
+      try {
+        const creds = await getCredentials();
+        const token = creds?.accessToken;
+        if(!token || !user?.sub) {
+          console.warn("Missing access token or user ID");
+          return;
+        }
+
+        const response = await fetch(`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${user.sub}`, {
+          method: "GET",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if(!response.ok) {
+          const errorText = await response.text();
+          console.warn(`Server error ${response.status}:`, errorText);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Profile data fetched:", data);
+        setProfileData(data);
+
+        const arr = Array.isArray(data.avatarSelections?.[0])
+          ? data.avatarSelections[0]
+          : data.avatarSelections;
+
+        // seed your indices from the returned array
+        const [skin, hat, face, top, bottom] = arr || [];
+        setCurrentSkinIndex(skin    ?? 0);
+        setCurrentHatIndex(hat      ?? 0);
+        setCurrentFaceIndex(face    ?? 0);
+        setCurrentTopIndex(top      ?? 0);
+        setCurrentBottomIndex(bottom?? 0);
+    
+
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
+    };
+
+    if(user && user.sub) {
+      fetchProfile();
+    }
+  }, [userId, getCredentials]);
+
+  const updateAvatar = async (userId: string | undefined, avatarSelections: number[]) => {
+    try {
+      const credentials = await getCredentials();
+      const token = credentials?.accessToken;
+
+      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/auth/update-avatar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, 
+        },
+        body: JSON.stringify({
+          userId,
+          avatarSelections: [
+            currentSkinIndex,
+            currentHatIndex,
+            currentFaceIndex,
+            currentTopIndex,
+            currentBottomIndex,
+          ],
+        }),
+      });
+      
+      const data = await response.json();
+      console.log(data);
+      console.log("Schmeh");
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}: ${JSON.stringify(data)}`);
+      }
+      console.log("Avatar updated: ", data);
+    } catch (err) {
+      console.error("Error sending user to backend:", err.message);
+    }
+  };
+
 
 
   // ADD BACKEND (THIS IS TEMPORARY STATS)
@@ -26,7 +117,7 @@ function Profile({ navigation }) {
   console.log('total explored area:', totalExploredArea)
 
 
-  const handleNext = (type) => {
+  const handleNext = (type: string) => {
     if (type === 'skin') {
       setCurrentSkinIndex((prevIndex) => (prevIndex + 1) % skins.length);
     } else if (type === 'hat') {
@@ -40,7 +131,7 @@ function Profile({ navigation }) {
     }
   };
 
-  const handlePrevious = (type) => {
+  const handlePrevious = (type: string) => {
     if (type === 'skin') {
       setCurrentSkinIndex((prevIndex) => (prevIndex - 1 + skins.length) % skins.length);
     } else if (type === 'hat') {
@@ -56,6 +147,19 @@ function Profile({ navigation }) {
 
   const [isCape, setCape] = useState(false);
   const toggleCape = () => setCape((prevState) => !prevState);
+
+  
+
+  if (
+    !profileData ||
+    [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex].some(i => i === null || i === undefined)
+  ) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading profile...</Text>
+      </View>
+    );
+  }
 
   return (
     // <ScrollView contentContainerStyle={{ flexGrow: 1 }}>     // not working rn
@@ -165,6 +269,9 @@ function Profile({ navigation }) {
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>
 
+      <View style={styles.changeMeContainer}>
+        <Button title="Save Profile" onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])} /> 
+      </View>
     </View>
     // </ScrollView>
   );
