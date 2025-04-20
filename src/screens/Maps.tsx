@@ -9,7 +9,7 @@ import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource
 import { MapView } from '@rnmapbox/maps';
 import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
-import { Feature, Polygon } from 'geojson';
+import { Feature, Polygon, MultiPolygon } from 'geojson';
 import { point } from "@turf/helpers";
 import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -35,7 +35,7 @@ const Maps: React.FC = () => {
     const { authorize, getCredentials, user } = useAuth0();
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
-    const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
+    const [staticPolygon, setStaticPolygon] = useState<Feature<Polygon | MultiPolygon> | null>(null); // Added multipolygon
     const [newTitle, setNewTitle] = useState('');
     const [newDescription, setNewDescription] = useState('');
     const [newImageUri, setNewImageUri] = useState<string | null>(null);
@@ -131,7 +131,7 @@ const Maps: React.FC = () => {
       }
     }
 
-    async function fetchFogFromBackend(userId: string, token: string): Promise<Feature<Polygon> | null> {
+    async function fetchFogFromBackend(userId: string, token: string): Promise<Feature<Polygon | MultiPolygon> | null> {
       const response = await fetch (`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${userId}/fog`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
