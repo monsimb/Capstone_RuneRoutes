@@ -118,7 +118,7 @@ const Maps: React.FC = () => {
           const creds = await getCredentials();
           const token = creds?.accessToken;
           if(token && user?.sub) {
-            await saveFogToBackend(user.sub, getAccessToken, newFogLayer);
+            await saveFogToBackend(newFogLayer);
           }
         } catch (err: any) {
           console.error('Failed to save fog state:', err);
@@ -142,10 +142,20 @@ const Maps: React.FC = () => {
       return (await response.json()).fog;
     }
 
-    async function saveFogToBackend(userId: string, token: string, fog: Feature<Polygon>) {
+    async function saveFogToBackend(fog) {
+
+      if(!user?.sub) {
+        return;
+      }
+
+      const { accessToken } = await getCredentials();
+
       const response = await fetch(`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${userId}/fog`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${accessToken}` 
+        },
         body: JSON.stringify({ fog }),
       });
       if(!response.ok) {

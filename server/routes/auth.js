@@ -27,11 +27,9 @@ router.post('/users', async (req, res) => {
       userName,
       avatarSelections, // We have to possibly prepare for flattening. Could be [] or [[]]
       travelDistance, 
-      lat, 
-      lon 
     } = req.body;
 
-    if(!userId || !userName || lat === undefined || lon === undefined) {
+    if(!userId || !userName) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -48,7 +46,6 @@ router.post('/users', async (req, res) => {
           userName,
           avatarSelections: [0,0,0,0,0],
           travelDistance: 0,
-          coordinates: { lat: parseFloat(lat) || 0, lon: parseFloat(lon) || 0 }
         }
       },
       {
@@ -114,45 +111,6 @@ router.post('/users/:userId/fog', checkJwt, async (req, res) => {
 });
 
 // ####################################################################### USERS(END)
-
-// ####################################################################### LOCATION NOT NEEDED. REPLACED WITH FOG 
-/*
-router.post('/location', checkJwt, async (req, res) => {
-  try {
-    const {userId, lat, lon} = req.body;
-
-    if(!userId || lat === undefined || lon === undefined) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
-
-    const updatedUser = await User.findOneAndUpdate(
-      {userId},
-      { 
-        $set: {
-          coordinates: {
-            lat: parseFloat(lat),
-            lon: parseFloat(lon)
-          }
-        }
-      },
-      { new: true }
-    );
-
-    if(!updatedUser) {
-      return res.status(404).json({message: `User not found`});
-    }
-
-    res.status(200).json({
-      message: 'Coordinates updated',
-      coordinates: updatedUser.coordinates
-    });
-  } catch(err) {
-    console.error('Error updating location:', err.message);
-    res.status(500).json({error: 'Internal Server Error'});
-  }
-});
-*/
-// ####################################################################### LOCATION(END)
 
 // ####################################################################### AVATAR
 
