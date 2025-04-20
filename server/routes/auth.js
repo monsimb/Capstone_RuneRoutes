@@ -87,9 +87,36 @@ router.get('/users/:userId', checkJwt, async (req, res) => {
   }
 });
 
+router.get('/users/:userId/fog', checkJwt, async (req, res) => {
+  const u = await User.findOne({ userId: req.params.userId });
+  
+  if(!u) 
+  {
+    return res.status(404).json({ message: 'User not found'});
+  }
+  res.json({ fog: u.fog });
+});
+
+router.post('/users/:userId/fog', checkJwt, async (req, res) => { 
+  const { fog } = req.body;
+
+  const u = await User.findOneAndUpdate(
+    { userId: req.params.userId },
+    { fog },
+    { new: true }
+  );
+
+  if(!u)
+  {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  res.json({ message: 'Fog updated', fog: u.fog });
+});
+
 // ####################################################################### USERS(END)
 
-// ####################################################################### LOCATION
+// ####################################################################### LOCATION NOT NEEDED. REPLACED WITH FOG 
+/*
 router.post('/location', checkJwt, async (req, res) => {
   try {
     const {userId, lat, lon} = req.body;
@@ -124,7 +151,7 @@ router.post('/location', checkJwt, async (req, res) => {
     res.status(500).json({error: 'Internal Server Error'});
   }
 });
-
+*/
 // ####################################################################### LOCATION(END)
 
 // ####################################################################### AVATAR

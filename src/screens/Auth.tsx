@@ -20,7 +20,7 @@ function AuthScreen({ navigation }) {
   }, [user]);
 
   // Function to send user data to backend
-  const addUserToDB = async (userId, userName, avatarSelections, travelDistance, coordinates) => {
+  const addUserToDB = async (userId, userName, avatarSelections, travelDistance) => {
     try {
       const credentials = await getCredentials();
       const token = credentials?.accessToken;
@@ -37,8 +37,6 @@ function AuthScreen({ navigation }) {
           userName,
           avatarSelections,
           travelDistance,
-          lat: coordinates.lat,
-          lon: coordinates.lon,
         }),
       });
       
