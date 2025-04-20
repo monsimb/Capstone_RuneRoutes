@@ -11,7 +11,7 @@ import { MAP_BOX_ACCESS_TOKEN } from '@env';
 //https://rapidapi.com/letscrape-6bRBa3QguO5/api/local-business-data
 export const fetchPOIs = async (latitude: number, longitude: number, setPois: { (value: SetStateAction<{ id: string; name: string; latitude: number; longitude: number; types: []; }[]>): void; (arg0: any[]): void; }) => {
   try {
-    const delta = 0.2;
+    const delta = 0.2; // might need to be altered based on tilesetsize!!!!!!!!!!
     const bbox = [
       longitude - delta, // minLon
       latitude - delta,  // minLat

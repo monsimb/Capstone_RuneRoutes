@@ -12,6 +12,7 @@ import { Feature } from 'geojson';
 import { point } from "@turf/helpers";
 import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
@@ -70,8 +71,15 @@ const Maps: React.FC = () => {
       setRecenter(true);
     };
     const [routeCoords, setRouteCoords] = useState<number[][] | null>(null);
+    const fetchedTilesRef = useRef<Set<string>>(new Set());
 
 
+    function getTileId(lat: number, lon: number, tileSize = 0.01): string {
+      // NOTE: tileSize represents 0.01 = ~1km
+      const latTile = Math.floor(lat / tileSize);
+      const lonTile = Math.floor(lon / tileSize);
+      return `${latTile}_${lonTile}`;       // ex. tileId = "3254_-9743"    when  lat = 32.54123 lon = -97.42187 tileSize = 0.01
+    }
     // Function to chomp away at fog polygon
     function subtractPoly() {
       if (!userLocation || !staticPolygon) return;
@@ -106,6 +114,7 @@ const Maps: React.FC = () => {
         console.warn("Difference operation returned null, check polygon validity!");
       }
     };
+
     // User uploaded images (markers)
     const pickImage = () => {
       launchImageLibrary({
@@ -168,10 +177,7 @@ const Maps: React.FC = () => {
             console.error("No coordinates found in event:", e);
         }
     };
-
-  
-
-
+    
     // Camera re-center
     useEffect(() => {
       if (userLocation && cameraRef.current && recenter){
@@ -185,51 +191,40 @@ const Maps: React.FC = () => {
       }
     }, [recenter]);
 
-    // // Retrieving POI!
-    // useEffect(() => {
-    //   if (userLocation) {
-    //       fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
-    //   }
-    // }, [userLocation]);
 
 
 
-    // const lastFetchTimeRef = useRef<number>(0);
 
     // useEffect(() => {
     //   if (!userLocation) return;
-
-    //   const now = Date.now();
-    //   const timeSinceLastFetch = now - lastFetchTimeRef.current;
-
-    //   // uses at least 10 seconds + user movement to fetch poi....
-    //   if (timeSinceLastFetch > 10000) { // 10 seconds
-    //     // fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
-    //     console.log('poi fetched stand-in');
-    //     lastFetchTimeRef.current = now;
-    //   }
+    
+    //   const fetchAndCacheTile = async () => {
+    //     const tileId = getTileId(userLocation.latitude, userLocation.longitude);
+    
+    //     if (!fetchedTilesRef.current.has(tileId)) {
+    //       try {
+    //         const cached = await AsyncStorage.getItem(`poi_tile_${tileId}`);
+    //         if (cached) {
+    //           const pois = JSON.parse(cached);
+    //           setPois((prev) => [...prev, ...pois]); // or dedupe
+    //           fetchedTilesRef.current.add(tileId);
+    //           console.log('tile cached');
+    //         } else {
+    //           fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
+    //             setPois((prev) => [...prev, ...data]); // or dedupe
+    //             fetchedTilesRef.current.add(tileId);
+    //             await AsyncStorage.setItem(`poi_tile_${tileId}`, JSON.stringify(data));
+    //             console.log('tile fetched');
+    //           });
+    //         }
+    //       } catch (error) {
+    //         console.error('AsyncStorage error:', error);
+    //       }
+    //     }
+    //   };
+    
+    //   fetchAndCacheTile();
     // }, [userLocation]);
-
-    function getTileId(lat: number, lon: number, tileSize = 0.001): string {
-      const latTile = Math.floor(lat / tileSize);
-      const lonTile = Math.floor(lon / tileSize);
-      return `${latTile}_${lonTile}`;
-    }
-    
-    const fetchedTilesRef = useRef<Set<string>>(new Set());
-    
-    useEffect(() => {
-      if (!userLocation) return;
-    
-      const tileId = getTileId(userLocation.latitude, userLocation.longitude);
-    
-      if (!fetchedTilesRef.current.has(tileId)) {
-        fetchPOIs(userLocation.latitude, userLocation.longitude, (data) => {
-          setPois((prev) => [...prev, ...data]); // or dedupe
-          fetchedTilesRef.current.add(tileId);
-        });
-      }
-    }, [userLocation]);
 
     // Request permission and get user location. Create initial fog polygon.
     useEffect(() => {
@@ -256,7 +251,7 @@ const Maps: React.FC = () => {
             }
         })
         .catch(err => console.warn('Permission denied:', err));
-    }, []); // will trigger only on load
+    }, []);     // will trigger only on load
 
     // Discover 'fog chomp' main logic
     useEffect(() => {
@@ -348,9 +343,9 @@ const Maps: React.FC = () => {
             >
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>{selectedPOI?.title}</Text>
-                  <Text style={styles.modalText}>{selectedPOI?.description}</Text>
-                  <Text style={styles.modalText}>📍 Lat: {selectedPOI?.latitude.toFixed(5)}, Lon: {selectedPOI?.longitude.toFixed(5)}</Text>
+                <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
+                  <Text style={styles.descriptionText}>{selectedPOI?.types}</Text>
+                  <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
                   <Button title="Route" onPress={() =>{
                     if (userLocation && selectedPOI) {
                       getDirections(
