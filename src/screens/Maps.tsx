@@ -33,7 +33,8 @@ Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
 const Maps: React.FC = () => {
     const { authorize, getCredentials, user } = useAuth0();
-    const userId = user?.sub;
+    const userId = user?.sub; // Need for DB saving polygon
+    const lastSavedFogRef = useRef<string | null>(null); // For comparison of past 
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<Polygon | MultiPolygon> | null>(null); // Added multipolygon
