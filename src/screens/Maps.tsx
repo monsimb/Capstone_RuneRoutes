@@ -297,22 +297,6 @@ const Maps: React.FC = () => {
     }, [user]); // Only run this effect once user is available
     
 
-
-    useEffect(() => {
-      const interval = setInterval(async () => {
-        if (!user) return; // <- User not authenticated, bail out
-    
-        const location = await Location.getLatestLocation({ enableHighAccuracy: true });
-        if (location) {
-          setUserLocation(location);
-          //await syncLocationToBackend(location.latitude, location.longitude);
-        }
-      }, LOCATION_UPDATE_INTERVAL);
-    
-      return () => clearInterval(interval);
-    }, [user]); // Only run this effect once user is available
-    
-
     // Discover 'fog chomp' main logic
     useEffect(() => {
       const interval = setInterval(() => {
