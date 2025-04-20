@@ -96,7 +96,6 @@ function Profile({ }) {
       
       const data = await response.json();
       console.log(data);
-      console.log("Schmeh");
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}: ${JSON.stringify(data)}`);
       }

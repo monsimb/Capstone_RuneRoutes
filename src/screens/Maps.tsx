@@ -33,6 +33,7 @@ Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
 const Maps: React.FC = () => {
     const { authorize, getCredentials, user } = useAuth0();
+    const userId = user?.sub;
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
     const [staticPolygon, setStaticPolygon] = useState<Feature<Polygon | MultiPolygon> | null>(null); // Added multipolygon
@@ -115,11 +116,13 @@ const Maps: React.FC = () => {
 
 
         try {
-          const creds = await getCredentials();
-          const token = creds?.accessToken;
-          if(token && user?.sub) {
-            await saveFogToBackend(newFogLayer);
-          }
+          //const creds = await getCredentials();
+          //const token = creds?.accessToken;
+          //if(token && user?.sub) {
+          //  await saveFogToBackend(newFogLayer);
+          //}
+          await saveFogToBackend(newFogLayer);
+          console.log("SAVED FOG SUCCESSFULLY ( I THINK? )");
         } catch (err: any) {
           console.error('Failed to save fog state:', err);
         }
@@ -142,19 +145,25 @@ const Maps: React.FC = () => {
       return (await response.json()).fog;
     }
 
-    async function saveFogToBackend(fog) {
+    async function saveFogToBackend(fog: Feature<Polygon | MultiPolygon>) {
 
-      if(!user?.sub) {
+      if(!userId) {
         return;
       }
 
-      const { accessToken } = await getCredentials();
+      const creds = await getCredentials();
+      const token = creds?.accessToken;
+
+      if(!token) {
+        console.warn("No Auth0 token. Skipping fog save");
+        return;
+      }
 
       const response = await fetch(`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${userId}/fog`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json', 
-          Authorization: `Bearer ${accessToken}` 
+          Authorization: `Bearer ${token}` 
         },
         body: JSON.stringify({ fog }),
       });
