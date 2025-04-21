@@ -1,5 +1,5 @@
 // MapUtils.ts
-// includes functions for retrieving POI's, setting POI's icon, and creating initial polygon
+// includes functions for retrieving POI's, setting POI's icon, routing to POIs, and creating initial polygon
 
 import axios from 'axios';
 import { polygon } from '@turf/helpers';
@@ -97,7 +97,7 @@ export const fetchPOIs = async (
   }
 };
 
-
+// Defines which ICON to give to a POI given type tags
 export const getPoiIcon = (types: string | string[]) => {
   // normalized types to avoid issues with tags like [chicken wing restaurant] -> now [chicken,wing,restaurant]
   const typeArray = Array.isArray(types) ? types : [types];
@@ -108,10 +108,12 @@ export const getPoiIcon = (types: string | string[]) => {
   if (normalizedTypes.includes('park')) return ICONS.PARK;
   if (normalizedTypes.includes('café') || normalizedTypes.includes('cafe')) return ICONS.CAFE;
   if (normalizedTypes.includes('food') || normalizedTypes.includes('restaurant')) return ICONS.FOOD;
+  if (normalizedTypes.includes('museum')) return ICONS.MUSEUM;
 
   return ICONS.DEFAULT;
 };
 
+// Retrieve directions from MAPBOX DIRECTIONS API
 export async function getDirections(
   startLat: number,
   startLon: number,
@@ -133,6 +135,7 @@ export async function getDirections(
   }
 };
 
+// Creates original polygon (if user is not already inside of a polygon based on db)
 export const createPolygon = (longitude: number, latitude: number) => {
 
   const outerBoundary = [

@@ -17,6 +17,7 @@ export const ICONS = {
   PARK: require('../assets/icon/parkIcon.png'),
   CAFE: require('../assets/icon/cafeIcon.png'),
   FOOD: require('../assets/icon/foodIcon.png'),
+  MUSEUM: require('../assets/icon/museumIcon.png'),
   DEFAULT: require('../assets/icon/signpostIcon.png'),
   CUSTOM: require('../assets/icon/defaultIcon.png')
 };

@@ -3,7 +3,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable } from 'react-native';
+import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable, ScrollView } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
 import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
 import { MapView } from '@rnmapbox/maps';
@@ -106,7 +106,7 @@ const Maps: React.FC = () => {
     };
 
 
-
+    // Cacheing tile settings
     function getTileId(lat: number, lon: number, tileSize = 0.01): string {
       // NOTE: tileSize represents 0.01 = ~1km
       const latTile = Math.floor(lat / tileSize);
@@ -233,8 +233,8 @@ const Maps: React.FC = () => {
     //   console.log('poi fetched');
 
     // }, []);
-  
 
+    // Tile cacheing
     useEffect(() => {
       if (!userLocation) return;
     
@@ -258,9 +258,10 @@ const Maps: React.FC = () => {
     
               fetchedTilesRef.current.add(tileId);
               console.log('Loaded POIs from cache for tile:', tileId, '| Count:', pois.length);
+            
             } else {
               fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
-                // Sanitize data before caching!
+                // Sanitize data before caching
                 const sanitized = data.map(poi => ({
                   ...poi,
                   photoUrl: poi.photoUrl || null,
@@ -318,6 +319,7 @@ const Maps: React.FC = () => {
     }, []);         // will trigger only on load
 
 
+    // 
     useEffect(() => {
       const interval = setInterval(async () => {
         if (!user) return; // <- User not authenticated, bail out
@@ -370,9 +372,11 @@ const Maps: React.FC = () => {
           <MapView
             provider="mapbox"
             style={styles.map}
-            centerCoordinate={[userLocation.longitude, userLocation.latitude]} // Set initial map center to user's location
-            showUserLocation={true} // Show user location on map
-            onPress={handlePress} // Handle press to add custom marker
+            centerCoordinate={
+              [userLocation.longitude, 
+                userLocation.latitude]}     // Set initial map center to user's location
+            showUserLocation={true}         // Show user location on map
+            onPress={handlePress}           // Handle press to add custom marker
           >
             <Camera 
               ref={cameraRef}
@@ -415,6 +419,7 @@ const Maps: React.FC = () => {
                         </TouchableOpacity>
                     </MarkerView>
                 ))}
+            {/* Modal when tapping POI markers */}
             <Modal
               visible={!!selectedPOI}
               transparent
@@ -423,81 +428,93 @@ const Maps: React.FC = () => {
             >
               <View style={{
                   flex: 1,
-                  backgroundColor: 'rgba(0,0,0,0.5)', // Dim background
+                  backgroundColor: 'rgba(0,0,0,0.5)', // dim background
                   justifyContent: 'center',
                   alignItems: 'center',
-                  padding: 20,
+                  padding: 10,
                 }}>
-                <View style={{
+                  <View style={{
                     width: '95%',
                     maxHeight: '90%',
                     backgroundColor: '#fff',
                     borderRadius: 16,
-                    padding: 20,
+                    padding: 15,
                     elevation: 5,
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.3,
                     shadowRadius: 8,
                   }}>
-                  <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
-                  {selectedPOI?.photoUrl && (
-                    <Image
-                      source={{ uri: selectedPOI.photoUrl }}
-                      style={styles.poiImage}
-                      resizeMode="cover"
-                    />
-                  )}
-                  <Text style={styles.descriptionText}>{selectedPOI?.summary}</Text>
-                  {selectedPOI?.accessibility && Object.keys(selectedPOI.accessibility).length > 0 && (
-                    <View style={{ marginTop: 10 }}>
-                      <Text style={styles.descriptionText}>♿ Accessibility:</Text>
-                      {Object.entries(selectedPOI.accessibility).map(([feature, available]) => (
-                        <Text
-                          key={feature}
-                          style={[
-                            styles.descriptionText,
-                            { color: available ? 'green' : 'gray' }
-                          ]}
-                        >
-                          {available ? '✓' : '✗'} {feature}
-                        </Text>
-                      ))}
-                    </View>
-                  )}
-                {selectedPOI?.workingHours && Object.keys(selectedPOI.workingHours).length > 0 && (
-                    <View style={{ marginTop: 10 }}>
-                      <TouchableOpacity onPress={() => setIsHoursExpanded(!isHoursExpanded)}>
-                        <Text style={[styles.descriptionText, { fontWeight: 'bold', textDecorationLine: 'underline' }]}>
-                          🕒 Working Hours {isHoursExpanded ? '▲' : '▼'}
-                        </Text>
-                      </TouchableOpacity>
+                    <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                      <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
+                      
+                      {selectedPOI?.photoUrl && (
+                        <Image
+                          source={{ uri: selectedPOI.photoUrl }}
+                          style={styles.poiImage}
+                          resizeMode="cover"
+                        />
+                      )}
+                      
+                      <Text style={styles.descriptionText}>{selectedPOI?.summary}</Text>
 
-                      {isHoursExpanded &&
-                        Object.entries(selectedPOI.workingHours).map(([day, hours]) => (
-                          <Text key={day} style={styles.descriptionText}>
-                            {`${day}: ${hours}`}
-                          </Text>
-                        ))
+                      {selectedPOI?.accessibility && Object.keys(selectedPOI.accessibility).length > 0 && (
+                        <View style={{ marginTop: 10 }}>
+                          <Text style={styles.descriptionText}>♿ Accessibility:</Text>
+                          {Object.entries(selectedPOI.accessibility).map(([feature, available]) => (
+                            <Text
+                              key={feature}
+                              style={[
+                                styles.descriptionText,
+                                { color: available ? 'green' : 'gray' }
+                              ]}
+                            >
+                              {available ? '✓' : '✗'} {feature}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+
+                      {selectedPOI?.workingHours && Object.keys(selectedPOI.workingHours).length > 0 && (
+                        <View style={{ marginTop: 10 }}>
+                          <TouchableOpacity onPress={() => setIsHoursExpanded(!isHoursExpanded)}>
+                            <Text style={[styles.descriptionText, { fontWeight: 'bold', textDecorationLine: 'underline' }]}>
+                              🕒 Working Hours {isHoursExpanded ? '▲' : '▼'}
+                            </Text>
+                          </TouchableOpacity>
+                          {isHoursExpanded &&
+                            Object.entries(selectedPOI.workingHours).map(([day, hours]) => (
+                              <Text key={day} style={styles.descriptionText}>
+                                {`${day}: ${hours}`}
+                              </Text>
+                            ))
+                          }
+                        </View>
+                      )}
+
+                      <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
+                    </ScrollView>
+
+                    <Button title="Route" onPress={() => {      // TODO: Change this to a cute little icon plz
+                      if (userLocation && selectedPOI) {
+                        getDirections(
+                          userLocation.latitude,
+                          userLocation.longitude,
+                          selectedPOI.latitude,
+                          selectedPOI.longitude,
+                          setRouteCoords
+                        );
+                        setSelectedPOI(null);
                       }
-                    </View>
-                  )}
-                  <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
-                  <Button title="Route" onPress={() =>{
-                    if (userLocation && selectedPOI) {
-                      getDirections(
-                        userLocation.latitude,
-                        userLocation.longitude,
-                        selectedPOI.latitude,
-                        selectedPOI.longitude,
-                        setRouteCoords 
-                      );
-                      setSelectedPOI(null);
-                  }}} />
-                  <Button title="Close" onPress={() => setSelectedPOI(null)} />
+                    }} />
+
+                    <Button title="Close" onPress={() => setSelectedPOI(null)} />
+                  </View>
                 </View>
-              </View>
+
             </Modal>
+
+            {/* Very Simplistic way in which routes are being displayed */}
             {routeCoords && <ShapeSource
               id="routeSource"
               shape={{
@@ -520,7 +537,6 @@ const Maps: React.FC = () => {
             
             }
 
-            
             <ShapeSource id="userPolygon" shape={staticPolygon}>
                 <LineLayer
                 sourceID="feature"
@@ -539,6 +555,7 @@ const Maps: React.FC = () => {
                 }}
                 />
             </ShapeSource>
+
             {/* Render custom markers */}
             {markers.map((marker) => (
               <MarkerView key={marker.id} coordinate={[marker.longitude, marker.latitude]}>
