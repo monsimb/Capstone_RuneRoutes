@@ -10,72 +10,104 @@ let count = 0;
 
 
 // https://rapidapi.com/letscrape-6bRBa3QguO5/api/local-business-data ?? 
-export const fetchPOIs = async (latitude: number, longitude: number, setPois: { (value: SetStateAction<{ id: string; name: string; latitude: number; longitude: number; types: []; }[]>): void; (arg0: any[]): void; }) => {
+export const fetchPOIs = async (
+  latitude: number,
+  longitude: number,
+  setPois: {
+    (value: SetStateAction<{
+      id: string;
+      name: string;
+      latitude: number;
+      longitude: number;
+      summary: string;
+      types: string[];
+      rate: number;
+      accessibility: Record<string, boolean>;
+      workingHours?: Record<string, string>;
+      photoUrl?: string;
+    }[]>): void;
+  }
+) => {
   try {
-    const delta = 0.2; // might need to be altered based on tilesetsize!!!!!!!!!!
-    const bbox = [
-      longitude - delta, // minLon
-      latitude - delta,  // minLat
-      longitude + delta, // maxLon
-      latitude + delta   // maxLat
-    ].join(',');
+    const queryTypes = ['parks', 'cafes', 'museums','restaurants'];
+    const allResults: any[] = [];
 
-    // Retrieving places with an outdoors tag
-    const response_a = await axios.get(
-      `https://api.mapbox.com/search/searchbox/v1/category/outdoors?`,
-      {
-        params: {
-          // q: `monument`,
-          proximity: `${longitude},${latitude}`,
-          limit: 10,
-          bbox: bbox,
-          // session_token: 'tempUUID',
-          access_token: MAP_BOX_ACCESS_TOKEN,
+    // get response for each of the queries instead of batch querying
+    for (const query of queryTypes) {
+      const options = {
+        method: 'POST',
+        url: 'https://local-business-data.p.rapidapi.com/search',
+        headers: {
+          'x-rapidapi-key': '98d848e108msh9774aeab8bdc785p14975fjsnb6f10e6bfe17',
+          'x-rapidapi-host': 'local-business-data.p.rapidapi.com',
+          'Content-Type': 'application/json'
         },
+        data: {
+          queries: [query],
+          limit: 20, // Lower limit per type
+          region: 'us',
+          language: 'en',
+          coordinates: `${latitude},${longitude}`,
+          zoom: 17,
+          dedup: true
+        }
+      };
+
+      const response = await axios.request(options);
+      allResults.push(...response.data.data);
+    }
+
+    const pois = allResults.map((entry: any) => {
+      const workingHoursRaw = entry.working_hours || {};
+      const workingHours: Record<string, string> = {};
+
+      for (const [day, value] of Object.entries(workingHoursRaw)) {
+        // Coerce to string for safety
+        workingHours[day.toString()] = Array.isArray(value) ? String(value[0]) : String(value);
       }
+      const summary = entry?.about?.summary || '';
+
+      return {
+        id: `${entry.business_id || entry.place_id || entry.google_id || `${entry.latitude},${entry.longitude}`}-${entry.name}`,
+        name: entry.name,
+        latitude: entry.latitude,
+        longitude: entry.longitude,
+        summary,
+        types: (entry.subtypes || [entry.type || 'unknown']).map((type: string) =>
+          type.toLowerCase()
+        ),
+        rate: entry.rating,
+        accessibility: entry.about?.details?.Accessibility || {},
+        workingHours,
+        photoUrl: entry.photos_sample?.[0]?.photo_url || null
+      };
+    });
+    
+    const uniquePois = Array.from(
+      new Map(pois.map(poi => [poi.id, poi])).values()
     );
-    const pois_outdoors = response_a.data.features.map((poi) => ({
-      name: poi.properties.name, // Use `name` or fallback to `text`
-      types: poi.properties.poi_category || [], // Use `categories` for types
-      longitude: poi.geometry.coordinates[0],
-      latitude: poi.geometry.coordinates[1],
-    }));
 
-    // Retrieving places with a food_and_drink tag
-    const response_b = await axios.get(
-      `https://api.mapbox.com/search/searchbox/v1/category/food_and_drink?`,
-      {
-        params: {
-          // q: `monument`,
-          proximity: `${longitude},${latitude}`,
-          limit: 10,
-          bbox: bbox,
-          // session_token: 'tempUUID',
-          access_token: MAP_BOX_ACCESS_TOKEN,
-        },
-      }
-    );
-    const pois_food = response_b.data.features.map((poi) => ({
-      name: poi.properties.name, // Use `name` or fallback to `text`
-      types: poi.properties.poi_category || [], // Use `categories` for types
-      longitude: poi.geometry.coordinates[0],
-      latitude: poi.geometry.coordinates[1],
-    }));
+    console.log(uniquePois);
 
-    console.log("! POI HIT !")
-    const pois = [...pois_outdoors, ...pois_food];
-    setPois(pois);
-
+    console.log('POIs fetched:', pois.length);
+    setPois(uniquePois);
   } catch (error) {
-    console.error("Error fetching POIs:", error);
+    console.error('Error fetching POIs:', error);
   }
 };
 
+
 export const getPoiIcon = (types: string | string[]) => {
-  if (types.includes('store')||types.includes('shopping')) return ICONS.STORE;
-  if (types.includes('park')) return ICONS.PARK;
-  if (types.includes('café')) return ICONS.CAFE;
-  if (types.includes('food')||types.includes('restaurant')) return ICONS.FOOD;
+  // normalized types to avoid issues with tags like [chicken wing restaurant] -> now [chicken,wing,restaurant]
+  const typeArray = Array.isArray(types) ? types : [types];
+  const normalizedTypes = typeArray
+    .flatMap(type => type.toLowerCase().split(/\s+/)); // split by spaces
+
+  if (normalizedTypes.includes('store') || normalizedTypes.includes('shopping')) return ICONS.STORE;
+  if (normalizedTypes.includes('park')) return ICONS.PARK;
+  if (normalizedTypes.includes('café') || normalizedTypes.includes('cafe')) return ICONS.CAFE;
+  if (normalizedTypes.includes('food') || normalizedTypes.includes('restaurant')) return ICONS.FOOD;
+
   return ICONS.DEFAULT;
 };
 

@@ -146,5 +146,11 @@ export const styles = StyleSheet.create({
       opacity: 0.9,
       padding: 3,
       elevation: 5,
-    }
+    },
+    poiImage: {
+      width: '100%',
+      height: 180,
+      borderRadius: 12,
+      marginBottom: 10,
+    },
   });

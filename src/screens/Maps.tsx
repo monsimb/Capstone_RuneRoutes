@@ -18,10 +18,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth0 } from 'react-native-auth0';
 import { updateBackendLocation } from '../api/updateLocation';
 
+import { fetchPOIs, getPoiIcon, createPolygon, getDirections } from '../functions/MapUtils';
+
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
-
-import { fetchPOIs, getPoiIcon, createPolygon, getDirections } from '../functions/MapUtils';
 
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
 import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
@@ -78,14 +78,11 @@ const Maps: React.FC = () => {
     const [routeCoords, setRouteCoords] = useState<number[][] | null>(null);
     const fetchedTilesRef = useRef<Set<string>>(new Set());
 
+    const [isHoursExpanded, setIsHoursExpanded] = useState(false);
 
-    function getTileId(lat: number, lon: number, tileSize = 0.01): string {
-      // NOTE: tileSize represents 0.01 = ~1km
-      const latTile = Math.floor(lat / tileSize);
-      const lonTile = Math.floor(lon / tileSize);
-      return `${latTile}_${lonTile}`;       // ex. tileId = "3254_-9743"    when  lat = 32.54123 lon = -97.42187 tileSize = 0.01
-    }
-    
+
+
+
     const syncLocationToBackend = async (lat: number, lon: number) => {
       try {
         const creds = await getCredentials(); 
@@ -107,6 +104,16 @@ const Maps: React.FC = () => {
         console.error(' Failed to sync location:', err);
       }
     };
+
+
+
+    function getTileId(lat: number, lon: number, tileSize = 0.01): string {
+      // NOTE: tileSize represents 0.01 = ~1km
+      const latTile = Math.floor(lat / tileSize);
+      const lonTile = Math.floor(lon / tileSize);
+      return `${latTile}_${lonTile}`;       // ex. tileId = "3254_-9743"    when  lat = 32.54123 lon = -97.42187 tileSize = 0.01
+    };
+    
     // Function to chomp away at fog polygon
     function subtractPoly() {
       if (!userLocation || !staticPolygon) return;
@@ -218,9 +225,15 @@ const Maps: React.FC = () => {
       }
     }, [recenter]);
 
+    // USED FOR API CALL TESTING
+    // useEffect(() => {
+    //   if (!userLocation) return;
 
+    //   fetchPOIs(userLocation.latitude, userLocation.longitude, setPois);
+    //   console.log('poi fetched');
 
-
+    // }, []);
+  
 
     useEffect(() => {
       if (!userLocation) return;
@@ -387,9 +400,49 @@ const Maps: React.FC = () => {
             >
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
-                  <Text style={styles.descriptionText}>{selectedPOI?.types}</Text>
-                  <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}: 'N/A'</Text>
+                  <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
+                  {selectedPOI?.photoUrl && (
+                    <Image
+                      source={{ uri: selectedPOI.photoUrl }}
+                      style={styles.poiImage}
+                      resizeMode="cover"
+                    />
+                  )}
+                  <Text style={styles.descriptionText}>{selectedPOI?.summary}</Text>
+                  {selectedPOI?.accessibility && Object.keys(selectedPOI.accessibility).length > 0 && (
+                    <View style={{ marginTop: 10 }}>
+                      <Text style={styles.descriptionText}>♿ Accessibility:</Text>
+                      {Object.entries(selectedPOI.accessibility).map(([feature, available]) => (
+                        <Text
+                          key={feature}
+                          style={[
+                            styles.descriptionText,
+                            { color: available ? 'green' : 'gray' }
+                          ]}
+                        >
+                          {available ? '✓' : '✗'} {feature}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+                {selectedPOI?.workingHours && Object.keys(selectedPOI.workingHours).length > 0 && (
+                    <View style={{ marginTop: 10 }}>
+                      <TouchableOpacity onPress={() => setIsHoursExpanded(!isHoursExpanded)}>
+                        <Text style={[styles.descriptionText, { fontWeight: 'bold', textDecorationLine: 'underline' }]}>
+                          🕒 Working Hours {isHoursExpanded ? '▲' : '▼'}
+                        </Text>
+                      </TouchableOpacity>
+
+                      {isHoursExpanded &&
+                        Object.entries(selectedPOI.workingHours).map(([day, hours]) => (
+                          <Text key={day} style={styles.descriptionText}>
+                            {`${day}: ${hours}`}
+                          </Text>
+                        ))
+                      }
+                    </View>
+                  )}
+                  <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
                   <Button title="Route" onPress={() =>{
                     if (userLocation && selectedPOI) {
                       getDirections(
