@@ -65,7 +65,8 @@ export const fetchPOIs = async (
         // Coerce to string for safety
         workingHours[day.toString()] = Array.isArray(value) ? String(value[0]) : String(value);
       }
-      const summary = entry?.about?.summary || '';
+
+      const summary = entry?.about?.summary || '';    // some summaries are null
 
       return {
         id: `${entry.business_id || entry.place_id || entry.google_id || `${entry.latitude},${entry.longitude}`}-${entry.name}`,
@@ -82,13 +83,13 @@ export const fetchPOIs = async (
         photoUrl: entry.photos_sample?.[0]?.photo_url || null
       };
     });
-    
+
+    // sanitize data -> deduplicate
     const uniquePois = Array.from(
       new Map(pois.map(poi => [poi.id, poi])).values()
     );
 
-    console.log(uniquePois);
-
+    // console.log(uniquePois);
     console.log('POIs fetched:', pois.length);
     setPois(uniquePois);
   } catch (error) {

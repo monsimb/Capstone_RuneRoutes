@@ -243,22 +243,46 @@ const Maps: React.FC = () => {
     
         if (!fetchedTilesRef.current.has(tileId)) {
           try {
-            const cached = await AsyncStorage.getItem(`poi_tile_${tileId}`);
+            const cacheKey = `poi_tile_${tileId}`;
+            const cached = await AsyncStorage.getItem(cacheKey);
+            // const cached = false;
+    
             if (cached) {
               const pois = JSON.parse(cached);
-              setPois((prev) => [...prev, ...pois]); // or dedupe
+    
+              setPois(prev => {
+                const seen = new Set(prev.map(p => p.id));
+                const newItems = pois.filter(p => !seen.has(p.id));
+                return [...prev, ...newItems];
+              });
+    
               fetchedTilesRef.current.add(tileId);
-              console.log('tile cached');
+              console.log('Loaded POIs from cache for tile:', tileId, '| Count:', pois.length);
             } else {
               fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
-                setPois((prev) => [...prev, ...data]); // or dedupe
+                // Sanitize data before caching!
+                const sanitized = data.map(poi => ({
+                  ...poi,
+                  photoUrl: poi.photoUrl || null,
+                  workingHours: poi.workingHours || {},
+                  accessibility: poi.accessibility || {},
+                }));
+    
+                setPois(prev => {
+                  const seen = new Set(prev.map(p => p.id));
+                  const newItems = sanitized.filter((p: { id: string; }) => !seen.has(p.id));
+                  return [...prev, ...newItems];
+                });
+    
                 fetchedTilesRef.current.add(tileId);
-                await AsyncStorage.setItem(`poi_tile_${tileId}`, JSON.stringify(data));
-                console.log('tile fetched');
+                await AsyncStorage.setItem(cacheKey, JSON.stringify(sanitized));
+    
+                console.log('Fetched & cached POIs for tile:', tileId, '| Count:', sanitized.length);
+                console.log('Sample POI:', JSON.stringify(sanitized[0], null, 2));
               });
             }
           } catch (error) {
-            console.error('AsyncStorage error:', error);
+            console.error('AsyncStorage or POI fetch error:', error);
           }
         }
       };
@@ -278,7 +302,6 @@ const Maps: React.FC = () => {
             Location.getLatestLocation({ enableHighAccuracy: true })
                 .then(location => {
                     setUserLocation(location); // Save location to state
-
 
                     // Set initial location (on load) ONCE, never again
                     if (!initialUserLocation) {
@@ -398,8 +421,25 @@ const Maps: React.FC = () => {
               animationType="slide"
               onRequestClose={() => setSelectedPOI(null)}
             >
-              <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
+              <View style={{
+                  flex: 1,
+                  backgroundColor: 'rgba(0,0,0,0.5)', // Dim background
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: 20,
+                }}>
+                <View style={{
+                    width: '95%',
+                    maxHeight: '90%',
+                    backgroundColor: '#fff',
+                    borderRadius: 16,
+                    padding: 20,
+                    elevation: 5,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                  }}>
                   <Text style={styles.modalTitle}>{selectedPOI?.name}</Text>
                   {selectedPOI?.photoUrl && (
                     <Image
