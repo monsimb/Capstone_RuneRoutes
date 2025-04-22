@@ -16,13 +16,12 @@ export const styles = StyleSheet.create({
     marginBottom: "8%",
   },
   statsContainer: {
-    position: 'absolute',
-    marginTop: '150%',
     alignItems: 'center',
+    marginTop: '5%',
   },
   statsText: {
     fontSize: 18,
-    color: 'rgba(0, 0, 0, 0.75)',
+    color: 'rgba(2, 2, 2, 0.75)',
     marginVertical: 5,
   },
   selector: {
@@ -34,14 +33,12 @@ export const styles = StyleSheet.create({
   skinSelector: {
     flexDirection: "row",
     alignItems: "center",
-    position: 'absolute',
-    marginTop: '125%',
+    marginTop: '90%',
   },
   toggleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 20,
-    marginTop: '-138%',
+    marginTop: '6%',
   },
   toggleText: {
     fontSize: 18,
@@ -50,14 +47,15 @@ export const styles = StyleSheet.create({
     zIndex: 3,
   },
   avatarPart: {
+    position: 'absolute',
     width: 100,
     height: 300,
     top: 50,
     zIndex: 1,
   },
   avatarContainer: {
-    position: 'relative',
-    width: 100,
+    position: 'absolute',
+    width: 300,
     height: 100,
     marginBottom: 20,
   },
@@ -66,34 +64,33 @@ export const styles = StyleSheet.create({
     height: 120,
     padding: 10,
     left: 0,
-    top: -330,    // change the position of the hat
     zIndex: 1,
   },
   FacePart: {
     width: 50,    // change the size of the face
     height: 50,
-    padding: 10,
+    padding: 0,
     right: 6,
-    top: -423,    // change the position of the face
+    top: 53,    // change the position of the face
     zIndex: 2,
   },
   TopPart: {
     width: 100,     // change the size of the top
     height: 165,
-    top: -628,    // change the position of the top
+    bottom: 112,    // change the position of the top
     zIndex: 3,
   },
   BottomPart: {
     width: 118,   // change the size of the bottom
     height: 135,
     left: 1,
-    top: -422,    // change the position of the bottom
+    top: 95,    // change the position of the bottom
     zIndex: 2,
   },
   CapePart: {
+    position: 'absolute',
     width: 135,
-    height: 285,
-    top: -440,
+    top: 23,
     zIndex: 0, // Place it behind the avatar
   },
   skinButton: {
@@ -114,23 +111,21 @@ export const styles = StyleSheet.create({
     height: 60,
   },
   buttonHat: {
-    top: -360, // change the position of the hat button
+    top: 80,
   },
   buttonFace: {
-    top: -430, // change the position of the face button
-    padding: 45,
+    top: 50, // change the position of the face button
+    paddingHorizontal: '15%',
   },
   buttonTop: {
-    top: -655, // change the position of the top button
-    padding: 15,
+    bottom: 150, // change the position of the top button
+    paddingHorizontal: '8%',
   },
   buttonBottom: {
-    top: -390, // change the position of the bottom button
-    padding: 10,
+    top: 105, // change the position of the bottom button
+    paddingHorizontal: '5%',
   },
   changeMeContainer: {
-    position: 'absolute',
-    bottom: 30,
     alignItems: 'center',
   },
 });
