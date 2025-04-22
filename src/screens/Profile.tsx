@@ -5,7 +5,7 @@ import { useAuth0 } from 'react-native-auth0';
 import { styles } from '../styles/Profile';
 import { useProfileContext } from '../context/ProfileContext';
 
-import { skins, colors, hats, faces, tops, bottoms, hatTopOffsets } from '../functions/constants';
+import { skins, colors, hats, faces, tops, bottoms, hatOffsets } from '../functions/constants';
 
 
 function Profile({ }) {
@@ -162,13 +162,22 @@ function Profile({ }) {
   }
 
   return (
-    // <ScrollView contentContainerStyle={{ flexGrow: 1 }}>     // not working rn
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
+
       <View style={styles.selector}>
         <Image source={skins[currentSkinIndex]} style={styles.avatarPart} resizeMode="contain" />
+        {isCape && (
+          <Image
+            source={require("../assets/cape.png")} // Path to the cape image
+            style={styles.CapePart} // Add a style for the cape
+            resizeMode="contain"
+          />
+        )}
       </View>
 
+      <View style={styles.avatarContainer}>
       {/* Hat Selector */}
       <View style={styles.selector}>
         <TouchableOpacity onPress={() => handlePrevious('hat')} style={styles.buttonHat}>
@@ -177,7 +186,7 @@ function Profile({ }) {
 
         <Image 
           source={hats[currentHatIndex]} 
-          style={[styles.HatPart, { top: hatTopOffsets[currentHatIndex] }]} 
+          style={[styles.HatPart, { top: hatOffsets[currentHatIndex] }]} 
           resizeMode="contain" 
         />
         
@@ -222,6 +231,7 @@ function Profile({ }) {
           <Ionicons name="chevron-forward" size={60} color="black" />
         </TouchableOpacity>
       </View>
+      </View>
 
       {/* Skin Selector */}
       <View style={styles.skinSelector}>
@@ -251,17 +261,6 @@ function Profile({ }) {
               thumbColor={isCape ? "#ffffff" : "#f4f3f4"} />
       </View>
 
-      {/* Avatar with Cape */}
-      <View style={styles.selector}>
-        {isCape && (
-          <Image
-            source={require("../assets/cape.png")} // Path to the cape image
-            style={styles.CapePart} // Add a style for the cape
-            resizeMode="contain"
-          />
-        )}
-      </View>
-
       {/* User Stats */}
       <View style={styles.statsContainer}>
         <Text style={styles.statsText}>Distance Traveled: {userStats.distanceTraveled} m^2</Text>
@@ -273,7 +272,7 @@ function Profile({ }) {
         <Button title="Save Profile" onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])} /> 
       </View>
     </View>
-    // </ScrollView>
+    </ScrollView>
   );
 }
 export default Profile;
