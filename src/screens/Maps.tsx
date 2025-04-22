@@ -495,7 +495,7 @@ const Maps: React.FC = () => {
                       <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
                     </ScrollView>
 
-                    <Button title="Route" onPress={() => {      // TODO: Change this to a cute little icon plz
+                    <Button title="Route" onPress={() => {      // TODO: Change this to a cute little icon plz 
                       if (userLocation && selectedPOI) {
                         getDirections(
                           userLocation.latitude,

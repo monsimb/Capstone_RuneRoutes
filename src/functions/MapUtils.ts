@@ -104,11 +104,12 @@ export const getPoiIcon = (types: string | string[]) => {
   const normalizedTypes = typeArray
     .flatMap(type => type.toLowerCase().split(/\s+/)); // split by spaces
 
+  if (normalizedTypes.includes('café') || normalizedTypes.includes('cafe')) return ICONS.CAFE;
+  if (normalizedTypes.includes('museum')) return ICONS.MUSEUM;
   if (normalizedTypes.includes('store') || normalizedTypes.includes('shopping')) return ICONS.STORE;
   if (normalizedTypes.includes('park')) return ICONS.PARK;
-  if (normalizedTypes.includes('café') || normalizedTypes.includes('cafe')) return ICONS.CAFE;
   if (normalizedTypes.includes('food') || normalizedTypes.includes('restaurant')) return ICONS.FOOD;
-  if (normalizedTypes.includes('museum')) return ICONS.MUSEUM;
+
 
   return ICONS.DEFAULT;
 };
