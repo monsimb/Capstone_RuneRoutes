@@ -9,19 +9,17 @@ import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource
 import { MapView } from '@rnmapbox/maps';
 import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
-import { Feature } from 'geojson';
+import { Feature, Polygon, MultiPolygon } from 'geojson';
 import { point } from "@turf/helpers";
 import { area } from "@turf/area";
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useAuth0 } from 'react-native-auth0';
-import { updateBackendLocation } from '../api/updateLocation';
-
-import { fetchPOIs, getPoiIcon, createPolygon, getDirections } from '../functions/MapUtils';
 
 import { styles } from '../styles/Map';
 import { ICONS, ICON_SIZE } from '../functions/constants';
+import { fetchPOIs, getPoiIcon, getDirections, createPolygon } from '../functions/MapUtils';
 
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
 import { CHOMP_DIAMETER, LOCATION_UPDATE_INTERVAL, DEFAULT_MAP_CENTER, DEFAULT_ZOOM_LEVEL } from '../functions/constants';
@@ -34,9 +32,11 @@ Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
 
 const Maps: React.FC = () => {
     const { authorize, getCredentials, user } = useAuth0();
+    const userId = user?.sub; // Need for DB saving polygon
+    const lastSavedFogRef = useRef<string | null>(null); // For comparison of past 
     const [userLocation, setUserLocation] = useState<LocationType | null>(null);
     const [initialUserLocation, setInitialUserLocation] = useState<LocationType | null>(null);
-    const [staticPolygon, setStaticPolygon] = useState<Feature<polygon> | null>(null);
+    const [staticPolygon, setStaticPolygon] = useState<Feature<Polygon | MultiPolygon> | null>(null); // Added multipolygon
     const [newTitle, setNewTitle] = useState('');
     const [newDescription, setNewDescription] = useState('');
     const [newImageUri, setNewImageUri] = useState<string | null>(null);
@@ -115,7 +115,7 @@ const Maps: React.FC = () => {
     };
     
     // Function to chomp away at fog polygon
-    function subtractPoly() {
+    async function subtractPoly() {
       if (!userLocation || !staticPolygon) return;
   
       const rad = CHOMP_DIAMETER;
@@ -142,13 +142,63 @@ const Maps: React.FC = () => {
         setStaticPolygon(newFogLayer);
         setTotalExploredArea((prevTotal) => prevTotal + chomped); // Add the chomped area to the total
 
+
+        try {
+          //const creds = await getCredentials();
+          //const token = creds?.accessToken;
+          //if(token && user?.sub) {
+          //  await saveFogToBackend(newFogLayer);
+          //}
+          await saveFogToBackend(newFogLayer);
+          console.log("SAVED FOG SUCCESSFULLY ( I THINK? )");
+        } catch (err: any) {
+          console.error('Failed to save fog state:', err);
+        }
+
         // //console.log('Updated fog layer!!!!');
   
       } else {
         console.warn("Difference operation returned null, check polygon validity!");
       }
-    };
+    }
 
+    async function fetchFogFromBackend(userId: string, token: string): Promise<Feature<Polygon | MultiPolygon> | null> {
+      const response = await fetch (`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${userId}/fog`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      if(!response.ok) {
+        throw new Error(`Fetch fog failed ${response.status}`);
+      }
+      return (await response.json()).fog;
+    }
+
+    async function saveFogToBackend(fog: Feature<Polygon | MultiPolygon>) {
+
+      if(!userId) {
+        return;
+      }
+
+      const creds = await getCredentials();
+      const token = creds?.accessToken;
+
+      if(!token) {
+        console.warn("No Auth0 token. Skipping fog save");
+        return;
+      }
+
+      const response = await fetch(`https://capstone-runeroutes-wgp6.onrender.com/auth/users/${userId}/fog`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ fog }),
+      });
+      if(!response.ok) {
+        throw new Error(`Save fog failed ${response.status}`);
+      }
+    }
     // User uploaded images (markers)
     const pickImage = () => {
       launchImageLibrary({
@@ -299,27 +349,43 @@ const Maps: React.FC = () => {
         })
         .then(granted => {
             if (granted) {
-            // Fetch the user current location
-            Location.getLatestLocation({ enableHighAccuracy: true })
-                .then(location => {
-                    setUserLocation(location); // Save location to state
+              // Fetch the user current location
+              Location.getLatestLocation({ enableHighAccuracy: true })
+                  .then(location => {
+                      setUserLocation(location); // Save location to state
 
-                    // Set initial location (on load) ONCE, never again
-                    if (!initialUserLocation) {
-                        setInitialUserLocation(location); // Initial location has been set
-                        // Now, it is important we generate the polygon hole here because we only want a new hole to generate on load and then we will modify/extend
-                        const fog = createPolygon(location.longitude, location.latitude);
-                        setStaticPolygon(fog);
-                    }
-                })
-                .catch(err => console.warn(err));
+                      // Set initial location (on load) ONCE, never again
+                      if (!initialUserLocation) {
+                          setInitialUserLocation(location); // Initial location has been set
+                          // Now, it is important we generate the polygon hole here because we only want a new hole to generate on load and then we will modify/extend
+                          //const fog = createPolygon(location.longitude, location.latitude);
+                          //setStaticPolygon(fog);
+
+                          let fog: Feature<Polygon> | null = null; // fog variable
+
+                          if(user?.sub) {
+                            return getCredentials()
+                              .then(({ accessToken }) => fetchFogFromBackend(user.sub, accessToken))
+                              .catch(() => null)
+                              .then(serverFog => {
+                                const fogToUse = serverFog || createPolygon(location.longitude, location.latitude);
+                                setStaticPolygon(fogToUse);
+                              });
+                          } else {
+                            const fog = createPolygon(location.longitude, location.latitude); 
+                            setStaticPolygon(fog);
+                          }
+                      }
+                  })
+                  .catch(err => {
+                    console.warn(err)
+                  });
             }
         })
         .catch(err => console.warn('Permission denied:', err));
-    }, []);         // will trigger only on load
+    }, [user]);         // will trigger only on load
 
-
-    // 
+    // Dynamic user location
     useEffect(() => {
       const interval = setInterval(async () => {
         if (!user) return; // <- User not authenticated, bail out
@@ -333,7 +399,6 @@ const Maps: React.FC = () => {
     
       return () => clearInterval(interval);
     }, [user]); // Only run this effect once user is available
-    
 
     // Discover 'fog chomp' main logic
     useEffect(() => {
