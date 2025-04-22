@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
   skinSelector: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: '90%',
+    marginTop: '95%',
   },
   toggleContainer: {
     flexDirection: "row",
@@ -57,7 +57,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     width: 300,
     height: 100,
-    marginBottom: 20,
+    top: '13%',
   },
   HatPart: {
     width: 135,   // change the size of the hat
@@ -71,20 +71,20 @@ export const styles = StyleSheet.create({
     height: 50,
     padding: 0,
     right: 6,
-    top: 53,    // change the position of the face
+    bottom: '125%',    // change the position of the face
     zIndex: 2,
   },
   TopPart: {
-    width: 100,     // change the size of the top
+    width: 90,     // change the size of the top
     height: 165,
-    bottom: 112,    // change the position of the top
+    bottom: '144%',    // change the position of the top
     zIndex: 3,
   },
   BottomPart: {
     width: 118,   // change the size of the bottom
     height: 135,
     left: 1,
-    top: 95,    // change the position of the bottom
+    bottom: '23%',    // change the position of the bottom
     zIndex: 2,
   },
   CapePart: {
@@ -111,18 +111,19 @@ export const styles = StyleSheet.create({
     height: 60,
   },
   buttonHat: {
-    top: 80,
+    bottom: '40%',
+    paddingHorizontal: '4%',
   },
   buttonFace: {
-    top: 50, // change the position of the face button
-    paddingHorizontal: '15%',
+    bottom: '115%', // change the position of the face button
+    paddingHorizontal: '18%',
   },
   buttonTop: {
-    bottom: 150, // change the position of the top button
-    paddingHorizontal: '8%',
+    bottom: '165%', // change the position of the top button
+    paddingHorizontal: '10%',
   },
   buttonBottom: {
-    top: 105, // change the position of the bottom button
+    bottom: '15%', // change the position of the bottom button
     paddingHorizontal: '5%',
   },
   changeMeContainer: {

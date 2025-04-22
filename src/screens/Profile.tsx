@@ -165,6 +165,7 @@ function Profile({ }) {
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
 
+    <View style={styles.avatarContainer}>
       <View style={styles.selector}>
         <Image source={skins[currentSkinIndex]} style={styles.avatarPart} resizeMode="contain" />
         {isCape && (
@@ -175,7 +176,7 @@ function Profile({ }) {
           />
           )}
       </View>
-      <View style={styles.avatarContainer}>
+      
         {/* Hat Selector */}
         <View style={styles.selector}>
           <TouchableOpacity onPress={() => handlePrevious('hat')} style={styles.buttonHat}>
@@ -184,7 +185,7 @@ function Profile({ }) {
 
           <Image 
             source={hats[currentHatIndex]} 
-            style={[styles.HatPart, { top: hatOffsets[currentHatIndex] }]} 
+            style={[styles.HatPart, { bottom: hatOffsets[currentHatIndex] }]} 
             resizeMode="contain" 
           />
           <TouchableOpacity onPress={() => handleNext('hat')} style={styles.buttonHat}>

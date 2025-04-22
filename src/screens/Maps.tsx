@@ -268,7 +268,6 @@ const Maps: React.FC = () => {
         cameraRef.current?.flyTo([userLocation.longitude, userLocation.latitude], 1000); // Fly to the user's location
         cameraRef.current?.setCamera({
           centerCoordinate: [userLocation.longitude, userLocation.latitude],
-          zoomLevel: 20,
           animationMode: 'flyTo',
         });
         setRecenter(false);
@@ -310,27 +309,27 @@ const Maps: React.FC = () => {
               console.log('Loaded POIs from cache for tile:', tileId, '| Count:', pois.length);
             
             } else {
-              fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
-                // Sanitize data before caching
-                const sanitized = data.map(poi => ({
-                  ...poi,
-                  photoUrl: poi.photoUrl || null,
-                  workingHours: poi.workingHours || {},
-                  accessibility: poi.accessibility || {},
-                }));
+              // fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
+              //   // Sanitize data before caching
+              //   const sanitized = data.map(poi => ({
+              //     ...poi,
+              //     photoUrl: poi.photoUrl || null,
+              //     workingHours: poi.workingHours || {},
+              //     accessibility: poi.accessibility || {},
+              //   }));
     
-                setPois(prev => {
-                  const seen = new Set(prev.map(p => p.id));
-                  const newItems = sanitized.filter((p: { id: string; }) => !seen.has(p.id));
-                  return [...prev, ...newItems];
-                });
+              //   setPois(prev => {
+              //     const seen = new Set(prev.map(p => p.id));
+              //     const newItems = sanitized.filter((p: { id: string; }) => !seen.has(p.id));
+              //     return [...prev, ...newItems];
+              //   });
     
-                fetchedTilesRef.current.add(tileId);
-                await AsyncStorage.setItem(cacheKey, JSON.stringify(sanitized));
+              //   fetchedTilesRef.current.add(tileId);
+              //   await AsyncStorage.setItem(cacheKey, JSON.stringify(sanitized));
     
-                console.log('Fetched & cached POIs for tile:', tileId, '| Count:', sanitized.length);
-                console.log('Sample POI:', JSON.stringify(sanitized[0], null, 2));
-              });
+              //   console.log('Fetched & cached POIs for tile:', tileId, '| Count:', sanitized.length);
+              //   console.log('Sample POI:', JSON.stringify(sanitized[0], null, 2));
+              // });
             }
           } catch (error) {
             console.error('AsyncStorage or POI fetch error:', error);
