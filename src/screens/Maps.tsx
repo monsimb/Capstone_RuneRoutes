@@ -150,7 +150,7 @@ const Maps: React.FC = () => {
           await saveFogToBackend(newFogLayer);
           console.log("SAVED FOG SUCCESSFULLY ( I THINK? )");
         } catch (err: any) {
-          // console.error('Failed to save fog state:', err);
+          console.error('Failed to save fog state:', err);
         }
 
         // //console.log('Updated fog layer!!!!');
