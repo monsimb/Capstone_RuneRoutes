@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator, LogBox } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
 import { styles } from "../styles/UI";
 
 const API_URL = "https://capstone-runeroutes-wgp6.onrender.com"; // Replace with your Render API URL
+LogBox.ignoreLogs(['new NativeEventEmitter()']);
 
 function AuthScreen({ navigation }) {
   const { authorize, clearSession, user, isAuthenticated, getCredentials } = useAuth0();

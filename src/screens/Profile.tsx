@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button, Text, View, Image, TouchableOpacity, StyleSheet, ScrollView, Switch } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuth0 } from 'react-native-auth0';
 import { styles } from '../styles/Profile';
 import { useProfileContext } from '../context/ProfileContext';
+import { captureRef } from 'react-native-view-shot';
+import ImageResizer from 'react-native-image-resizer';
 
 import { skins, colors, hats, faces, tops, bottoms, hatOffsets } from '../functions/constants';
 
+global.avatarURI = null;
 
 function Profile({ }) {
   // const { chompedArea = 0 } = route.params || {}; // Default to 0 if not passed
@@ -19,6 +22,9 @@ function Profile({ }) {
   const [profileData, setProfileData] = useState(null);
   const { getCredentials, user } = useAuth0();
   const userId = user?.sub;
+  const [isCape, setCape] = useState(false);
+  const toggleCape = () => setCape((prevState) => !prevState);
+  const avatar = useRef();
 
   useEffect(() => { 
     const fetchProfile = async () => {
@@ -103,6 +109,19 @@ function Profile({ }) {
     } catch (err) {
       console.error("Error sending user to backend:", err.message);
     }
+
+    try {
+      const uri = await captureRef(avatar, {
+        fileName: 'avatar',
+        format: 'png',
+        quality: 1,
+      });
+  
+      // resize captured image
+      global.avatarURI = await ImageResizer.createResizedImage(uri, 300, 300, 'PNG', 1.0, 0)
+    } catch (error) {
+      console.error('Failed to capture or resize avatar:', error);
+    }
   };
 
 
@@ -143,10 +162,6 @@ function Profile({ }) {
       setCurrentBottomIndex((prevIndex) => (prevIndex - 1 + bottoms.length) % bottoms.length);
     }
   };
-
-  const [isCape, setCape] = useState(false);
-  const toggleCape = () => setCape((prevState) => !prevState);
-
   
 
   if (
@@ -165,7 +180,7 @@ function Profile({ }) {
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
 
-    <View style={styles.avatarContainer}>
+    <View ref={avatar} style={styles.avatarContainer} collapsable={false}>
       <View style={styles.selector}>
         <Image source={skins[currentSkinIndex]} style={styles.avatarPart} resizeMode="contain" />
         {isCape && (
@@ -177,63 +192,77 @@ function Profile({ }) {
           )}
       </View>
       
-        {/* Hat Selector */}
+        {/* Hat Display */}
         <View style={styles.selector}>
-          <TouchableOpacity onPress={() => handlePrevious('hat')} style={styles.buttonHat}>
-            <Ionicons name="chevron-back" size={60} color="black" />
-          </TouchableOpacity>
-
           <Image 
             source={hats[currentHatIndex]} 
             style={[styles.HatPart, { bottom: hatOffsets[currentHatIndex] }]} 
             resizeMode="contain" 
           />
-          <TouchableOpacity onPress={() => handleNext('hat')} style={styles.buttonHat}>
+        </View>
+
+        {/* Face Display */}
+        <View style={styles.selector}>
+          <Image source={faces[currentFaceIndex]} style={styles.FacePart} resizeMode="contain" />
+        </View>      
+
+        {/* Bottoms Display */}
+        <View style={styles.selector}>
+          <Image source={bottoms[currentBottomIndex]} style={styles.BottomPart} resizeMode="contain" />
+        </View>
+
+        {/* Tops Display */}
+        <View style={styles.selector}>
+          <Image source={tops[currentTopIndex]} style={styles.TopPart} resizeMode="contain" />
+        </View>
+      </View>
+        
+      {/* Selector Buttons */}
+      <View style={styles.selectorContainer}>
+        {/* Hats Buttons */}
+        <View style={styles.selector}>
+            <TouchableOpacity onPress={() => handlePrevious('hat')} style={styles.arrows}>
+              <Ionicons name="chevron-back" size={60} color="black" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => handleNext('hat')} style={styles.arrows}>
+              <Ionicons name="chevron-forward" size={60} color="black" />
+            </TouchableOpacity>
+        </View>
+
+        {/* Faces Buttons */}
+        <View style={styles.selector}>
+          <TouchableOpacity onPress={() => handlePrevious('face')} style={styles.arrows}>
+            <Ionicons name="chevron-back" size={60} color="black" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => handleNext('face')} style={styles.arrows}>
             <Ionicons name="chevron-forward" size={60} color="black" />
           </TouchableOpacity>
+        </View>
+
+        {/* Tops Buttons */}
+        <View style={styles.selector}>
+          <TouchableOpacity onPress={() => handlePrevious('top')} style={styles.arrows}>
+            <Ionicons name="chevron-back" size={60} color="black" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={() => handleNext('top')} style={styles.arrows}>
+            <Ionicons name="chevron-forward" size={60} color="black" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Bottoms Buttons */}
+        <View style={styles.selector}>
+          <TouchableOpacity onPress={() => handlePrevious('bottom')} style={styles.arrows}>
+            <Ionicons name="chevron-back" size={60} color="black" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={() => handleNext('bottom')} style={styles.arrows}>
+            <Ionicons name="chevron-forward" size={60} color="black" />
+          </TouchableOpacity>
+        </View>
       </View>
-
-      {/* Face Selector */}
-      <View style={styles.selector}>
-        <TouchableOpacity onPress={() => handlePrevious('face')} style={styles.buttonFace}>
-          <Ionicons name="chevron-back" size={60} color="black" />
-        </TouchableOpacity>
-        <Image source={faces[currentFaceIndex]} style={styles.FacePart} resizeMode="contain" />
-        <TouchableOpacity onPress={() => handleNext('face')} style={styles.buttonFace}>
-          <Ionicons name="chevron-forward" size={60} color="black" />
-        </TouchableOpacity>
-      </View>      
-
-      {/* Bottom Selector */}
-      <View style={styles.selector}>
-        <TouchableOpacity onPress={() => handlePrevious('bottom')} style={styles.buttonBottom}>
-          <Ionicons name="chevron-back" size={60} color="black" />
-        </TouchableOpacity>
-
-        <Image source={bottoms[currentBottomIndex]} style={styles.BottomPart} resizeMode="contain" />
-        
-        <TouchableOpacity onPress={() => handleNext('bottom')} style={styles.buttonBottom}>
-          <Ionicons name="chevron-forward" size={60} color="black" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Top Selector */}
-      <View style={styles.selector}>
-        <TouchableOpacity onPress={() => handlePrevious('top')} style={styles.buttonTop}>
-          <Ionicons name="chevron-back" size={60} color="black" />
-        </TouchableOpacity>
-
-        <Image source={tops[currentTopIndex]} style={styles.TopPart} resizeMode="contain" />
-        
-        <TouchableOpacity onPress={() => handleNext('top')} style={styles.buttonTop}>
-          <Ionicons name="chevron-forward" size={60} color="black" />
-        </TouchableOpacity>
-      </View>
-      </View>
-        
-        
-
-      
 
       {/* Skin Selector */}
       <View style={styles.skinSelector}>
@@ -270,8 +299,11 @@ function Profile({ }) {
         <Text style={styles.statsText}>Current Streak: {userStats.currentStreak} days</Text>
       </View>
 
-      <View style={styles.changeMeContainer}>
-        <Button title="Save Profile" onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])} /> 
+      {/* Save Avatar Button */}
+      <View style={styles.save}>
+        <TouchableOpacity onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])}>
+          <Text style={styles.saveText}>Save Avatar</Text>
+        </TouchableOpacity> 
       </View>
     </View>
     </ScrollView>

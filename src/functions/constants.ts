@@ -75,13 +75,13 @@ export const bottoms = [
   require("../assets/bottoms/bottom6.png"),
 ];
 export const hatOffsets = [
-  37, // hat1: 87
-  80, // hat2: 100
-  16, // hat3: 100
-  43, // hat4: 98
-  16, // hat5: 100
-  33, // hat6: 76
-  43, // hat7: 100
-  54, // hat8: 130
-  25, // hat9: 100
+  17, // hat1: 87
+  60, // hat2: 100
+  -4, // hat3: 100
+  23, // hat4: 98
+  -4, // hat5: 100
+  13, // hat6: 76
+  23, // hat7: 100
+  34, // hat8: 130
+  5, // hat9: 100
 ];

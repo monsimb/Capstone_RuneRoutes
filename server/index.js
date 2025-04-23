@@ -7,7 +7,7 @@ const cors = require('cors');  // Allows frontend to connect
 
 
 const app = express();
-app.use(express.json()); // Middleware to parse JSON data
+app.use(express.json({ limit: '10mb' })); // Middleware to parse JSON data
 app.use(cors());  // Enable CORS (important for frontend requests)
 
 const PORT = process.env.PORT || 5000;
