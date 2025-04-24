@@ -38,13 +38,13 @@ export const fetchPOIs = async (
         method: 'POST',
         url: 'https://local-business-data.p.rapidapi.com/search',
         headers: {
-          'x-rapidapi-key': '98d848e108msh9774aeab8bdc785p14975fjsnb6f10e6bfe17',
+          'x-rapidapi-key': '4b5119710emsh962c37089dc3f92p1395a8jsne0b28b9ce8aa',
           'x-rapidapi-host': 'local-business-data.p.rapidapi.com',
           'Content-Type': 'application/json'
         },
         data: {
           queries: [query],
-          limit: 20, // Lower limit per type
+          limit: 15, // Lower limit per type
           region: 'us',
           language: 'en',
           coordinates: `${latitude},${longitude}`,

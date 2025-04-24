@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
   skinSelector: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: '95%',
+    marginTop: '8%',
   },
   toggleContainer: {
     flexDirection: "row",
@@ -50,14 +50,13 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     width: 100,
     height: 300,
-    top: 50,
+    top: 70,
     zIndex: 1,
   },
   avatarContainer: {
-    position: 'absolute',
     width: 300,
-    height: 100,
-    top: '13%',
+    height: 375,
+    top: '2%',
   },
   HatPart: {
     width: 135,   // change the size of the hat
@@ -71,26 +70,26 @@ export const styles = StyleSheet.create({
     height: 50,
     padding: 0,
     right: 6,
-    bottom: '125%',    // change the position of the face
+    bottom: '90%',    // change the position of the face
     zIndex: 2,
   },
   TopPart: {
     width: 90,     // change the size of the top
     height: 165,
-    bottom: '144%',    // change the position of the top
+    bottom: '132%',    // change the position of the top
     zIndex: 3,
   },
   BottomPart: {
     width: 118,   // change the size of the bottom
     height: 135,
     left: 1,
-    bottom: '23%',    // change the position of the bottom
+    bottom: '8.5%',    // change the position of the bottom
     zIndex: 2,
   },
   CapePart: {
     position: 'absolute',
     width: 135,
-    top: 23,
+    top: 43,
     zIndex: 0, // Place it behind the avatar
   },
   skinButton: {

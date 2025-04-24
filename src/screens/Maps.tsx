@@ -107,8 +107,8 @@ const Maps: React.FC = () => {
 
 
     // Cacheing tile settings
-    function getTileId(lat: number, lon: number, tileSize = 0.01): string {
-      // NOTE: tileSize represents 0.01 = ~1km
+    function getTileId(lat: number, lon: number, tileSize = 10): string {
+      // NOTE: tileSize represents 0.1 = ~10km
       const latTile = Math.floor(lat / tileSize);
       const lonTile = Math.floor(lon / tileSize);
       return `${latTile}_${lonTile}`;       // ex. tileId = "3254_-9743"    when  lat = 32.54123 lon = -97.42187 tileSize = 0.01
@@ -289,13 +289,16 @@ const Maps: React.FC = () => {
     
       const fetchAndCacheTile = async () => {
         const tileId = getTileId(userLocation.latitude, userLocation.longitude);
-    
+        
+        const keys = await AsyncStorage.getAllKeys();
+        console.log("Stored keys:", keys);
+
         if (!fetchedTilesRef.current.has(tileId)) {
           try {
             const cacheKey = `poi_tile_${tileId}`;
             const cached = await AsyncStorage.getItem(cacheKey);
             // const cached = false;
-    
+
             if (cached) {
               const pois = JSON.parse(cached);
     
@@ -309,27 +312,27 @@ const Maps: React.FC = () => {
               console.log('Loaded POIs from cache for tile:', tileId, '| Count:', pois.length);
             
             } else {
-              // fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
-              //   // Sanitize data before caching
-              //   const sanitized = data.map(poi => ({
-              //     ...poi,
-              //     photoUrl: poi.photoUrl || null,
-              //     workingHours: poi.workingHours || {},
-              //     accessibility: poi.accessibility || {},
-              //   }));
+              fetchPOIs(userLocation.latitude, userLocation.longitude, async (data) => {
+                // Sanitize data before caching
+                const sanitized = data.map(poi => ({
+                  ...poi,
+                  photoUrl: poi.photoUrl || null,
+                  workingHours: poi.workingHours || {},
+                  accessibility: poi.accessibility || {},
+                }));
     
-              //   setPois(prev => {
-              //     const seen = new Set(prev.map(p => p.id));
-              //     const newItems = sanitized.filter((p: { id: string; }) => !seen.has(p.id));
-              //     return [...prev, ...newItems];
-              //   });
+                setPois(prev => {
+                  const seen = new Set(prev.map(p => p.id));
+                  const newItems = sanitized.filter((p: { id: string; }) => !seen.has(p.id));
+                  return [...prev, ...newItems];
+                });
     
-              //   fetchedTilesRef.current.add(tileId);
-              //   await AsyncStorage.setItem(cacheKey, JSON.stringify(sanitized));
+                fetchedTilesRef.current.add(tileId);
+                await AsyncStorage.setItem(cacheKey, JSON.stringify(sanitized));
     
-              //   console.log('Fetched & cached POIs for tile:', tileId, '| Count:', sanitized.length);
-              //   console.log('Sample POI:', JSON.stringify(sanitized[0], null, 2));
-              // });
+                console.log('Fetched & cached POIs for tile:', tileId, '| Count:', sanitized.length);
+                console.log('Sample POI:', JSON.stringify(sanitized[0], null, 2));
+              });
             }
           } catch (error) {
             console.error('AsyncStorage or POI fetch error:', error);
