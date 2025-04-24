@@ -60,6 +60,7 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
     width: "80%",
     alignItems: "center",
+    marginTop: '5%',
   },
   buttonText: {
     color: "#FFF",

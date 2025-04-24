@@ -92,7 +92,7 @@ export const styles = StyleSheet.create({
         color: 'black'
       },
       markerButtonContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'space-between',
         marginTop: 10,
       },
@@ -152,5 +152,17 @@ export const styles = StyleSheet.create({
       height: 200,
       borderRadius: 12,
       marginBottom: 10,
+    },
+  clearRouteButtonContainer: {
+    position: 'absolute',
+    bottom: 80,
+    right: 1,
+    zIndex: 10,
+  },
+  clearRouteButton: {
+      opacity: 0.9,
+      opacity: 0.9,
+      padding: 3,
+      elevation: 5,
     },
   });

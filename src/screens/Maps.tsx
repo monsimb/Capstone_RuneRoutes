@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable, ScrollView } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
-import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer } from '@rnmapbox/maps';
+import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer, type ImageEntry } from '@rnmapbox/maps';
 import { MapView } from '@rnmapbox/maps';
 import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
@@ -27,8 +27,6 @@ import { useProfileContext } from '../context/ProfileContext';
 
 
 Mapbox.setAccessToken(MAP_BOX_ACCESS_TOKEN);
-
-
 
 const Maps: React.FC = () => {
     const { authorize, getCredentials, user } = useAuth0();
@@ -290,10 +288,11 @@ const Maps: React.FC = () => {
       const fetchAndCacheTile = async () => {
         const tileId = getTileId(userLocation.latitude, userLocation.longitude);
         
-        const keys = await AsyncStorage.getAllKeys();
-        console.log("Stored keys:", keys);
+        
 
         if (!fetchedTilesRef.current.has(tileId)) {
+          const keys = await AsyncStorage.getAllKeys();
+          console.log("Stored keys:", keys);
           try {
             const cacheKey = `poi_tile_${tileId}`;
             const cached = await AsyncStorage.getItem(cacheKey);
@@ -433,7 +432,7 @@ const Maps: React.FC = () => {
     if (!userLocation) {
     return <View style={{ flex: 1 }} />; // Return blank until location is fetched
     }
-
+    
     return (
         <View style={{ flex: 1 }}>
           <MapView
@@ -445,6 +444,14 @@ const Maps: React.FC = () => {
             showUserLocation={true}         // Show user location on map
             onPress={handlePress}           // Handle press to add custom marker
           >
+            <Mapbox.Images
+              images={{
+                customAvatar: global.avatarURI || "topImage",   // register location image with a key & set default
+              }}
+              onImageMissing={(imageKey: string) =>
+                console.log('Image missing for key:', imageKey)
+              }
+            />
             <Camera 
               ref={cameraRef}
               defaultSettings={{
@@ -458,12 +465,12 @@ const Maps: React.FC = () => {
             <LocationPuck
               puckBearing ='heading'
               bearingImage = 'compass'
-              topImage='topimage'
+              topImage="customAvatar"
               visible={true}
-              scale={['interpolate', ['linear'], ['zoom'], 10, 1.0, 20, 4.0]}
+              scale={['interpolate', ['linear'], ['zoom'], 2, 0.4, 40, 2.0]}
               pulsing={{
                 isEnabled: true,
-                color: 'teal',
+                color: '#605795',
                 radius: 50.0,
               }}
             />
@@ -562,18 +569,27 @@ const Maps: React.FC = () => {
                       <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
                     </ScrollView>
 
-                    <Button title="Route" onPress={() => {      // TODO: Change this to a cute little icon plz 
-                      if (userLocation && selectedPOI) {
-                        getDirections(
-                          userLocation.latitude,
-                          userLocation.longitude,
-                          selectedPOI.latitude,
-                          selectedPOI.longitude,
-                          setRouteCoords
-                        );
-                        setSelectedPOI(null);
-                      }
-                    }} />
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (userLocation && selectedPOI) {
+                          getDirections(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            selectedPOI.latitude,
+                            selectedPOI.longitude,
+                            setRouteCoords
+                          );
+                          setSelectedPOI(null);
+                        }
+                      }}
+                      style={{ padding: 10 }}
+                    >
+                      <Image
+                        source={require('../assets/button/routeButton.png')} 
+                        style={{ width: 100, height: 50 }}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
 
                     <Button title="Close" onPress={() => setSelectedPOI(null)} />
                   </View>
@@ -603,6 +619,7 @@ const Maps: React.FC = () => {
               </ShapeSource>
             
             }
+
 
             <ShapeSource id="userPolygon" shape={staticPolygon}>
                 <LineLayer
@@ -721,12 +738,22 @@ const Maps: React.FC = () => {
             
         </MapView>
         <View style={styles.recenterButtonContainer}>
-          <TouchableOpacity style={styles.recenterButton} onPress={recenterMap}>
-            <Image
-              source={require("../assets/icon/recenter.png")}
-              style={{ width: 35, height: 35 }}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.recenterButton} onPress={recenterMap}>
+              <Image
+                source={require("../assets/icon/recenter.png")}
+                style={{ width: 35, height: 35 }}
+              />
+            </TouchableOpacity>
+            {routeCoords && (
+                  <View style={styles.clearRouteButtonContainer}>
+                    <TouchableOpacity style={styles.clearRouteButton} onPress={() => setRouteCoords(null)}>
+                      <Image
+                        source={require("../assets/button/clear_routeButton.png")} // use your own X or trash icon
+                        style={{ width: 70, height: 35 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
         </View>
       </View>
     );
