@@ -671,21 +671,39 @@ const Maps: React.FC = () => {
                     value={newTitle}
                     onChangeText={setNewTitle}
                     style={styles.input}
+                    placeholderTextColor={"gray"}
                   />
                   <TextInput
                     placeholder="Description"
                     value={newDescription}
                     onChangeText={setNewDescription}
                     style={styles.input}
+                    placeholderTextColor={"gray"}
                   />
                   {/* Temp fix for button overlap issue */}
-                  <View style={{marginBottom: 5}}>
-                    <Button title="Upload Image" onPress={pickImage} color='#33CCFF'/>
+                  <View style={styles.markerButtonContainer}>
+                    <TouchableOpacity
+                      style={[styles.button, styles.closeButton]}
+                      onPress={pickImage}
+                    >
+                      <Text style={styles.buttonText}>Upload Image</Text>
+                    </TouchableOpacity>
                   </View>
-                  <View style={{marginBottom: 5}}>
-                    <Button title="Add Marker" onPress={handleAddMarker} color="#3B3456" />
+                  <View style={styles.markerButtonContainer}>
+                    <TouchableOpacity
+                      style={[styles.button, styles.closeButton]}
+                      onPress={handleAddMarker}
+                    >
+                      <Text style={styles.buttonText}>Add Marker</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.button, styles.deleteButton]}
+                      onPress={() => setModalVisible(false)}
+                    >
+                      <Text style={styles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
                   </View>
-                  <Button title="Cancel" onPress={() => setModalVisible(false)} color="#3B3456C7" />
                 </View>
               </View>
             </Modal>
@@ -737,23 +755,21 @@ const Maps: React.FC = () => {
               </Modal>
             
         </MapView>
-        <View style={styles.recenterButtonContainer}>
+        <View style={styles.extraButtons}>
+            {routeCoords && (
+                  <TouchableOpacity style={styles.clearRouteButton} onPress={() => setRouteCoords(null)}>
+                    <Image
+                      source={require("../assets/button/clear_routeButton.png")} // use your own X or trash icon
+                      style={{ width: 80, height: 40 }}
+                    />
+                  </TouchableOpacity>
+                )}
             <TouchableOpacity style={styles.recenterButton} onPress={recenterMap}>
               <Image
                 source={require("../assets/icon/recenter.png")}
-                style={{ width: 35, height: 35 }}
+                style={{ width: 40, height: 40 }}
               />
             </TouchableOpacity>
-            {routeCoords && (
-                  <View style={styles.clearRouteButtonContainer}>
-                    <TouchableOpacity style={styles.clearRouteButton} onPress={() => setRouteCoords(null)}>
-                      <Image
-                        source={require("../assets/button/clear_routeButton.png")} // use your own X or trash icon
-                        style={{ width: 70, height: 35 }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
         </View>
       </View>
     );
