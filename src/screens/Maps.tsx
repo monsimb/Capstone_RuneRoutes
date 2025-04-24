@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Button, Modal, TextInput, Image, View, Text, TouchableOpacity, Touchable, ScrollView } from 'react-native';
 import Location, { Location as LocationType } from 'react-native-location';
-import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer, type ImageEntry } from '@rnmapbox/maps';
+import Mapbox, { Camera, MarkerView, UserTrackingMode, LocationPuck, ShapeSource, FillLayer, LineLayer, type ImageEntry, Images } from '@rnmapbox/maps';
 import { MapView } from '@rnmapbox/maps';
 import { booleanPointInPolygon, difference, featureCollection } from '@turf/turf';
 import { circle } from "@turf/circle";
@@ -568,7 +568,7 @@ const Maps: React.FC = () => {
 
                       <Text style={styles.descriptionText}>⭐ Rating: {selectedPOI?.rate}</Text>
                     </ScrollView>
-
+                    <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                     <TouchableOpacity
                       onPress={() => {
                         if (userLocation && selectedPOI) {
@@ -591,7 +591,19 @@ const Maps: React.FC = () => {
                       />
                     </TouchableOpacity>
 
-                    <Button title="Close" onPress={() => setSelectedPOI(null)} />
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSelectedPOI(null)
+                      }}
+                      style={{ padding: 10 }}
+                      >
+                      <Image
+                        source={require('../assets/button/closeButton.png')}
+                        style={{ width: 100, height: 50 }}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
 
