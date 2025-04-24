@@ -446,7 +446,7 @@ const Maps: React.FC = () => {
           >
             <Mapbox.Images
               images={{
-                customAvatar: global.avatarURI || "topImage",   // register location image with a key & set default
+                customAvatar: global.avatarURI || require('../assets/default_avatar.png'),   // register location image with a key & set default
               }}
               onImageMissing={(imageKey: string) =>
                 console.log('Image missing for key:', imageKey)

@@ -123,7 +123,7 @@ function AuthScreen({ navigation }) {
             {isLoading ? (
               <ActivityIndicator size="small" color="#FFF" />
             ) : (
-              <Text style={styles.buttonText}>Get Started</Text>
+              <Text style={styles.welcomeButtonText}>Get Started</Text>
             )}
           </TouchableOpacity>
         </>

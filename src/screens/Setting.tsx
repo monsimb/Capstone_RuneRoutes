@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Switch, Image } from "react-native";
+import { View, Text, TouchableOpacity, Switch, Image } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
 import { styles } from "../styles/UI";
 
@@ -80,9 +80,6 @@ return (
         <Image style={styles.image} source={require('../assets/icon/logo_1.png')} resizeMode="contain" />
       </View>
 
-      {/* User information */}
-      <Text style={styles.userIdText}>User: {user?.name || "Unknown User"}</Text>
-      <Text style={styles.userIdText}>User ID: {user?.sub || "N/A"}</Text>
       
        {/* Toggle Switches */}
         <View style={styles.toggleContainer}>
@@ -95,7 +92,6 @@ return (
         </View>
     
         <View style={styles.fogOptionsContainer}>
-        <View style={styles.toggleContainer}>
             <Text style={styles.toggleText}>Fog Level</Text>
             {fogOptions.map((option) => (
                 <TouchableOpacity
@@ -116,10 +112,12 @@ return (
                     </Text>
                 </TouchableOpacity>
             ))}
-        </View>
     </View>
 
-
+            
+      {/* User information */}
+      <Text style={styles.userIdText}>User: {user?.name || "Unknown User"}</Text>
+      {/* <Text style={styles.userIdText}>User ID: {user?.sub || "N/A"}</Text> */}
 
       {/* Logout Button */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -131,48 +129,3 @@ return (
 
 
 export default Settings;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     backgroundColor: "#f5f5f5",
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     marginBottom: 20,
-//     color:"black",
-//   },
-//   subtitle: {
-//     fontSize: 16,
-//     color: "purple",
-//   },
-//   userIdText: {
-//     fontSize: 14,
-//     marginVertical: 5,
-//     color: "purple"
-//   },
-//   toggleContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     marginVertical: 20,
-//   },
-//   toggleText: {
-//     fontSize: 16,
-//     marginRight: 10,
-//     color: "purple",
-//   },
-//   logoutButton: {
-//     marginTop: 20,
-//     backgroundColor: "#d9534f",
-//     padding: 10,
-//     borderRadius: 5,
-//   },
-//   buttonText: {
-//     color: "black",
-//     fontSize: 16,
-//     fontWeight: "bold",
-//   },
-// });

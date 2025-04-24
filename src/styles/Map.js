@@ -92,7 +92,7 @@ export const styles = StyleSheet.create({
         color: 'black'
       },
       markerButtonContainer: {
-        flexDirection: 'column',
+        flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 10,
       },
@@ -116,12 +116,12 @@ export const styles = StyleSheet.create({
       },
       input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: 'black',
         borderWidth: 1,
         borderRadius: 5,
         marginBottom: 10,
         paddingHorizontal: 10,
-        color: 'black'
+        color: 'black',
       },
     buttonContainer: {
         position: 'absolute',
@@ -136,13 +136,15 @@ export const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
     },
-    recenterButtonContainer: {
+    extraButtons: {
+      flex: 1,
+      justifyContent: 'space-between',
+      flexDirection: 'row',
       position: 'absolute',
       bottom: 15,
       right: 15,
     },
     recenterButton: {
-      backgroundColor: '#ffecb5',
       opacity: 0.9,
       padding: 3,
       elevation: 5,
@@ -153,16 +155,10 @@ export const styles = StyleSheet.create({
       borderRadius: 12,
       marginBottom: 10,
     },
-  clearRouteButtonContainer: {
-    position: 'absolute',
-    bottom: 80,
-    right: 1,
-    zIndex: 10,
-  },
   clearRouteButton: {
-      opacity: 0.9,
-      opacity: 0.9,
-      padding: 3,
-      elevation: 5,
-    },
-  });
+    opacity: 0.9,
+    padding: 3,
+    elevation: 5,
+    marginHorizontal: '1%'
+  },
+});

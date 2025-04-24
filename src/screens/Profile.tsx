@@ -11,7 +11,7 @@ import { skins, colors, hats, faces, tops, bottoms, hatOffsets } from '../functi
 
 global.avatarURI = null;
 
-function Profile({ }) {
+function Profile({ navigation }) {
   // const { chompedArea = 0 } = route.params || {}; // Default to 0 if not passed
   const [currentSkinIndex, setCurrentSkinIndex] = useState(0);
   const [currentHatIndex, setCurrentHatIndex] = useState(0);
@@ -118,7 +118,8 @@ function Profile({ }) {
       });
   
       // resize captured image
-      global.avatarURI = await ImageResizer.createResizedImage(uri, 300, 300, 'PNG', 1.0, 0)
+      global.avatarURI = await ImageResizer.createResizedImage(uri, 300, 300, 'PNG', 1.0, 0);
+      navigation.navigate("Maps");
     } catch (error) {
       console.error('Failed to capture or resize avatar:', error);
     }

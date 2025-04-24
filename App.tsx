@@ -21,6 +21,7 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        tabBarStyle: {backgroundColor: '#fff6db'},
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
@@ -37,8 +38,8 @@ function MainTabs() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#5b4087',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: '#605795',
+        tabBarInactiveTintColor: 'black',
         headerShown: false,
       })}
     >

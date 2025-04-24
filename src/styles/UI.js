@@ -13,12 +13,11 @@ export const styles = StyleSheet.create({
 	  backButton: {
 		position: 'absolute',
 		top: 40,
-		//bottom: 90,
 		left: 20,
 		zIndex: 1,
 	  },
 	  title: {
-		fontSize: 36,
+		fontSize: 48,
 		fontWeight: "bold",
 		color: "white",
 		justifyContent: "top",
@@ -56,10 +55,12 @@ export const styles = StyleSheet.create({
 	  marginBottom: "-15%",
 	},
 	logoutButton: {
-	  backgroundColor: "#FF6347",
+	  backgroundColor: "#FF7057",
 	  paddingVertical: 12,
 	  paddingHorizontal: 30,
 	  borderRadius: 5,
+	  borderWidth: 1,
+	  borderColor: 'black',
 	  width: "80%",
 	  alignItems: "center",
 	  marginTop: 20,
@@ -67,10 +68,10 @@ export const styles = StyleSheet.create({
 	toggleContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginVertical: 20,
+		marginTop: 50,
 	},
 	toggleText: {
-		fontSize: 16,
+		fontSize: 18,
 		marginRight: 10,
 		color: "white",
 	},
@@ -83,31 +84,37 @@ export const styles = StyleSheet.create({
 	  fogOptionsContainer: {
 		flexDirection: "row",
 		justifyContent: "center",
-		marginBottom: 20,
+		marginBottom: '25%',
+		marginTop: '8%'
 	  },
 	  fogOptionButton: {
 		padding: 10,
 		marginHorizontal: 5,
 		borderRadius: 5,
 		borderWidth: 1,
-		borderColor: "purple",
+		borderColor: "black",
 		backgroundColor: "#fff",
 	  },
 	  fogOptionSelected: {
-		backgroundColor: "purple",
+		backgroundColor: "#f3d88b",
 	  },
 	  fogOptionText: {
-		color: "purple",
+		color: "black",
 		fontWeight: "bold",
 	  },
 	  fogOptionTextSelected: {
-		color: "#fff",
+		color: "black",
 	  },
 	buttonText: {
-	  color: "#FFF",
+	  color: "black",
 	  fontSize: 16,
 	  fontWeight: "bold",
 	},
+	welcomeButtonText: {
+		color: "white",
+		fontSize: 16,
+		fontWeight: "bold",
+	  },
 	userIdText: {
 	  color: "white",
 	  fontSize: 18,
