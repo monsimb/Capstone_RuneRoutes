@@ -303,7 +303,11 @@ function Profile({ navigation }) {
       {/* Save Avatar Button */}
       <View style={styles.save}>
         <TouchableOpacity onPress={() => updateAvatar(userId, [currentSkinIndex, currentHatIndex, currentFaceIndex, currentTopIndex, currentBottomIndex])}>
-          <Text style={styles.saveText}>Save Avatar</Text>
+          <Image
+            source={require('../assets/button/saveAvatarButton.png')}
+            style={{ width: 100, height: 50 }}
+            resizeMode="contain"
+          />
         </TouchableOpacity> 
       </View>
     </View>
