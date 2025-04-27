@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator, LogBox } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
 import { styles } from "../styles/UI";
+import { AUTH0_DOMAIN } from '@env';
 
 const API_URL = "https://capstone-runeroutes-wgp6.onrender.com"; // Replace with your Render API URL
 LogBox.ignoreLogs(['new NativeEventEmitter()']);
@@ -20,6 +21,7 @@ function AuthScreen({ navigation }) {
     }
   }, [user]);
 
+
   // Function to send user data to backend
   const addUserToDB = async (userId, userName, avatarSelections, travelDistance) => {
     try {
@@ -27,7 +29,7 @@ function AuthScreen({ navigation }) {
       const token = credentials?.accessToken;
       console.log("Token in addUserToDB: ", token);
 
-      const response = await fetch("https://capstone-runeroutes-wgp6.onrender.com/auth/users", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,7 +61,7 @@ function AuthScreen({ navigation }) {
     setIsLoading(true);
     try {
       const result = await authorize({
-        audience: 'https://dev-r3fzkkn3e0cei0co.us.auth0.com/api/v2/', // 👈 or your Auth0 API identifier
+        audience: AUTH0_DOMAIN+'/api/v2/', // or your Auth0 API identifier
         scope: 'openid profile email offline_access',
       });
       //console.log("Auth result: ", result);
@@ -67,7 +69,7 @@ function AuthScreen({ navigation }) {
       console.log('-> got tokens', result);
 
       const userInfo = await fetch(
-        `https://dev-r3fzkkn3e0cei0co.us.auth0.com/userinfo`,
+        AUTH0_DOMAIN+`/userinfo`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
       .then(res => res.json());

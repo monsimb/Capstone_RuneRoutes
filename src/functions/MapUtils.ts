@@ -6,6 +6,7 @@ import { polygon } from '@turf/helpers';
 import { ICONS, OFFSET } from './constants';
 import { MAP_BOX_ACCESS_TOKEN } from '@env';
 import { SetStateAction } from 'react';
+import { BUSINESS_API_KEY } from '@env';
 let count = 0;
 
 
@@ -38,7 +39,7 @@ export const fetchPOIs = async (
         method: 'POST',
         url: 'https://local-business-data.p.rapidapi.com/search',
         headers: {
-          'x-rapidapi-key': '4b5119710emsh962c37089dc3f92p1395a8jsne0b28b9ce8aa',
+          'x-rapidapi-key': BUSINESS_API_KEY,
           'x-rapidapi-host': 'local-business-data.p.rapidapi.com',
           'Content-Type': 'application/json'
         },
