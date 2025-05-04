@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator, LogBox } from "react-native";
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, LogBox } from "react-native";
 import { useAuth0 } from 'react-native-auth0';
 import { styles } from "../styles/UI";
 import { AUTH0_DOMAIN } from '@env';
@@ -61,7 +61,7 @@ function AuthScreen({ navigation }) {
     setIsLoading(true);
     try {
       const result = await authorize({
-        audience: AUTH0_DOMAIN+'/api/v2/', // or your Auth0 API identifier
+        audience: 'https://'+AUTH0_DOMAIN+'/api/v2/', // or your Auth0 API identifier
         scope: 'openid profile email offline_access',
       });
       //console.log("Auth result: ", result);
@@ -69,7 +69,7 @@ function AuthScreen({ navigation }) {
       console.log('-> got tokens', result);
 
       const userInfo = await fetch(
-        AUTH0_DOMAIN+`/userinfo`,
+        'https://'+AUTH0_DOMAIN+`/userinfo`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
       .then(res => res.json());
