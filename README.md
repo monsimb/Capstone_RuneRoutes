@@ -12,6 +12,11 @@
 
 The application embraces a fantasy theme throughout its design, with the name "RuneRoutes" reflecting the magical, RPG inspired journey of discovery. Users can personalize their exploration experience by selecting custom character icons, adding a role-playing element to the navigation experience. As explorers venture into uncharted territories, they reveal hidden realms on their map, dsicover points of interest, and build their own legendary path through the world around them.
 
+# Live Demo
+
+[![Watch the demo](https://img.youtube.com/vi/tGGJVUbkPWM/0.jpg)](https://youtu.be/tGGJVUbkPWM)
+
+
 ## Technical Features
 
 - **Interactive Map System**: Integrated Mapbox API for advanced map visualization
